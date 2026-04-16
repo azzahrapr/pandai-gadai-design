@@ -54,3 +54,36 @@ If a new component is added to the DS, update `CORTES-DS-components.md` with its
 
 > "Search for the new `[component name]` component in the DS and add it to the index"
 
+---
+
+## Customer App – Page Map
+
+| Page | Contains |
+|---|---|
+| `↳ Gadai Instan` | Login, Simulasi Pinjaman screens |
+| `↳ Category: New ELE` | Riwayat Gadai screen |
+| `↳ Category: BPKB` | BPKB category screens |
+
+---
+
+## Future Improvements
+
+### 1. Expand page map with screen node IDs
+Currently the page map only tells Claude which page a screen is on. Adding the node ID of each screen would let Claude jump directly to it with zero searching:
+
+```
+↳ Category: New ELE
+  - Riwayat Gadai → node: 1:2849
+```
+
+### 2. Add component usage guide
+Add a short note per component on when to use which variant, so Claude makes the right choice without needing explicit instructions every time. Example:
+
+```
+badge-status     → use for transaction/order states
+badge-notification → use for unread counts
+badge-product    → use for product categories
+```
+
+### 3. Auto-update index script
+Set up a script that re-indexes the DS automatically whenever a new component is added to the Figma library — so `CORTES-DS-components.md` never goes stale without manual effort.
