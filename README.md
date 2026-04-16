@@ -54,12 +54,3 @@ If a new component is added to the DS, update `CORTES-DS-components.md` with its
 
 > "Search for the new `[component name]` component in the DS and add it to the index"
 
----
-
-## Customer App – Page Map
-
-| Page | Contains |
-|---|---|
-| `↳ Gadai Instan` | Login, Simulasi Pinjaman screens |
-| `↳ Category: New ELE` | Riwayat Gadai screen |
-| `↳ Category: BPKB` | BPKB category screens |
