@@ -1,13 +1,17 @@
 # Claude Code – Project Context
 
 ## Design System
-This project uses the Cortes Design System. All component keys, file keys, and the page map are documented in:
 
-→ [CORTES-DS-components.md](CORTES-DS-components.md) — component keys & page map
-→ [CORTES-DS-tokens.md](CORTES-DS-tokens.md) — color, spacing & typography tokens *(add when ready)*
+This project uses the Cortes Design System.
 
-Always reference this file before doing any Figma work. Use the pre-indexed component keys directly — do not run `search_design_system` unless a component is missing from the index.
+→ [design-components.md](design-components.md) — component keys & page map  
+→ [design-tokens.md](design-tokens.md) — color, spacing & typography tokens  
+→ [layout-guidelines.md](layout-guidelines.md) — layout principles (read before building any screen)  
+→ [figma/figma-protocol.md](figma/figma-protocol.md) — technical rules for every `use_figma` call  
+→ [figma/figma-plugin-helpers.js](figma/figma-plugin-helpers.js) — token & component helper functions  
 
 ## Figma Workflow Tips
-- Always specify the **page name** when asking for changes (e.g. "on the Category: New ELE page...") to avoid slow page searches
-- When a component is missing from CORTES-DS.md, search for it, then add it to the index
+
+- Always specify the **page name** when targeting a page (e.g. "on the ↳ Gadai Instan page")
+- Use pre-indexed component keys from `design-components.md` directly — do not run `search_design_system` unless a component is missing
+- When a component is missing, search for it and add it to `design-components.md`
