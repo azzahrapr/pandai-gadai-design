@@ -38,7 +38,10 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Badge | `badge-status` | component_set | `831717d904e0c80de8e6ddcda4f71c5ac4c8c906` |
 | Banner Info | `banner - desktop` | component_set | `f82ebac1f10ef3c6525daa5af9c3d15afd5a3522` |
 | Banner Info | `banner - mobile` | component_set | `4013bbe387c4f23cdd1a13ccc8f3ea4be08dcae8` |
-| Bottom Navbar | `bottom-navbar` | component | `a50f58766c5d07a331c312dd7e7d814a25d4d0a3` |
+| Bottom Navbar | `menu-home` | component_set | `7240d9b532ef9b3174961f6669b9531180e4d56f` |
+| Bottom Navbar | `menu-pinjaman` | component_set | `82ebc8630181d121492570f715cb3cafad949bd5` |
+| Bottom Navbar | `menu-emas` | component_set | `36bb3fd3dddf3ed52e68e475521071da18649f25` |
+| Bottom Navbar | `menu-profile` | component_set | `dc2d49dd10840141704e98cf7f82f6d3ca468a1f` |
 | Bottom Sheet | `bottom sheet` | component_set | `83d3a31d8ef9f03a75209b5bb1bfbd78f1e5f42f` |
 | Button | `button` | component_set | `1495853628b779a9ec9d94265156d5508fdb8a22` |
 | Checkbox | `checkbox` | component_set | `247107ab3f7c1f99ebfa66354fa151435a01e832` |
@@ -53,6 +56,7 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Loader: skeleton | `loader/skeleton` | component_set | `cc668b5c695073e24faaee9adb6827fc9561d040` |
 | Modal | `modal` | component_set | `65be5fa0cfcbd115bbbafded69d4358ab7921fbc` |
 | Pagination | `pagination` | component_set | `4392a58b6788b82193255d9aa2dedd3f5c91f1e7` |
+| Pagination | `page` | component_set | `6aebb2933a9c165d73686bfe24becdfa61e06b6a` |
 | Progress Bar | `Progress Bar` | component_set | `34f8f45f0c42b539c089107583bea8093573dee7` |
 | Radio Button | `radio-button` | component_set | `491c91c07f43024414cd9bb5e87d8a3e13a97286` |
 | Side Navbar | `side-navigation-bar` | component_set | `446d6b70a68c6fba800687ef512d8dbcb58a19ee` |
@@ -129,6 +133,15 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | state=type7, type=solid | `b4d6ab12995f9782d5e9c828547ca708cb93aef2` |
 | state=type6, type=solid | `f261b5fe2c1f59a2177ace35b5695607ffe0adfa` |
 
+### banner - mobile
+| Variant | Key |
+|---|---|
+| Property 1=info | `499ce59d5e0d7a213507737dcf153a44a3fce3fb` |
+| Property 1=Type6 | `32c0d8253fcf9dade351e6d3ce342dc0baba9656` |
+| Property 1=Variant3 | `b0893fa1648a7340f003e725b584c3d2f93d4b62` |
+| Property 1=Variant4 | `c2b525347bc68c54eda18a8d8e130cfe816709de` |
+| Property 1=Variant5 | `59a0a581c109aad93d41365117bfdfc768d25e82` |
+
 ### banner - desktop
 | Variant | Key |
 |---|---|
@@ -137,6 +150,30 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Type=Success | `c91243fa238a6df6bf5e483c85e8955c8cedb7b5` |
 | Type=Alert | `745645f7841d875d78c7041fbfec8a1f2e70aabb` |
 | Type=Error | `baf9d9c227cf9893ef233ba824c11c416e4bfd79` |
+
+### menu-home
+| Variant | Key |
+|---|---|
+| State=Unselected | `d47029749c7de1778538e53e3db0df7e664a56de` |
+| State=Selected | `daaaff90a12676f9bc1c4eeae23bdc59d2cba5ba` |
+
+### menu-pinjaman
+| Variant | Key |
+|---|---|
+| State=Unselected | `17b8603e4a08f62d0810e6f4f1dd151170670a33` |
+| State=Selected | `ad7438ac0cb27c1c25af729c2229dc6721de0b97` |
+
+### menu-emas
+| Variant | Key |
+|---|---|
+| State=Unselected | `15a4ca31ea98c1081f097196feab880851d19947` |
+| State=Selected | `bcc6b2e44ecf832df23dffc10b2daf973d28f30f` |
+
+### menu-profile
+| Variant | Key |
+|---|---|
+| State=Unselected | `34733afd4afec84f50736e8364696bb2745e0369` |
+| State=Selected | `3f1002cf769db5e6124bb202457f61146abe5aca` |
 
 ### bottom sheet
 | Variant | Key |
@@ -148,21 +185,70 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 ### button
 | Variant | Key |
 |---|---|
-| Primary, Default, Large | `e00ea99ffa38452334575f25e6a12c7433c428ed` |
-| Primary, Hovered, Large | `567a3c0a1fe79b5ee229b6c59bb821888a682e5d` |
-| Primary, Loading, Large | `da3e75177dc4169bd9414a52ff8534b19132bb52` |
-| Primary, Disabled, Large | `c13ca3e50c5bebd8d366726d646e48492edb4dee` |
-| Primary, Default, Medium | `3041c1a3b3951dfca4482fef081c54f6dd7a15fb` |
-| Primary, Default, Small | `4733ad297d5dc773f9b07bf67b8bf2bf7c07f66b` |
-| Secondary, Default, Large | `eaf991da95ab41c48f18975543bfd715ea1a383f` |
-| Secondary, Default, Medium | `dcd3cf26dd778c368fe4d369e94e80de9b74ff52` |
-| Secondary, Default, Small | `34d17c40833102ae28979a02accac85805389618` |
-| Ghost, Default, Large | `239d3e3427404d0d95fbdd790d7467e90fdf2fa9` |
-| Ghost, Default, Medium | `8e12a50dd1c59d1622efea6e8204137d1e8aff1f` |
-| Ghost, Default, Small | `92901299ed2a69473187ce52242ca2a52d0d17ce` |
-| Destructive, Default, Large | `e37e9143f177ad4871568714c5413e889b9356ac` |
-| Destructive, Default, Medium | `46f98a55d8fcc454cee056af704f9559eeacff8c` |
-| Destructive, Default, Small | `58eb523ba7b9b8e1e92a23260baf5bc7aa4ce40b` |
+| Type=Primary, State=Default, Size=Large | `e00ea99ffa38452334575f25e6a12c7433c428ed` |
+| Type=Primary, State=Hovered, Size=Large | `567a3c0a1fe79b5ee229b6c59bb821888a682e5d` |
+| Type=Primary, State=Loading, Size=Large | `da3e75177dc4169bd9414a52ff8534b19132bb52` |
+| Type=Primary, State=Disabled, Size=Large | `c13ca3e50c5bebd8d366726d646e48492edb4dee` |
+| Type=Primary, State=Default, Size=Medium | `3041c1a3b3951dfca4482fef081c54f6dd7a15fb` |
+| Type=Primary, State=Hovered, Size=Medium | `08779cdeb83bd1d9d90f59d817f379a63350d3bc` |
+| Type=Primary, State=Loading, Size=Medium | `634e2ed354c44145d28c20b1d96177a6a4113641` |
+| Type=Primary, State=Disabled, Size=Medium | `36fc4fddd43190cbcdc872e9eff63958b972b9f6` |
+| Type=Primary, State=Default, Size=Small | `4733ad297d5dc773f9b07bf67b8bf2bf7c07f66b` |
+| Type=Primary, State=Hovered, Size=Small | `e243787d754c4225e7917801d38cc60079f8c280` |
+| Type=Primary, State=Loading, Size=Small | `5c568f1d98dc0af931a18ddbc066390f48ad411b` |
+| Type=Primary, State=Disabled, Size=Small | `fadcbb1c5a17c9de12d66ff7d31275ddce20108a` |
+| Type=Primary, State=Default, Size=Extra Small | `d129273f36e1e8e35c33b8989ddd926bc93b185a` |
+| Type=Primary, State=Hovered, Size=Extra Small | `052b8396e29dc2495da48e9fe1330aa5af76d79d` |
+| Type=Primary, State=Loading, Size=Extra Small | `973768fe00d73eec81cc1876814b25dc3e5b3ea3` |
+| Type=Primary, State=Disabled, Size=Extra Small | `169920f7e9fed857e5fa8898abf7f8f2a99f7769` |
+| Type=Secondary, State=Default, Size=Large | `eaf991da95ab41c48f18975543bfd715ea1a383f` |
+| Type=Secondary, State=Hovered, Size=Large | `6da56f2b04c90807f2654f58a748cac0cf42e38e` |
+| Type=Secondary, State=Loading, Size=Large | `5f311806c598a37cc968ba66941bdab5ed4bcbe7` |
+| Type=Secondary, State=Disabled, Size=Large | `49e78f023a4b06579db7cd46486325fba0fc0d86` |
+| Type=Secondary, State=Default, Size=Medium | `dcd3cf26dd778c368fe4d369e94e80de9b74ff52` |
+| Type=Secondary, State=Hovered, Size=Medium | `4ada1cb65faeb248e8c78537de74b0d7311323ed` |
+| Type=Secondary, State=Loading, Size=Medium | `f5f4fb5ce693aecb09a373d61bfddd41c11c8dee` |
+| Type=Secondary, State=Disabled, Size=Medium | `e212ae39800711ed208ece05dd3e0613fc9245f9` |
+| Type=Secondary, State=Default, Size=Small | `34d17c40833102ae28979a02accac85805389618` |
+| Type=Secondary, State=Hovered, Size=Small | `58d0e7aebeff7f5999d878fd17739e09f011b558` |
+| Type=Secondary, State=Loading, Size=Small | `92fb12997a0b2c548a4af49c2e78e6719aba0411` |
+| Type=Secondary, State=Disabled, Size=Small | `7ac9a60fc7702717aca1086b6a2dfe0e374ec6e5` |
+| Type=Secondary, State=Default, Size=Extra Small | `0e5c74a50a37cf011881bda740b02427d028a6f1` |
+| Type=Secondary, State=Hovered, Size=Extra Small | `2afc0fd57c5fd0d9e55552add74e4d24f7517e2f` |
+| Type=Secondary, State=Loading, Size=Extra Small | `b86573e6660d8a650d6e59c60e295e6e312f5ff4` |
+| Type=Secondary, State=Disabled, Size=Extra Small | `d19bbd45ec628bc94544025dd346cb9d202e53b7` |
+| Type=Ghost, State=Default, Size=Large | `239d3e3427404d0d95fbdd790d7467e90fdf2fa9` |
+| Type=Ghost, State=Hovered, Size=Large | `ae97f7fca6509beb2da7c467090530010d07e9d8` |
+| Type=Ghost, State=Loading, Size=Large | `aa3f26e4492459614b72cba8b1ec666d9e118ebd` |
+| Type=Ghost, State=Disabled, Size=Large | `d6900cdc15778bea090bfb3cde1243ac92ce531f` |
+| Type=Ghost, State=Default, Size=Medium | `8e12a50dd1c59d1622efea6e8204137d1e8aff1f` |
+| Type=Ghost, State=Hovered, Size=Medium | `fd4cf9ee9b28f0651366b1d06eea2b43119fa710` |
+| Type=Ghost, State=Loading, Size=Medium | `6b819c585a08cb1e7e77f7bbafebbb6ea501608e` |
+| Type=Ghost, State=Disabled, Size=Medium | `2b2a28e31366cfbac5bd7c208522f83c6baf6ab5` |
+| Type=Ghost, State=Default, Size=Small | `92901299ed2a69473187ce52242ca2a52d0d17ce` |
+| Type=Ghost, State=Hovered, Size=Small | `7f60f410ba3ce4cf76eef12f5d06223cdb711218` |
+| Type=Ghost, State=Loading, Size=Small | `55602589566b65616e41817fb9cff9ba7a7471ec` |
+| Type=Ghost, State=Disabled, Size=Small | `6c74eb00bf1bc5191d1aa78639b39295a7400d84` |
+| Type=Ghost, State=Default, Size=Extra Small | `ff0a529d140bfaee5c3768941d0519af1a7834c3` |
+| Type=Ghost, State=Hovered, Size=Extra Small | `b6bdbf333714a2ba26186b93a94f69fe1b0c936b` |
+| Type=Ghost, State=Loading, Size=Extra Small | `50c863ed0ca18b039b384cf39b3845cdf7a6f19f` |
+| Type=Ghost, State=Disabled, Size=Extra Small | `785b6b37f168cbb88c4da6e82cd23bb6ed45e0c7` |
+| Type=Destructive, State=Default, Size=Large | `e37e9143f177ad4871568714c5413e889b9356ac` |
+| Type=Destructive, State=Hovered, Size=Large | `0725128ba82c27bad856590227e7d1712a394b6f` |
+| Type=Destructive, State=Loading, Size=Large | `7f08980d0fa7d1c28964ccd11ad576c2886d4b20` |
+| Type=Destructive, State=Disabled, Size=Large | `7d90685d8673cb8113fa050c5fb8094101b5c39b` |
+| Type=Destructive, State=Default, Size=Medium | `46f98a55d8fcc454cee056af704f9559eeacff8c` |
+| Type=Destructive, State=Hovered, Size=Medium | `886a580334d8f3549ea37c9b51de1edf9fce3db5` |
+| Type=Destructive, State=Loading, Size=Medium | `da3fdcd611fcf110fac66f0f85f657e6814f758b` |
+| Type=Destructive, State=Disabled, Size=Medium | `a99aaff0410c218a0dd79d859b026cfbd454d40c` |
+| Type=Destructive, State=Default, Size=Small | `58eb523ba7b9b8e1e92a23260baf5bc7aa4ce40b` |
+| Type=Destructive, State=Hovered, Size=Small | `dc543a93a1b03b47ffc3f782c9ce370ca9707575` |
+| Type=Destructive, State=Loading, Size=Small | `42c38bdb5ff05177bf76896d6675cd3bfe861561` |
+| Type=Destructive, State=Disabled, Size=Small | `b4fc925a8f23874de07266726a53d3929a5a326c` |
+| Type=Destructive, State=Default, Size=Extra Small | `85b14e232ea0ec14bbe098517eb469cddb74dae4` |
+| Type=Destructive, State=Hovered, Size=Extra Small | `7ca7a058746c314f78bd5a04b8e1cae2220c9db2` |
+| Type=Destructive, State=Loading, Size=Extra Small | `9d138d5312c5de430683483c36efb95b715d11d9` |
+| Type=Destructive, State=Disabled, Size=Extra Small | `a008e8fa091f5fdb799d7bc48f9f9dc9c4ccfcd1` |
 
 ### checkbox
 | Variant | Key |
@@ -241,6 +327,16 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | variant=alert | `9f9ef3973042cbd510fca225f25287cdf70ea93b` |
 | variant=error | `bb5419a6e8127085b1e21dd52637f6a59ad3016e` |
 
+### page
+| Variant | Key |
+|---|---|
+| State=Selected | `afe4d07a3a803c13c61e44c45aaa0146b3d9dc7a` |
+| State=Default | `85c2c5beff6261df3b4b73b4318f052f7fb6b018` |
+| State=Nav Back - Default | `c55a6454dbd891e3c25503b1e52110946b05c1b0` |
+| State=Nav Back - Disabled | `4d9a341567d56bfde774aa81b55d01df4bd94ac9` |
+| State=Nav Next - Default | `4a4e5b52f8923dc8ca831472082b9e973230a9d6` |
+| State=Nav Next - Disabled | `3d8bfb3fc8fdfe71fca332a154b63d7250dca117` |
+
 ### pagination
 | Variant | Key |
 |---|---|
@@ -267,8 +363,8 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Variant | Key |
 |---|---|
 | State=Default | `f068a40771a3b91ceb5c3c7cf5b57860442ee728` |
-| State=State2 | `df8fc617be5ed2762747b76fbcaf2db3a576759c` |
-| State=State3 | `e9b77dbfcfe3d46ae1d5a32a14b05466ac4d5d2e` |
+| State=Selected | `e9b77dbfcfe3d46ae1d5a32a14b05466ac4d5d2e` |
+| State=Disabled | `df8fc617be5ed2762747b76fbcaf2db3a576759c` |
 
 ### side-navigation-bar
 | Variant | Key |
@@ -276,7 +372,6 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Variant=Desktop, State=Open-Default | `9d0cdd0abce53ea31df8eb1eda090012864a8957` |
 | Variant=Desktop, State=Open-Scrollable | `c592cc4e03f64545735797ad66f40904c76d0f4e` |
 | Variant=Desktop, State=Closed-Default | `2c71ece489d63eb573ad2f6e0530c79a996f5f1a` |
-| Variant=Desktop, State=Closed-OnHover | `8cb156c94ceacb29f842febbeac5c5d957ead820` |
 | Variant=Mobile, State=Default | `157c5f756e688177285fad5862fa5f73afec85de` |
 | Variant=Mobile, State=Scrollable | `15fef5162fc9417645ff88d8c7a964f2cc5ccb10` |
 
@@ -415,4 +510,4 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 
 ---
 
-*Last indexed: 2026-04-16 — If new components are added to the DS, re-run the indexing and update this file.*
+*Last indexed: 2026-04-22 — If new components are added to the DS, re-run the indexing and update this file.*
