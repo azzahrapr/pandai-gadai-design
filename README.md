@@ -17,6 +17,22 @@ Claude Code automatically reads `CLAUDE.md` on startup, which points to all cont
 ### 3. Connect Figma MCP *(for Figma work only)*
 Make sure you have the **Figma MCP server** connected to Claude Code. Without it, Claude can read the index but won't be able to make changes in Figma.
 
+### 4. Open your Figma file *(for component placement only)*
+This step is only needed when you want Claude to **place or swap components** on your canvas. For token lookups (colors, spacing, typography), Claude reads `design-tokens.md` directly — no Figma needed.
+
+When placing components, Claude cannot open Figma on its own — you need to have the **Figma desktop app open** with the file you want to work on. The Figma MCP connects Claude Code to whatever file is currently active in Figma.
+
+The flow looks like this:
+```
+You open the Figma file → Claude connects via MCP
+↓
+Claude reads component keys from design-components.md
+↓
+Claude places the right components directly onto your canvas
+```
+
+> **Token lookups** (e.g. "what's the primary color?" or "use the correct spacing") work without Figma open — Claude reads the values from `design-tokens.md`.
+
 ---
 
 ## Files in This Repo
