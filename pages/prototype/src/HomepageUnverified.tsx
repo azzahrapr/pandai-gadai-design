@@ -17,7 +17,7 @@ const imgLocationIcon     = "/assets/location-icon.svg";
 const imgBanner           = "/assets/banner.jpg";
 const imgCarouselDots     = "/assets/carousel-indicator.svg";
 const imgHomeIcon         = "/assets/nav-home-solid.svg";
-const imgPoinEmasOutline  = "/assets/poin-outline.svg";
+const imgPoinEmasOutline  = "/assets/nav-poin-outline.svg";
 const imgSmileIcon        = "/assets/nav-smile.svg";
 
 // Quick action icons (same composited icon approach as Homepage)

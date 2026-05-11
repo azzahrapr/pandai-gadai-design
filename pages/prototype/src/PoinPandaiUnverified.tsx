@@ -9,8 +9,7 @@ const imgPoinEmasSm   = "/assets/poin-fill-sm.svg";
 const imgPoinEmasActive = "/assets/poin-fill-active.svg";
 const imgSmileIcon    = "/assets/nav-smile.svg";
 const imgHomeVec      = "/assets/nav-home-outline.svg";
-const imgCreditCardV1 = "/assets/nav-credit-v1.svg";
-const imgCreditCardV2 = "/assets/nav-credit-v2.svg";
+const imgCreditCard   = "/assets/nav-credit-v2b.svg";
 const imgPose81       = "/assets/panda-pose8.png";
 const imgDecoPattern  = "/assets/deco-pattern.svg";
 const imgHandHeart    = "/assets/hand-heart.svg";
@@ -208,14 +207,7 @@ export default function PoinPandaiUnverified() {
 
         {/* Pinjaman */}
         <button onClick={() => navigate('/pinjaman/detail')} className="flex flex-col items-center gap-1 w-20">
-          <div className="relative size-6 overflow-hidden">
-            <div className="absolute inset-[58.33%_70.83%_29.17%_16.67%]">
-              <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgCreditCardV1} />
-            </div>
-            <div className="absolute inset-[12.5%_0]">
-              <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgCreditCardV2} />
-            </div>
-          </div>
+          <img src={imgCreditCard} alt="" className="size-6 object-contain" />
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
 

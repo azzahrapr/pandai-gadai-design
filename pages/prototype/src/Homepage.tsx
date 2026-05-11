@@ -10,14 +10,14 @@ const imgPoinEmas    = "/assets/poin-fill.svg";
 const imgSaldoIcon   = "/assets/saldo-icon.svg";
 const imgCuanIcon    = "/assets/cuan-icon.svg";
 const imgHomeIcon    = "/assets/nav-home-solid.svg";
-const imgPoinEmasOutline = "/assets/poin-outline.svg";
+const imgPoinEmasOutline = "/assets/nav-poin-outline.svg";
 const imgSmileIcon   = "/assets/nav-smile.svg";
 const imgBanner      = "/assets/banner.jpg";
 const imgCarouselDots = "/assets/carousel-indicator.svg";
 const imgCalcIcon    = "/assets/calc-icon.svg";
 const imgLocationIcon = "/assets/location-icon.svg";
 const imgPhoneIcon   = "/assets/phone-icon.svg";
-const imgCreditCard  = "/assets/nav-pinjaman-v1.svg";
+const imgCreditCard  = "/assets/nav-credit-v2b.svg";
 
 // ── Quick-action icon assets
 const icons = {
