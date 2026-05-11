@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('../node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('../node_modules/geist/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('../node_modules/geist/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('../node_modules/geist/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Geist Sans', sans-serif;
+}
+
+@keyframes shimmer-slide {
+  0%   { transform: translateX(-150%) rotate(17deg); }
+  100% { transform: translateX(600%) rotate(17deg); }
+}
+
+.shimmer-btn {
+  animation: shimmer-slide 1.2s ease-in-out 0.5s infinite;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Interactive press states */
+button {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+button:not(.pressable):active {
+  transform: scale(0.94);
+  opacity: 0.75;
+}
+
+/* Larger tappable areas (cards, list rows) — gentler scale */
+.pressable {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.pressable:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
