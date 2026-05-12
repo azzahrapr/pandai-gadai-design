@@ -10,7 +10,11 @@ import PaymentDetail from './PaymentDetail'
 import PoinPandaiVerified from './PoinPandaiVerified'
 import PoinPandaiUnverified from './PoinPandaiUnverified'
 import PoinPandaiSuccess from './PoinPandaiSuccess'
-import SBGDetail, { SBGPerpanjang, SBGTebus } from './SBGDetail'
+import SBGDetail from './SBGDetail'
+import PinjamanPerpanjang from './PinjamanPerpanjang'
+import PinjamanTebus from './PinjamanTebus'
+import PinjamanCicil from './PinjamanCicil'
+import PostPaymentDetail from './PostPaymentDetail'
 
 function App() {
   return (
@@ -28,8 +32,10 @@ function App() {
           <Route path="/poin-pandai/unverified" element={<PoinPandaiUnverified />} />
           <Route path="/poin-pandai/success" element={<PoinPandaiSuccess />} />
           <Route path="/pinjaman/sbg-detail" element={<SBGDetail />} />
-          <Route path="/pinjaman/perpanjang" element={<SBGPerpanjang />} />
-          <Route path="/pinjaman/tebus" element={<SBGTebus />} />
+          <Route path="/pinjaman/perpanjang" element={<PinjamanPerpanjang />} />
+          <Route path="/pinjaman/tebus" element={<PinjamanTebus />} />
+          <Route path="/pinjaman/cicil" element={<PinjamanCicil />} />
+          <Route path="/pinjaman/selesai" element={<PostPaymentDetail />} />
         </Routes>
       </BrowserRouter>
     </div>

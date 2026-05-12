@@ -1,3 +1,6 @@
 .agents/
 .claude/
 skills-lock.json
+pages/prototype/dist/
+pages/prototype/node_modules/
+pages/landing/node_modules/
