@@ -114,9 +114,9 @@
       color: #fff;
     }
     .step-circle.done {
-      border-color: #0255CA;
-      background: #fff;
-      color: #0255CA;
+      border-color: #28832D;
+      background: #28832D;
+      color: #fff;
     }
     .step-label {
       font-size: 10px;
@@ -125,7 +125,7 @@
       line-height: 1.3;
     }
     .step-label.active { color: #0255CA; font-weight: 600; }
-    .step-label.done { color: #0255CA; }
+    .step-label.done { color: #28832D; }
     .step-connector {
       flex: 1;
       height: 2px;
@@ -133,7 +133,7 @@
       margin-bottom: 18px;
       transition: background 0.2s;
     }
-    .step-connector.done { background: #0255CA; }
+    .step-connector.done { background: #28832D; }
 
     /* ── CONTENT ── */
     .content {
@@ -409,7 +409,7 @@
       color: #5F6C85;
     }
     .product-detail-bottom {
-      background: #F8F9FC;
+      background: #D3F1D4;
       padding: 12px 14px;
       position: relative;
       overflow: hidden;
@@ -442,8 +442,8 @@
     .product-info-note {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-      padding: 8px 14px 12px;
+      gap: 8px;
+      padding: 10px 15px 4px;
     }
     .product-info-note svg { flex-shrink: 0; margin-top: 1px; }
     .product-info-note-text {
@@ -474,6 +474,64 @@
       line-height: 1.5;
     }
 
+    /* ── PROMO SECTION ── */
+    .promo-section {
+      margin: 0 15px;
+    }
+    .promo-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #001533;
+      line-height: 24px;
+      margin-bottom: 12px;
+    }
+    .promo-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .promo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1.5px solid #E1E6EF;
+      border-radius: 10px;
+      padding: 14px 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fff;
+    }
+    .promo-item:last-child { margin-bottom: 0; }
+    .promo-item.selected {
+      border-color: #0255CA;
+      background: #F0F5FF;
+    }
+    .promo-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #CBD2E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s;
+    }
+    .promo-item.selected .promo-radio { border-color: #0255CA; }
+    .promo-radio-inner {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #0255CA;
+      display: none;
+    }
+    .promo-item.selected .promo-radio-inner { display: block; }
+    .promo-label {
+      font-size: 14px;
+      color: #021431;
+      line-height: 1.4;
+    }
+
     /* ── STEP 3 - BOOKING ── */
     #step3 { display: none; }
     .booking-section {
@@ -488,19 +546,23 @@
     }
     /* Arrival time */
     .time-group {
-      border: 1px solid #E1E6EF;
+      display: flex;
+      flex-direction: row;
+      border: 1.5px solid #E1E6EF;
       border-radius: 8px;
       overflow: hidden;
     }
+    .time-group.error { border-color: #E85C3D; }
     .time-option {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-bottom: 1px solid #E1E6EF;
+      gap: 8px;
+      padding: 12px 10px;
+      border-right: 1px solid #E1E6EF;
       cursor: pointer;
     }
-    .time-option:last-child { border-bottom: none; }
+    .time-option:last-child { border-right: none; }
     .time-option.selected { background: #E6ECFF; }
     .radio-dot {
       width: 18px;
@@ -522,7 +584,7 @@
     }
     .time-label {
       font-size: 14px;
-      color: #94A0B8;
+      color: #021431;
     }
     .time-label.selected { color: #0255CA; font-weight: 600; }
     /* Branch */
@@ -980,16 +1042,45 @@
             <p class="loan-range" id="detailLoan">— <span>*</span></p>
             <div class="shiny-bar"></div>
           </div>
-          <div class="product-info-note">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="#94A0B8" stroke-width="2"/>
-              <path d="M12 8v4M12 16h.01" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <p class="product-info-note-text">Nilai akhir tergantung pada hasil pengecekan kondisi barang oleh petugas kami.</p>
-          </div>
+        </div>
+        <div class="product-info-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#94A0B8" stroke-width="2"/>
+            <path d="M12 8v4M12 16h.01" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <p class="product-info-note-text">Nilai akhir tergantung pada hasil pengecekan kondisi barang oleh petugas kami.</p>
         </div>
 
         <div class="separator"></div>
+
+        <!-- PROMO SELECTION -->
+        <div class="promo-section">
+          <p class="promo-title">Tawaran Spesial Khusus Gadai Pertama</p>
+          <div class="promo-list" id="promoList">
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN100', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp100 RB (Min. Gadai Rp2 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN50', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp50 RB (Min. Gadai Rp1 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN25', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp25 RB (Min. Gadai Rp500 RB)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('ELE-GRATIS-INSTAN', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Bunga 0% (Tebus dalam 7 Hari, Maks. Gadai Rp2.5 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('ELE-DISKON-20-BUNGA', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Bunga 8% (Tebus dalam 30 Hari)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="separator" style="margin-top:18px"></div>
 
         <div class="no-bi-box">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -1003,28 +1094,8 @@
 
       <!-- STEP 3: BOOKING GADAI -->
       <div id="step3">
-        <!-- Arrival time -->
-        <div class="booking-section" style="margin-top:20px">
-          <p class="booking-section-title">Waktu Kedatangan</p>
-          <div class="time-group">
-            <div class="time-option" id="timeToday" onclick="selectTime('TODAY')">
-              <div class="radio-dot" id="radioDotTODAY"></div>
-              <span class="time-label" id="timeLabelTODAY">Hari Ini</span>
-            </div>
-            <div class="time-option" id="timeTomorrow" onclick="selectTime('TOMORROW')">
-              <div class="radio-dot" id="radioDotTOMORROW"></div>
-              <span class="time-label" id="timeLabelTOMORROW">Besok</span>
-            </div>
-            <div class="time-option" id="timeLusa" onclick="selectTime('DAY_AFTER_TOMORROW')">
-              <div class="radio-dot" id="radioDotDAY_AFTER_TOMORROW"></div>
-              <span class="time-label" id="timeLabelDAY_AFTER_TOMORROW">Lusa</span>
-            </div>
-          </div>
-          <p class="error-text" id="timeError" style="display:none">Pilih waktu kedatangan terlebih dahulu</p>
-        </div>
-
         <!-- Branch selection -->
-        <div class="booking-section">
+        <div class="booking-section" style="margin-top:20px">
           <p class="booking-section-title">Lokasi Cabang</p>
           <div id="branchEmpty" onclick="openBranchSheet()">
             <button class="branch-select-btn" id="branchSelectBtn">
@@ -1045,6 +1116,26 @@
               <button class="branch-change-btn" onclick="openBranchSheet()">Ubah</button>
             </div>
           </div>
+        </div>
+
+        <!-- Arrival time -->
+        <div class="booking-section">
+          <p class="booking-section-title">Waktu Kedatangan</p>
+          <div class="time-group" id="timeGroup">
+            <div class="time-option" id="timeToday" onclick="selectTime('TODAY')">
+              <div class="radio-dot" id="radioDotTODAY"></div>
+              <span class="time-label" id="timeLabelTODAY">Hari Ini</span>
+            </div>
+            <div class="time-option" id="timeTomorrow" onclick="selectTime('TOMORROW')">
+              <div class="radio-dot" id="radioDotTOMORROW"></div>
+              <span class="time-label" id="timeLabelTOMORROW">Besok</span>
+            </div>
+            <div class="time-option" id="timeLusa" onclick="selectTime('DAY_AFTER_TOMORROW')">
+              <div class="radio-dot" id="radioDotDAY_AFTER_TOMORROW"></div>
+              <span class="time-label" id="timeLabelDAY_AFTER_TOMORROW">Lusa</span>
+            </div>
+          </div>
+          <p class="error-text" id="timeError" style="display:none">Pilih waktu kedatangan terlebih dahulu</p>
         </div>
 
         <!-- Personal info -->
@@ -1370,15 +1461,15 @@
     function selectTime(id) {
       selectedTime = id;
       ['TODAY','TOMORROW','DAY_AFTER_TOMORROW'].forEach(t => {
-        const opt = document.getElementById('timeOpt_' + t) ||
-                    document.querySelector(`[onclick="selectTime('${t}')"]`);
+        const opt = document.querySelector(`[onclick="selectTime('${t}')"]`);
         const dot = document.getElementById('radioDot' + t);
         const lbl = document.getElementById('timeLabel' + t);
         const isSelected = t === id;
-        if (dot) { dot.className = 'radio-dot' + (isSelected ? ' selected' : ''); }
-        if (lbl) { lbl.className = 'time-label' + (isSelected ? ' selected' : ''); }
-        if (opt) { opt.className = 'time-option' + (isSelected ? ' selected' : ''); }
+        if (dot) dot.className = 'radio-dot' + (isSelected ? ' selected' : '');
+        if (lbl) lbl.className = 'time-label' + (isSelected ? ' selected' : '');
+        if (opt) opt.className = 'time-option' + (isSelected ? ' selected' : '');
       });
+      document.getElementById('timeGroup').classList.remove('error');
       document.getElementById('timeError').style.display = 'none';
       validateForm();
     }
@@ -1444,7 +1535,10 @@
     // ── BOOKING SUBMIT ────────────────────────────────────────────────────────
     async function submitBooking() {
       if (!validateForm()) {
-        if (!selectedTime) document.getElementById('timeError').style.display = 'block';
+        if (!selectedTime) {
+        document.getElementById('timeError').style.display = 'block';
+        document.getElementById('timeGroup').classList.add('error');
+      }
         return;
       }
       const btn = document.getElementById('btnLanjut');
@@ -1455,6 +1549,15 @@
       setStep(4);
       document.getElementById('stepSuccess').style.display = 'flex';
       document.getElementById('bookingCodeDisplay').textContent = 'PG-' + Math.random().toString(36).substring(2,8).toUpperCase();
+    }
+
+    // ── PROMO SELECTION ──────────────────────────────────────────────────────
+    let selectedPromo = null;
+
+    function selectPromo(code, el) {
+      selectedPromo = code;
+      document.querySelectorAll('.promo-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
     }
 
     // ── LEAD CAPTURE ─────────────────────────────────────────────────────────
