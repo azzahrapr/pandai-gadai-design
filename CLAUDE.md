@@ -4,11 +4,11 @@
 
 This project uses the Cortes Design System.
 
-→ [design-components.md](design-components.md) — component keys & page map  
-→ [design-tokens.md](design-tokens.md) — color, spacing & typography tokens  
-→ [layout-guidelines.md](layout-guidelines.md) — layout principles (read before building any screen)  
-→ [figma/figma-protocol.md](figma/figma-protocol.md) — technical rules for every `use_figma` call  
-→ [figma/figma-plugin-helpers.js](figma/figma-plugin-helpers.js) — token & component helper functions  
+→ [design-system/design-components.md](design-system/design-components.md) — component keys & page map  
+→ [design-system/design-tokens.md](design-system/design-tokens.md) — color, spacing & typography tokens  
+→ [design-system/layout-guidelines.md](design-system/layout-guidelines.md) — layout principles (read before building any screen)  
+→ [design-system/figma/figma-protocol.md](design-system/figma/figma-protocol.md) — technical rules for every `use_figma` call  
+→ [design-system/figma/figma-plugin-helpers.js](design-system/figma/figma-plugin-helpers.js) — token & component helper functions  
 
 ## Figma Workflow Tips
 
