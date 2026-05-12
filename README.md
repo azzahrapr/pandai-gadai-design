@@ -1,6 +1,6 @@
 # Pandai Gadai – Design Workspace
 
-This repo is the end-to-end design workspace for **Pandai Gadai**, a pawnshop (gadai) service based in Jakarta. It covers the design system, product prototypes, and tooling used to design, prototype, and evaluate the product.
+This repo is the end-to-end design workspace for **Pandai Gadai**. It covers the design system, product prototypes, and tooling used to design, prototype, and evaluate the product.
 
 ---
 
@@ -21,15 +21,6 @@ Interactive prototypes built to explore and validate product flows.
 |---|---|
 | `landing-page/` | Replica of pandaigadai.com — static HTML, faithful to the live site. Includes a simulasi gadai page with a lead capture form. |
 | `mobile-app/` | React-based prototype of the Pandai Gadai customer app — covers Homepage, Verifikasi KTP, Detail Pinjaman, Poin Pandai, SBG, and transaction flows (Tebus, Cicil, Perpanjang). |
-
----
-
-## Initiatives
-
-- **Design System** — Cortes DS built in Figma, fully indexed for Claude Code integration
-- **Landing Page Prototype** — pixel-faithful replica of pandaigadai.com with a simulasi gadai flow and lead capture bottomsheet
-- **Mobile App Prototype** — multi-screen interactive prototype covering the core customer app flows
-- **Claude Code Integration** — all design context (tokens, components, Figma protocol) is wired into Claude Code so AI-assisted design work is consistent and context-aware
 
 ---
 
