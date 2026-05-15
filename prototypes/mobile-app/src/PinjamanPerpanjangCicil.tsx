@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom'
 const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
-const BIAYA_JASA   = 85000
-const POIN_BALANCE = 12000
-const POIN_EARN    = 2000
-
-// Change to 0 to demo the "Insufficient Balance" state
+const NILAI_PINJAMAN    = 850000
+const BIAYA_JASA        = 85000
+const POIN_BALANCE      = 12000
+const POIN_EARN         = 2000
 const DEMO_POIN_BALANCE = POIN_BALANCE
 
 function fmt(n: number) {
@@ -42,17 +41,21 @@ function IconPoinEmas({ faded }: { faded?: boolean }) {
   )
 }
 
-export default function PinjamanPerpanjang() {
+export default function PinjamanPerpanjangCicil() {
   const navigate = useNavigate()
-  const [poinOn, setPoinOn] = useState(false)
+  const [cicilOn, setCicilOn] = useState(false)
+  const [nominalCicilStr, setNominalCicilStr] = useState('')
   const [promoCode, setPromoCode] = useState('')
+  const [poinOn, setPoinOn] = useState(false)
 
-  // Derive poin state based on balance
+  const parsedNominal = parseInt(nominalCicilStr.replace(/\D/g, ''), 10) || 0
+  const showNominalCicilRow = cicilOn && parsedNominal > 0
+  const subtotal = BIAYA_JASA + (showNominalCicilRow ? parsedNominal : 0)
+
   const poinState: PoinState = DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available'
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
-
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0
-  const total = BIAYA_JASA - poinDiscount
+  const total = subtotal - poinDiscount
 
   function getPoinSubtext() {
     switch (poinState) {
@@ -94,6 +97,49 @@ export default function PinjamanPerpanjang() {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto hide-scrollbar px-4 py-4 flex flex-col gap-4">
 
+        {/* Nilai Pinjaman card */}
+        <div className="bg-white border border-[#e2e8f0] rounded-lg px-3 py-3 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] text-[#64748b]">Nilai Pinjaman</span>
+            <span className="text-[14px] text-[#0f1729]">{fmt(NILAI_PINJAMAN)}</span>
+          </div>
+          {cicilOn && (
+            <div className="flex items-center justify-between">
+              <span className="text-[14px] text-[#64748b]">Nilai Pinjaman Baru</span>
+              <span className="text-[14px] text-[#0f1729]">
+                {parsedNominal > 0 ? fmt(NILAI_PINJAMAN - parsedNominal) : '-'}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] font-semibold text-[#0f1729]">Tambah cicil pinjaman</span>
+            <Toggle
+              on={cicilOn}
+              onClick={() => {
+                if (cicilOn) setNominalCicilStr('')
+                setCicilOn(v => !v)
+              }}
+            />
+          </div>
+          {cicilOn && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex border border-[#cbd5e1] rounded-[6px] overflow-hidden">
+                <div className="bg-[#f8fafc] px-3 py-3 flex items-center shrink-0">
+                  <span className="text-[14px] text-[#65758b]">Rp</span>
+                </div>
+                <input
+                  type="number"
+                  value={nominalCicilStr}
+                  onChange={e => setNominalCicilStr(e.target.value)}
+                  placeholder="Masukkan nominal cicil"
+                  className="flex-1 px-3 py-3 text-[14px] text-[#0f1729] outline-none"
+                />
+              </div>
+              <p className="text-[12px] text-[#64748b]">Nominal cicil antara Rp50.000 - Rp750.000</p>
+            </div>
+          )}
+        </div>
+
         {/* Detail Pembayaran */}
         <div className="flex flex-col gap-3">
           <p className="text-[14px] font-semibold text-[#0f1729]">Detail Pembayaran</p>
@@ -105,10 +151,16 @@ export default function PinjamanPerpanjang() {
               </div>
               <span className="text-[14px] text-[#020617]">{fmt(BIAYA_JASA)}</span>
             </div>
+            {showNominalCicilRow && (
+              <div className="flex items-center justify-between">
+                <span className="text-[14px] text-[#64748b]">Nominal Cicil</span>
+                <span className="text-[14px] text-[#020617]">{fmt(parsedNominal)}</span>
+              </div>
+            )}
             <div className="h-px bg-[#e2e8f0]" />
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-semibold text-[#020617]">Subtotal</span>
-              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(BIAYA_JASA)}</span>
+              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(subtotal)}</span>
             </div>
           </div>
         </div>
@@ -179,12 +231,12 @@ export default function PinjamanPerpanjang() {
             <div className="flex items-baseline gap-2">
               <p className="text-[20px] font-bold text-[#023dff]">{fmt(total)}</p>
               {poinState === 'selected' && (
-                <p className="text-[14px] text-[#94a3b8] line-through">{fmt(BIAYA_JASA)}</p>
+                <p className="text-[14px] text-[#94a3b8] line-through">{fmt(subtotal)}</p>
               )}
             </div>
           </div>
           <button
-            onClick={() => navigate('/pinjaman/pin', { state: { type: 'perpanjang' } })}
+            onClick={() => navigate('/pinjaman/pin', { state: { type: 'perpanjang-cicil' } })}
             className="bg-[#023dff] rounded-[6px] px-4 py-2 flex items-center gap-2 shrink-0"
           >
             <span className="text-[14px] font-medium text-white">Bayar</span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 // ── Local static assets ────────────────────────────────────────────────────────
 const imgDate           = "/assets/status-date.svg";
@@ -240,8 +240,15 @@ function MissionOverlay({ mission, onClose }: { mission: typeof missions[0]; onC
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PoinPandaiVerified() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showKlaimOverlay, setShowKlaimOverlay] = useState(false);
   const [selectedMission, setSelectedMission] = useState<typeof missions[0] | null>(null);
+
+  useEffect(() => {
+    if ((location.state as { openKlaim?: boolean } | null)?.openKlaim) {
+      setShowKlaimOverlay(true)
+    }
+  }, []);
 
   return (
     <div className="w-[375px] bg-white flex flex-col overflow-hidden rounded-3xl shadow-2xl relative" style={{ height: 812 }}>
@@ -384,7 +391,7 @@ export default function PoinPandaiVerified() {
           </div>
           <span className="text-[12px] font-bold text-slate-500">Beranda</span>
         </button>
-        <button onClick={() => navigate('/pinjaman/detail')} className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20">
           <img src={imgCreditCard} alt="" className="size-6 object-contain" />
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>

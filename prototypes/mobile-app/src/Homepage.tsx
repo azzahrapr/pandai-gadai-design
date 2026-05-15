@@ -176,11 +176,11 @@ export default function Homepage() {
               <p className="text-lg font-bold text-black">20.000 poin</p>
             </div>
             {/* fix 3: shimmer animation on Klaim poin button */}
-            <div className="relative overflow-hidden bg-[#ffcd05] border border-[#fffdc6] rounded-lg px-3 py-1.5">
+            <button onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })} className="relative overflow-hidden bg-[#ffcd05] border border-[#fffdc6] rounded-lg px-3 py-1.5">
               <span className="text-sm font-semibold text-[#492504] relative z-10">Klaim poin</span>
               <div className="shimmer-btn absolute top-[-14px] left-0 w-6 h-16 opacity-60"
                 style={{ background: "linear-gradient(266deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 100%)" }} />
-            </div>
+            </button>
           </div>
 
           {/* Dark hook strip */}
@@ -288,7 +288,9 @@ export default function Homepage() {
       </div>{/* end scrollable area */}
 
       {/* ── Klaim Poin strip */}
-      <div className="flex items-center gap-2 px-4 py-2"
+      <button
+        onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })}
+        className="flex items-center gap-2 px-4 py-2 w-full text-left"
         style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
         <div className="flex flex-col flex-1">
           <p className="text-sm font-semibold text-[#492504]">Klaim 4.000 Poin Pandai</p>
@@ -300,7 +302,7 @@ export default function Homepage() {
           </div>
           <ArrowRightSmall className="size-5 text-[#492504]" />
         </div>
-      </div>
+      </button>
 
       {/* ── Bottom Navbar */}
       <div className="bg-white flex items-center justify-between px-4 pt-4 pb-8">
@@ -311,7 +313,7 @@ export default function Homepage() {
         </button>
 
         {/* Pinjaman */}
-        <button onClick={() => navigate('/pinjaman/detail')} className="flex flex-col items-center gap-1 w-20 relative">
+        <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20 relative">
           <img src={imgCreditCard} alt="" className="size-6 object-contain" />
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
@@ -323,7 +325,7 @@ export default function Homepage() {
         </button>
 
         {/* Akun */}
-        <button className="flex flex-col items-center gap-1 w-20 relative">
+        <button onClick={() => navigate('/akun')} className="flex flex-col items-center gap-1 w-20 relative">
           <div className="relative">
             <img src={imgSmileIcon} alt="" className="size-6 object-contain" />
             <div className="absolute -top-2 left-3 bg-red-600 text-white text-[10px] font-bold px-1 rounded-full min-w-[18px] text-center leading-[15px]">
