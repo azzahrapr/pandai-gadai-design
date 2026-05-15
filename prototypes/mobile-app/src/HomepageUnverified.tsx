@@ -5,7 +5,7 @@ const imgPattern          = "/assets/bg-pattern.svg";
 const imgDate             = "/assets/status-date.svg";
 const imgRight            = "/assets/status-right.svg";
 const imgPose15           = "/assets/panda-pose15.png";
-const imgPoinEmasSm       = "/assets/poin-fill-sm.svg";
+const imgPoinEmasSm       = "/assets/poin-fill.svg";
 const imgEllipse          = "/assets/ellipse-dot.svg";
 const imgArrowSmRight     = "/assets/arrow-right-v1-sm.svg";
 const imgArrowRightV1     = "/assets/arrow-right-v1-sm.svg";
@@ -289,7 +289,13 @@ export default function HomepageUnverified() {
             <div className="relative">
               <img src={imgBanner} alt="Banner promo" className="w-full h-[120px] rounded-xl object-cover" />
             </div>
-            <img src={imgCarouselDots} alt="" className="h-2 mx-auto" />
+            <svg width="72" height="8" viewBox="0 0 72 8" fill="none" className="mx-auto block">
+              <circle cx="4"  cy="4" r="4" fill="#023DFF"/>
+              <circle cx="20" cy="4" r="4" fill="#DDEFFF"/>
+              <circle cx="36" cy="4" r="4" fill="#DDEFFF"/>
+              <circle cx="52" cy="4" r="4" fill="#DDEFFF"/>
+              <circle cx="68" cy="4" r="4" fill="#DDEFFF"/>
+            </svg>
           </div>
         </div>
       </div>{/* end scrollable area */}
@@ -325,10 +331,10 @@ export default function HomepageUnverified() {
         </button>
 
         {/* Pinjaman */}
-        <button onClick={() => navigate('/pinjaman/detail')} className="flex flex-col items-center gap-1 w-20">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M3 10L3 17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V10" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round"/>
-            <rect x="1" y="6" width="22" height="5" rx="1" stroke="#64748b" strokeWidth="1.5"/>
+        <button className="flex flex-col items-center gap-1 w-20">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
           </svg>
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
@@ -344,7 +350,7 @@ export default function HomepageUnverified() {
         </button>
 
         {/* Akun */}
-        <button className="flex flex-col items-center gap-1 w-20 relative">
+        <button onClick={() => navigate('/akun')} className="flex flex-col items-center gap-1 w-20 relative">
           <div className="relative">
             <img src={imgSmileIcon} alt="" className="size-6 object-contain" />
             <div className="absolute -top-2 left-3 bg-red-600 text-white text-[10px] font-bold px-1 rounded-full min-w-[18px] text-center leading-[15px]">

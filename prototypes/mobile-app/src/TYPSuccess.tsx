@@ -1,10 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
 // Figma CDN assets — expire ~7 days from design fetch (save locally to replace)
-const imgSpotSuccess    = "https://www.figma.com/api/mcp/asset/9ae6038c-0bc1-4504-b2b8-84a278f9a882"
-const imgConfettiCircle = "https://www.figma.com/api/mcp/asset/9c6189c1-d701-4cee-ba8c-ff54d317ca6d"
-const imgConfettiUpper  = "https://www.figma.com/api/mcp/asset/0732949f-c3c2-4a6b-9467-a14bfdc9a739"
-const imgConfettiLower  = "https://www.figma.com/api/mcp/asset/c3b1e385-3be3-475e-a0c3-1b93068ef3ee"
+const imgSpotSuccess    = "https://www.figma.com/api/mcp/asset/f11e1e6a-cbda-4fe3-8056-8a419e638d1f"
+const imgConfettiCircle = "https://www.figma.com/api/mcp/asset/4078bea5-248b-4e91-82b2-d13766f7db74"
+const imgConfettiUpper  = "https://www.figma.com/api/mcp/asset/47f4aea3-3f14-40aa-b23f-75f125ecc45d"
+const imgConfettiLower  = "https://www.figma.com/api/mcp/asset/0b93e6f5-0ff1-44ca-a296-1e0631be3227"
 
 // Local permanent assets
 const imgWeave    = "/assets/weave-success.svg"  // 375×175 — scaleX(-1) mirrors wave direction

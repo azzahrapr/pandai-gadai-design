@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router-dom'
 const imgDate         = "/assets/status-date.svg";
 const imgRight        = "/assets/status-right.svg";
 const imgHeadset      = "/assets/headset-icon.svg";
-const imgPoinEmasLg   = "/assets/poin-fill-lg.svg";
 const imgPoinEmasSm   = "/assets/poin-fill-sm.svg";
 const imgPoinEmasActive = "/assets/poin-fill-active.svg";
 const imgSmileIcon    = "/assets/nav-smile.svg";
 const imgHomeVec      = "/assets/nav-home-outline.svg";
-const imgCreditCard   = "/assets/nav-credit-v2b.svg";
 const imgPose81       = "/assets/panda-pose8.png";
 const imgDecoPattern  = "/assets/deco-pattern.svg";
 const imgHandHeart    = "/assets/hand-heart.svg";
@@ -78,7 +76,7 @@ export default function PoinPandaiUnverified() {
           {/* Panda + CTA button */}
           <div className="flex flex-col items-center gap-0 w-full relative">
             <img src={imgPose81} alt="Panda mascot" className="size-[120px] object-cover z-10 relative" />
-            <button className="w-full bg-[#ffcd05] rounded-lg flex items-center justify-center gap-2 py-3 -mt-3 shadow-lg">
+            <button onClick={() => navigate('/verifikasi')} className="w-full bg-[#ffcd05] rounded-lg flex items-center justify-center gap-2 py-3 -mt-3 shadow-lg">
               <span className="text-sm font-semibold text-slate-900">
                 Ambil <span className="text-[#7e480f]">4.000 Poin Pandai</span> sekarang
               </span>
@@ -92,7 +90,7 @@ export default function PoinPandaiUnverified() {
             <div className="flex-1 bg-[#fefdea] border border-[#ca8a04] rounded-2xl flex flex-col items-center gap-2 px-3 py-2">
               <div className="relative size-5 overflow-hidden shrink-0">
                 <div className="absolute inset-[0_6.53%_0_6.5%]">
-                  <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasLg} />
+                  <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasSm} />
                 </div>
               </div>
               <p className="text-[12px] font-medium text-[#ca8a04] text-center leading-4">
@@ -206,8 +204,11 @@ export default function PoinPandaiUnverified() {
         </button>
 
         {/* Pinjaman */}
-        <button onClick={() => navigate('/pinjaman/detail')} className="flex flex-col items-center gap-1 w-20">
-          <img src={imgCreditCard} alt="" className="size-6 object-contain" />
+        <button className="flex flex-col items-center gap-1 w-20">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
 
@@ -222,7 +223,7 @@ export default function PoinPandaiUnverified() {
         </button>
 
         {/* Akun */}
-        <button className="flex flex-col items-center gap-1 w-20 relative">
+        <button onClick={() => navigate('/akun')} className="flex flex-col items-center gap-1 w-20 relative">
           <div className="relative">
             <div className="relative size-6 overflow-hidden">
               <img alt="" className="absolute inset-0 block size-full max-w-none object-contain" src={imgSmileIcon} />

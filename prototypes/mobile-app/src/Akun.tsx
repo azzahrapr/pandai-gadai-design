@@ -1,20 +1,19 @@
 import { useNavigate } from 'react-router-dom'
 
 const imgBgPattern = "/assets/bg-pattern.svg"
-const imgHeadset   = "/assets/headset-icon.svg"
-const imgNavHome   = "/assets/nav-home-outline.svg"
-const imgNavCredit = "/assets/nav-pinjaman-v1.svg"
-const imgNavSmile  = "/assets/nav-smile.svg"
+const imgNavHome         = "/assets/nav-home-outline.svg"
+const imgPoinEmasOutline = "/assets/nav-poin-outline.svg"
+const imgNavSmile        = "/assets/nav-smile.svg"
 
 // Figma CDN assets — node 3114:6576, expire ~7 days from design fetch
-const imgCardBg     = "https://www.figma.com/api/mcp/asset/bfee06c9-71d4-49be-81e6-badf6f8604eb"
-const imgPandaiLogo = "https://www.figma.com/api/mcp/asset/bb4ee7f4-c242-4475-8b27-2b0cd2f9c114"
-const imgCardNumber = "https://www.figma.com/api/mcp/asset/3c0eda60-5ce8-4342-b63a-5abdc9089e1a"
-const imgCopyIcon   = "https://www.figma.com/api/mcp/asset/827772d4-b069-41df-9231-470855fed2d1"
-const imgShareIcon  = "https://www.figma.com/api/mcp/asset/d4656714-d22a-459c-8cdb-9aa6efec3e40"
-const imgVerified1  = "https://www.figma.com/api/mcp/asset/c0594e04-ca4c-4c52-9cce-02e3de0dd1bd"
-const imgVerified2  = "https://www.figma.com/api/mcp/asset/00b7d8f1-2ac2-4652-9281-825673716410"
-const imgOjk        = "https://www.figma.com/api/mcp/asset/13741799-9fba-4d82-a722-82f8175041f4"
+const imgCardBg     = "https://www.figma.com/api/mcp/asset/7db03511-7b86-4aa8-af1f-c1cff50cc986"
+const imgPandaiLogo = "https://www.figma.com/api/mcp/asset/d731b817-a956-4623-b69c-9c0c7cfabd79"
+const imgCardNumber = "https://www.figma.com/api/mcp/asset/37ef09d7-d5ed-468a-b890-d30a6156ad24"
+const imgCopyIcon   = "https://www.figma.com/api/mcp/asset/f9f12d50-a328-4cce-8ad4-fc76595b9524"
+const imgShareIcon  = "https://www.figma.com/api/mcp/asset/07d7650f-cba0-4865-9126-df6ac6d9c8c4"
+const imgVerified1  = "https://www.figma.com/api/mcp/asset/ad144b6e-337d-4692-9b1b-2f67fb8e78f9"
+const imgVerified2  = "https://www.figma.com/api/mcp/asset/e86df361-f5dc-4e10-9e6c-ce3b8e431d22"
+const imgOjk        = "https://www.figma.com/api/mcp/asset/15900bae-082d-4b94-ae82-e176e6f00161"
 
 function StatusBar() {
   return (
@@ -67,13 +66,17 @@ export default function Akun() {
       <StatusBar />
 
       {/* Scrollable content */}
-      <div className="flex-1 flex flex-col overflow-y-auto hide-scrollbar pb-[89px]">
+      <div className="flex-1 flex flex-col overflow-y-auto hide-scrollbar pb-[96px]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0 relative z-10">
           <h1 className="text-[28px] font-bold text-white leading-8 tracking-[-0.168px]">Akun Saya</h1>
           <button className="flex items-center justify-center p-[10px] rounded-full border border-[#a8cfff] bg-[rgba(229,242,255,0.4)] backdrop-blur-sm">
-            <img src={imgHeadset} alt="" className="size-5" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+              <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
           </button>
         </div>
 
@@ -247,25 +250,32 @@ export default function Akun() {
         </div>
       </div>
 
-      {/* Bottom tab bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-[rgba(255,255,255,0.7)] backdrop-blur-md border-t border-[#e2e8f0] flex flex-col">
-        <div className="flex items-center">
-          <button onClick={() => navigate('/')} className="flex-1 flex flex-col items-center gap-1 pt-[14px] pb-[10px]">
-            <img src={imgNavHome} alt="" className="size-6" />
-            <span className="text-[12px] font-semibold text-[#64748b]">Home</span>
-          </button>
-          <button onClick={() => navigate('/pinjaman/detail')} className="flex-1 flex flex-col items-center gap-1 pt-[14px] pb-[10px]">
-            <img src={imgNavCredit} alt="" className="size-6" />
-            <span className="text-[12px] font-semibold text-[#64748b]">Pinjaman</span>
-          </button>
-          <button className="flex-1 flex flex-col items-center gap-1 pt-[14px] pb-[10px]">
-            <img src={imgNavSmile} alt="" className="size-6" />
-            <span className="text-[12px] font-semibold text-[#023dff]">Akun</span>
-          </button>
-        </div>
-        <div className="flex justify-center pb-2">
-          <div className="w-36 h-[5px] rounded-full bg-black" />
-        </div>
+      {/* Bottom navbar */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-4 pt-4 pb-8">
+        <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 w-20">
+          <img src={imgNavHome} alt="" className="size-6 object-contain" />
+          <span className="text-[12px] font-bold text-slate-500">Beranda</span>
+        </button>
+        <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
+        </button>
+        <button onClick={() => navigate('/poin-pandai')} className="flex flex-col items-center gap-1 w-20">
+          <img src={imgPoinEmasOutline} alt="" className="size-6 object-contain" />
+          <span className="text-[12px] font-bold text-slate-500">Poin Pandai</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 w-20 relative">
+          <div className="relative">
+            <img src={imgNavSmile} alt="" className="size-6 object-contain" />
+            <div className="absolute -top-2 left-3 bg-red-600 text-white text-[10px] font-bold px-1 rounded-full min-w-[18px] text-center leading-[15px]">
+              99+
+            </div>
+          </div>
+          <span className="text-[12px] font-bold text-[#001cdb]">Akun</span>
+        </button>
       </div>
     </div>
   )

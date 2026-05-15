@@ -102,7 +102,7 @@ function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () =
 
       {/* Bottom sheet */}
       <div
-        className="relative bg-white rounded-t-2xl shadow-xl flex flex-col overflow-hidden max-h-[90%] transition-transform duration-300 ease-out"
+        className="relative bg-white rounded-t-2xl shadow-xl flex flex-col overflow-hidden max-h-[85%] transition-transform duration-300 ease-out"
         style={{ transform: visible ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Yellow strip header */}
@@ -148,7 +148,7 @@ function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () =
                   <span className="text-[12px] font-semibold text-white">Klaim</span>
                   <div className="relative size-4 overflow-hidden shrink-0">
                     <div className="absolute inset-[0_6.53%_0_6.5%]">
-                      <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasKlaim} />
+                      <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasKlaim} style={{ filter: 'brightness(0) invert(1)' }} />
                     </div>
                   </div>
                   <span className="text-[12px] font-semibold text-white">2.000</span>
@@ -392,7 +392,10 @@ export default function PoinPandaiVerified() {
           <span className="text-[12px] font-bold text-slate-500">Beranda</span>
         </button>
         <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20">
-          <img src={imgCreditCard} alt="" className="size-6 object-contain" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
         <button className="flex flex-col items-center gap-1 w-20">

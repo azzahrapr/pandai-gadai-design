@@ -16,7 +16,6 @@ const imgBanner      = "/assets/banner.jpg";
 const imgCarouselDots = "/assets/carousel-indicator.svg";
 const imgCalcIcon    = "/assets/calc-icon.svg";
 const imgLocationIcon = "/assets/location-icon.svg";
-const imgPhoneIcon   = "/assets/phone-icon.svg";
 const imgCreditCard  = "/assets/nav-credit-v2b.svg";
 
 // ── Quick-action icon assets
@@ -102,7 +101,10 @@ function AssetCard({ action }: { action: "Bayar" | "Gadai Lagi" }) {
     <div className="pressable bg-white border border-slate-200 flex h-28 items-center overflow-hidden rounded-2xl shrink-0 w-80">
       <div className="flex flex-col gap-2 flex-1 pl-4 pr-2 py-3 border-r border-slate-200 h-full justify-center">
         <div className="flex flex-col gap-2">
-          <img src={imgPhoneIcon} alt="" className="size-6 object-contain" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
+          </svg>
           <p className="font-semibold text-sm text-slate-900 leading-4">SAMSUNG GALAXY A52S 6/128GB</p>
         </div>
         {action === "Bayar" && (
@@ -281,7 +283,13 @@ export default function Homepage() {
           <div className="relative">
             <img src={imgBanner} alt="Banner promo" className="w-full h-[120px] rounded-xl object-cover" />
           </div>
-          <img src={imgCarouselDots} alt="" className="h-2 mx-auto" />
+          <svg width="72" height="8" viewBox="0 0 72 8" fill="none" className="mx-auto block">
+            <circle cx="4"  cy="4" r="4" fill="#023DFF"/>
+            <circle cx="20" cy="4" r="4" fill="#DDEFFF"/>
+            <circle cx="36" cy="4" r="4" fill="#DDEFFF"/>
+            <circle cx="52" cy="4" r="4" fill="#DDEFFF"/>
+            <circle cx="68" cy="4" r="4" fill="#DDEFFF"/>
+          </svg>
         </div>
       </div>
 
@@ -313,8 +321,11 @@ export default function Homepage() {
         </button>
 
         {/* Pinjaman */}
-        <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20 relative">
-          <img src={imgCreditCard} alt="" className="size-6 object-contain" />
+        <button onClick={() => navigate('/pinjaman')} className="flex flex-col items-center gap-1 w-20">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
 

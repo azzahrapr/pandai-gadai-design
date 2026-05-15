@@ -179,7 +179,10 @@ export default function DaftarPinjaman() {
           <span className="text-[12px] font-bold text-slate-500">Beranda</span>
         </button>
         <button className="flex flex-col items-center gap-1 w-20">
-          <img src={imgCreditCard} alt="" className="size-6 object-contain" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#001cdb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
           <span className="text-[12px] font-bold text-[#001cdb]">Pinjaman</span>
         </button>
         <button onClick={() => navigate('/poin-pandai')} className="flex flex-col items-center gap-1 w-20">
