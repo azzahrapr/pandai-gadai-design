@@ -6,7 +6,7 @@ const imgRight = "/assets/status-right.svg"
 const imgTebus = "/assets/tebus-illus-grp.svg"
 
 const NOMINAL_TEBUS = 850000
-const POIN_BALANCE  = 12000
+const POIN_BALANCE: number = 12000
 const POIN_EARN     = 2000
 
 // Change to 0 to demo the "Insufficient Balance" state
@@ -49,7 +49,7 @@ export default function PinjamanTebus() {
   const [poinOn, setPoinOn] = useState(false)
   const [promoCode, setPromoCode] = useState('')
 
-  const poinState: PoinState = DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available'
+  const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
 
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0

@@ -5,7 +5,7 @@ const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
 const BIAYA_JASA   = 85000
-const POIN_BALANCE = 12000
+const POIN_BALANCE: number = 12000
 const POIN_EARN    = 2000
 
 // Change to 0 to demo the "Insufficient Balance" state
@@ -48,7 +48,7 @@ export default function PinjamanPerpanjang() {
   const [promoCode, setPromoCode] = useState('')
 
   // Derive poin state based on balance
-  const poinState: PoinState = DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available'
+  const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
 
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0

@@ -6,7 +6,7 @@ const imgRight = "/assets/status-right.svg"
 
 const NILAI_PINJAMAN    = 850000
 const BIAYA_JASA        = 85000
-const POIN_BALANCE      = 12000
+const POIN_BALANCE: number = 12000
 const POIN_EARN         = 2000
 const DEMO_POIN_BALANCE = POIN_BALANCE
 
@@ -52,7 +52,7 @@ export default function PinjamanPerpanjangCicil() {
   const showNominalCicilRow = cicilOn && parsedNominal > 0
   const subtotal = BIAYA_JASA + (showNominalCicilRow ? parsedNominal : 0)
 
-  const poinState: PoinState = DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available'
+  const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0
   const total = subtotal - poinDiscount

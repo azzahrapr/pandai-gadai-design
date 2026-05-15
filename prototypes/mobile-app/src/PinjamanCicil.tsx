@@ -5,7 +5,7 @@ const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
 const NILAI_PINJAMAN    = 850000
-const POIN_BALANCE      = 12000
+const POIN_BALANCE: number = 12000
 const DEMO_POIN_BALANCE = POIN_BALANCE
 
 function fmt(n: number) {
@@ -48,7 +48,7 @@ export default function PinjamanCicil() {
   const parsedNominal = parseInt(nominalCicilStr.replace(/\D/g, ''), 10) || 0
   const nilaiPinjamanBaru = parsedNominal > 0 ? NILAI_PINJAMAN - parsedNominal : null
 
-  const poinState: PoinState = DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available'
+  const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance' || DEMO_POIN_BALANCE > parsedNominal
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0
   const total = parsedNominal - poinDiscount
