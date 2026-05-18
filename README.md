@@ -10,9 +10,12 @@ This repo is the end-to-end design workspace for **Pandai Gadai**. It covers the
 The **Cortes Design System** — the shared visual language used across all Pandai Gadai products.
 
 - `design-tokens.md` — color, spacing & typography tokens
-- `design-components.md` — component index with Figma keys
+- `design-components.md` — component index with Figma keys *(requires Figma MCP access)*
+- `component-specs.md` — stack-agnostic component specs for teams without Figma access
 - `layout-guidelines.md` — layout principles for all screens
 - `figma/` — Figma MCP protocol and plugin helpers for Claude Code integration
+
+> **Using Claude Code?** It auto-detects whether Figma MCP is connected and picks the right files — no manual setup needed. Figma users get `design-components.md`, everyone else gets `component-specs.md` + `design-tokens.md`.
 
 ### `prototypes/`
 Interactive prototypes built to explore and validate product flows.
