@@ -1,15 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
-const BIAYA_JASA   = 85000
 const POIN_BALANCE: number = 12000
 const POIN_EARN    = 2000
 
-// Change to 0 to demo the "Insufficient Balance" state
-const DEMO_POIN_BALANCE = POIN_BALANCE
+interface PinjamanItem {
+  nilai: number
+  name?: string
+  [key: string]: unknown
+}
+
+
 
 function fmt(n: number) {
   return 'Rp' + n.toLocaleString('id-ID')
@@ -44,15 +48,20 @@ function IconPoinEmas({ faded }: { faded?: boolean }) {
 
 export default function PinjamanPerpanjang() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const pinjaman = (location.state as { pinjaman?: PinjamanItem } | null)?.pinjaman
+  const biayaJasa = Math.round((pinjaman?.nilai ?? 850000) * 0.10)
+
   const [poinOn, setPoinOn] = useState(false)
   const [promoCode, setPromoCode] = useState('')
 
+  const DEMO_POIN_BALANCE = POIN_BALANCE
   // Derive poin state based on balance
   const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
 
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0
-  const total = BIAYA_JASA - poinDiscount
+  const total = biayaJasa - poinDiscount
 
   function getPoinSubtext() {
     switch (poinState) {
@@ -101,14 +110,14 @@ export default function PinjamanPerpanjang() {
             <div className="flex items-start justify-between">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[14px] text-[#64748b]">Biaya Jasa</span>
-                <span className="text-[12px] text-[#94a3b8]">(0.8% per 7 hari)</span>
+                <span className="text-[12px] text-[#94a3b8]">(10% per 30 hari)</span>
               </div>
-              <span className="text-[14px] text-[#020617]">{fmt(BIAYA_JASA)}</span>
+              <span className="text-[14px] text-[#020617]">{fmt(biayaJasa)}</span>
             </div>
             <div className="h-px bg-[#e2e8f0]" />
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-semibold text-[#020617]">Subtotal</span>
-              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(BIAYA_JASA)}</span>
+              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(biayaJasa)}</span>
             </div>
           </div>
         </div>
@@ -179,7 +188,7 @@ export default function PinjamanPerpanjang() {
             <div className="flex items-baseline gap-2">
               <p className="text-[20px] font-bold text-[#023dff]">{fmt(total)}</p>
               {poinState === 'selected' && (
-                <p className="text-[14px] text-[#94a3b8] line-through">{fmt(BIAYA_JASA)}</p>
+                <p className="text-[14px] text-[#94a3b8] line-through">{fmt(biayaJasa)}</p>
               )}
             </div>
           </div>

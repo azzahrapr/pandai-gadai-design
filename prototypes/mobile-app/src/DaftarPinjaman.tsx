@@ -4,13 +4,75 @@ import { useNavigate } from 'react-router-dom'
 const imgDate            = "/assets/status-date.svg"
 const imgRight           = "/assets/status-right.svg"
 const imgHomeOutline     = "/assets/nav-home-outline.svg"
-const imgCreditCard      = "/assets/nav-credit-v2b.svg"
 const imgPoinEmasOutline = "/assets/nav-poin-outline.svg"
 const imgSmileIcon       = "/assets/nav-smile.svg"
 
 type TabType = 'semua' | 'aktif' | 'riwayat'
 
-function PhoneIcon() {
+export interface PinjamanItemFull {
+  id: string
+  sbg: string
+  status: 'aktif' | 'selesai'
+  tanggalPinjaman: string
+  cabang: string
+  name: string
+  category: string
+  iconType: 'phone' | 'tv' | 'watch'
+  nilai: number
+  jatuhTempo?: string
+}
+
+const pinjamanItems: PinjamanItemFull[] = [
+  {
+    id: 'p1',
+    sbg: '#2000240800002203',
+    status: 'aktif',
+    tanggalPinjaman: '01 Okt 2025',
+    cabang: 'Otista',
+    name: 'SAMSUNG GALAXY A52S 6/128GB',
+    category: 'Elektronik - HP',
+    iconType: 'phone',
+    nilai: 850000,
+    jatuhTempo: '01 Nov 2025',
+  },
+  {
+    id: 'p2',
+    sbg: '#2000240600001456',
+    status: 'selesai',
+    tanggalPinjaman: '27 Apr 2026',
+    cabang: 'Fatmawati',
+    name: 'SAMSUNG 4K CRYSTAL UHD SMART TV',
+    category: 'Elektronik - TV',
+    iconType: 'tv',
+    nilai: 1350000,
+  },
+  {
+    id: 'p3',
+    sbg: '#2000240500000891',
+    status: 'selesai',
+    tanggalPinjaman: '15 Mar 2026',
+    cabang: 'Kebayoran',
+    name: 'GARMIN FENIX 8 SAPPHIRE AMOLED JAM TANGAN GPS MULTISPORT',
+    category: 'Elektronik - Smartwatch',
+    iconType: 'watch',
+    nilai: 699000,
+  },
+]
+
+function ItemIcon({ type }: { type: PinjamanItemFull['iconType'] }) {
+  if (type === 'tv') return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="15" rx="2"/>
+      <polyline points="17 2 12 7 7 2"/>
+    </svg>
+  )
+  if (type === 'watch') return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="6"/>
+      <polyline points="12 9 12 12 13.5 13.5"/>
+      <path d="M16 5.5l-.5-3.5H8.5L8 5.5M8 18.5l.5 3.5h7l.5-3.5"/>
+    </svg>
+  )
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="5" y="2" width="14" height="20" rx="2"/>
@@ -19,32 +81,13 @@ function PhoneIcon() {
   )
 }
 
-function TVIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="15" rx="2"/>
-      <polyline points="17 2 12 7 7 2"/>
-    </svg>
-  )
-}
-
-function WatchIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="6"/>
-      <polyline points="12 9 12 12 13.5 13.5"/>
-      <path d="M16 5.5l-.5-3.5H8.5L8 5.5M8 18.5l.5 3.5h7l.5-3.5"/>
-    </svg>
-  )
-}
-
-function LoanCardPrimary({ onBayar }: { onBayar: () => void }) {
+function LoanCardPrimary({ item, onBayar }: { item: PinjamanItemFull; onBayar: () => void }) {
   return (
     <div className="bg-white border border-[#f9fafb] rounded-[20px] shadow-[0px_4px_3px_rgba(0,0,0,0.1),0px_2px_2px_rgba(0,0,0,0.1)] flex flex-col gap-3 p-3 w-full shrink-0">
       <div className="flex items-start justify-between h-9">
         <div className="flex flex-col justify-center">
           <p className="text-[12px] font-medium text-[#64748b]">No. SBG</p>
-          <p className="text-[12px] font-medium text-[#020617]">#2000240800002203</p>
+          <p className="text-[12px] font-medium text-[#020617]">{item.sbg}</p>
         </div>
         <div className="flex flex-col items-end">
           <p className="text-[12px] font-medium text-[#64748b] text-right">Jatuh Tempo</p>
@@ -55,14 +98,14 @@ function LoanCardPrimary({ onBayar }: { onBayar: () => void }) {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-1.5">
           <div className="size-6 bg-[#cfe7ff] rounded-full flex items-center justify-center shrink-0">
-            <PhoneIcon />
+            <ItemIcon type={item.iconType} />
           </div>
-          <p className="text-[14px] font-semibold text-[#020617] flex-1">SAMSUNG GALAXY A52S 6/128GB</p>
+          <p className="text-[14px] font-semibold text-[#020617] flex-1">{item.name}</p>
         </div>
         <div className="flex items-end justify-between">
           <div className="pl-1 flex flex-col gap-0.5">
             <p className="text-[12px] font-medium text-[#64748b]">Nilai Pinjaman</p>
-            <p className="text-[18px] font-bold text-[#020617]">850.000</p>
+            <p className="text-[18px] font-bold text-[#020617]">{item.nilai.toLocaleString('id-ID')}</p>
           </div>
           <button
             onClick={onBayar}
@@ -76,38 +119,35 @@ function LoanCardPrimary({ onBayar }: { onBayar: () => void }) {
   )
 }
 
-interface LoanCardSecondaryProps {
-  product: string
-  icon: React.ReactNode
-  sisaPembayaran: string
-}
-
-function LoanCardSecondary({ product, icon, sisaPembayaran }: LoanCardSecondaryProps) {
+function LoanCardSecondary({ item, onLihatDetail }: { item: PinjamanItemFull; onLihatDetail: () => void }) {
   return (
     <div className="bg-white border border-[#f9fafb] rounded-[20px] shadow-[0px_4px_3px_rgba(0,0,0,0.1),0px_2px_2px_rgba(0,0,0,0.1)] flex flex-col gap-3 p-3 w-full shrink-0">
       <div className="flex items-start h-9">
         <div className="flex flex-col justify-center">
           <p className="text-[12px] font-medium text-[#64748b]">No. SBG</p>
-          <p className="text-[12px] font-medium text-[#020617]">#2000240800002203</p>
+          <p className="text-[12px] font-medium text-[#020617]">{item.sbg}</p>
         </div>
       </div>
       <div className="h-px bg-[#f8fafc] w-full" />
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-1.5">
           <div className="size-6 bg-[#cfe7ff] rounded-full flex items-center justify-center shrink-0">
-            {icon}
+            <ItemIcon type={item.iconType} />
           </div>
           <p className="text-[14px] font-semibold text-[#020617] flex-1 overflow-hidden"
             style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' } as React.CSSProperties}>
-            {product}
+            {item.name}
           </p>
         </div>
         <div className="flex items-end justify-between">
           <div className="pl-1 flex flex-col gap-0.5">
             <p className="text-[12px] font-medium text-[#64748b]">Sisa Pembayaran</p>
-            <p className="text-[18px] font-bold text-[#020617]">{sisaPembayaran}</p>
+            <p className="text-[18px] font-bold text-[#020617]">{item.nilai.toLocaleString('id-ID')}</p>
           </div>
-          <button className="bg-white border border-[#cbd5e1] px-4 py-2 h-[38px] rounded-[8px] flex items-center justify-center shrink-0">
+          <button
+            onClick={onLihatDetail}
+            className="bg-white border border-[#cbd5e1] px-4 py-2 h-[38px] rounded-[8px] flex items-center justify-center shrink-0"
+          >
             <span className="text-[14px] font-semibold text-[#0f1729]">Lihat detail</span>
           </button>
         </div>
@@ -125,6 +165,12 @@ export default function DaftarPinjaman() {
     { key: 'aktif',   label: 'Aktif'   },
     { key: 'riwayat', label: 'Riwayat' },
   ]
+
+  const visibleItems = activeTab === 'aktif'
+    ? pinjamanItems.filter(i => i.status === 'aktif')
+    : activeTab === 'riwayat'
+    ? pinjamanItems.filter(i => i.status === 'selesai')
+    : pinjamanItems
 
   return (
     <div className="w-[375px] bg-white flex flex-col overflow-hidden rounded-3xl shadow-2xl" style={{ height: 812 }}>
@@ -159,17 +205,21 @@ export default function DaftarPinjaman() {
 
       {/* Scrollable card list */}
       <div className="flex-1 overflow-y-auto hide-scrollbar px-4 py-4 flex flex-col gap-[10px]">
-        <LoanCardPrimary onBayar={() => navigate('/pinjaman/detail')} />
-        <LoanCardSecondary
-          product="Samsung 4K Crystal UHD Smart TV"
-          icon={<TVIcon />}
-          sisaPembayaran="Rp1.350.000"
-        />
-        <LoanCardSecondary
-          product="Garmin Fenix 8 Sapphire AMOLED Jam Tangan GPS Multisport - Garansi Resmi 2 Tahun"
-          icon={<WatchIcon />}
-          sisaPembayaran="Rp699.000"
-        />
+        {visibleItems.map(item =>
+          item.status === 'aktif' ? (
+            <LoanCardPrimary
+              key={item.id}
+              item={item}
+              onBayar={() => navigate('/pinjaman/detail', { state: { pinjaman: item } })}
+            />
+          ) : (
+            <LoanCardSecondary
+              key={item.id}
+              item={item}
+              onLihatDetail={() => navigate('/pinjaman/detail', { state: { pinjaman: item } })}
+            />
+          )
+        )}
       </div>
 
       {/* Bottom navbar */}

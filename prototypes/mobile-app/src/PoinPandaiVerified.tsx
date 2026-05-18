@@ -29,12 +29,12 @@ const missions = [
 ];
 
 const klaimItems = [
-  { category: "Tarik Saldo",  title: "Tarik Saldo",     subtitle: "Rp128.000" },
-  { category: "PDAM",         title: "Tagihan PDAM",    subtitle: "321123*********" },
-  { category: "Listrik",      title: "Listrik PLN",     subtitle: "321123*********" },
-  { category: "Pulsa/Data",   title: "Pulsa Telkomsel", subtitle: "08132123412312" },
-  { category: "Pulsa/Data",   title: "Data Telkomsel",  subtitle: "Paket Telkomsel 10GB..." },
-  { category: "Cuan Pandai",  title: "Misi Spesial",    subtitle: "Cuan Pandai" },
+  { category: "Tarik Saldo",  title: "Tarik Saldo",     subtitle: "Rp128.000",               poin: 2000 },
+  { category: "PDAM",         title: "Tagihan PDAM",    subtitle: "321123*********",         poin: 2000 },
+  { category: "Listrik",      title: "Listrik PLN",     subtitle: "321123*********",         poin: 2000 },
+  { category: "Pulsa/Data",   title: "Pulsa Telkomsel", subtitle: "08132123412312",          poin: 2000 },
+  { category: "Pulsa/Data",   title: "Data Telkomsel",  subtitle: "Paket Telkomsel 10GB...", poin: 2000 },
+  { category: "Cuan Pandai",  title: "Misi Spesial",    subtitle: "Cuan Pandai",             poin: 2000 },
 ];
 
 // ── Shared SVG helpers ────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ function ChevronDown() {
 }
 
 // ── Klaim Poin overlay ────────────────────────────────────────────────────────
-function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () => void }) {
+function KlaimOverlay({ onClose, onKlaim, onKlaimItem }: { onClose: () => void; onKlaim: () => void; onKlaimItem: (poin: number) => void }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -109,7 +109,7 @@ function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () =
         <div className="flex items-center gap-2 px-4 py-2 shrink-0"
           style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
           <div className="flex flex-col flex-1">
-            <p className="text-sm font-semibold text-[#492504]">Klaim 4.000 Poin Pandai</p>
+            <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
             <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -123,7 +123,7 @@ function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () =
 
         {/* Scrollable list */}
         <div className="overflow-y-auto hide-scrollbar flex flex-col gap-2 p-4">
-          {klaimItems.map(({ category, title, subtitle }) => (
+          {klaimItems.map(({ category, title, subtitle, poin }) => (
             <div key={title} className="pressable bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-3">
               {/* Item header */}
               <div className="flex items-center justify-between">
@@ -144,14 +144,14 @@ function KlaimOverlay({ onClose, onKlaim }: { onClose: () => void; onKlaim: () =
                   <p className="text-sm font-medium text-slate-900 truncate">{title}</p>
                   <p className="text-[12px] font-semibold text-slate-500 truncate">{subtitle}</p>
                 </div>
-                <button className="flex items-center gap-1 bg-[#023dff] px-3 py-1.5 rounded-md shrink-0">
+                <button onClick={() => onKlaimItem(poin)} className="flex items-center gap-1 bg-[#023dff] px-3 py-1.5 rounded-md shrink-0">
                   <span className="text-[12px] font-semibold text-white">Klaim</span>
                   <div className="relative size-4 overflow-hidden shrink-0">
                     <div className="absolute inset-[0_6.53%_0_6.5%]">
                       <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasKlaim} style={{ filter: 'brightness(0) invert(1)' }} />
                     </div>
                   </div>
-                  <span className="text-[12px] font-semibold text-white">2.000</span>
+                  <span className="text-[12px] font-semibold text-white">{poin.toLocaleString('id-ID')}</span>
                 </button>
               </div>
             </div>
@@ -243,6 +243,9 @@ export default function PoinPandaiVerified() {
   const location = useLocation()
   const [showKlaimOverlay, setShowKlaimOverlay] = useState(false);
   const [selectedMission, setSelectedMission] = useState<typeof missions[0] | null>(null);
+  const [poinBalance, setPoinBalance] = useState(() =>
+    parseInt(localStorage.getItem('pandai_poin') ?? '20000', 10)
+  );
 
   useEffect(() => {
     if ((location.state as { openKlaim?: boolean } | null)?.openKlaim) {
@@ -295,9 +298,9 @@ export default function PoinPandaiVerified() {
                   </div>
                   <span className="text-sm text-[#492504]">Poin Pandai</span>
                 </div>
-                <p className="text-[26px] font-semibold text-[#492504] leading-8 tracking-[-0.156px]">20.000</p>
+                <p className="text-[26px] font-semibold text-[#492504] leading-8 tracking-[-0.156px]">{poinBalance.toLocaleString('id-ID')}</p>
                 <div className="bg-[rgba(178,114,2,0.2)] rounded-full px-2 h-5 flex items-center">
-                  <span className="text-[12px] text-[#492504]">Setara Rp20.000</span>
+                  <span className="text-[12px] text-[#492504]">Setara Rp{poinBalance.toLocaleString('id-ID')}</span>
                 </div>
               </div>
 
@@ -370,7 +373,7 @@ export default function PoinPandaiVerified() {
       <div className="flex items-center gap-2 px-4 py-2"
         style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
         <div className="flex flex-col flex-1">
-          <p className="text-sm font-semibold text-[#492504]">Klaim 4.000 Poin Pandai</p>
+          <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
           <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -423,7 +426,19 @@ export default function PoinPandaiVerified() {
       {showKlaimOverlay && (
         <KlaimOverlay
           onClose={() => setShowKlaimOverlay(false)}
-          onKlaim={() => navigate('/poin-pandai/success')}
+          onKlaim={() => {
+            const claimed = klaimItems.reduce((sum, item) => sum + item.poin, 0)
+            const newTotal = poinBalance + claimed
+            localStorage.setItem('pandai_poin', String(newTotal))
+            setPoinBalance(newTotal)
+            navigate('/poin-pandai/success', { state: { claimed, newTotal } })
+          }}
+          onKlaimItem={(claimed) => {
+            const newTotal = poinBalance + claimed
+            localStorage.setItem('pandai_poin', String(newTotal))
+            setPoinBalance(newTotal)
+            navigate('/poin-pandai/success', { state: { claimed, newTotal } })
+          }}
         />
       )}
       {selectedMission && (

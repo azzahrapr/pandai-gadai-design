@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // Local static assets
@@ -96,28 +97,68 @@ function ArrowRightSmall({ className = "size-3" }: { className?: string }) {
   );
 }
 
-function AssetCard({ action }: { action: "Bayar" | "Gadai Lagi" }) {
+interface PinjamanItem {
+  id: string
+  name: string
+  category: string
+  iconType: 'phone' | 'tv'
+  nilai: number
+  jatuhTempo: string
+  action: 'Bayar' | 'Gadai Lagi'
+}
+
+const pinjamanItems: PinjamanItem[] = [
+  {
+    id: 'p1',
+    name: 'SAMSUNG GALAXY A52S 6/128GB',
+    category: 'Elektronik - HP',
+    iconType: 'phone',
+    nilai: 4500000,
+    jatuhTempo: '30 Sep 2025',
+    action: 'Bayar',
+  },
+  {
+    id: 'p2',
+    name: 'SAMSUNG SMART TV 50"',
+    category: 'Elektronik - TV',
+    iconType: 'tv',
+    nilai: 2800000,
+    jatuhTempo: '15 Okt 2025',
+    action: 'Gadai Lagi',
+  },
+]
+
+function AssetCard({ item, onBayar }: { item: PinjamanItem; onBayar?: () => void }) {
   return (
     <div className="pressable bg-white border border-slate-200 flex h-28 items-center overflow-hidden rounded-2xl shrink-0 w-80">
       <div className="flex flex-col gap-2 flex-1 pl-4 pr-2 py-3 border-r border-slate-200 h-full justify-center">
         <div className="flex flex-col gap-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="2"/>
-            <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
-          </svg>
-          <p className="font-semibold text-sm text-slate-900 leading-4">SAMSUNG GALAXY A52S 6/128GB</p>
+          {item.iconType === 'phone' ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+          )}
+          <p className="font-semibold text-sm text-slate-900 leading-4">{item.name}</p>
         </div>
-        {action === "Bayar" && (
-          <p className="text-[12px] font-medium text-slate-500">Jatuh tempo 30 Sep 2025</p>
+        {item.action === "Bayar" && (
+          <p className="text-[12px] font-medium text-slate-500">Jatuh tempo {item.jatuhTempo}</p>
         )}
       </div>
       <div className="flex flex-col w-32 h-full">
         <div className="flex flex-col gap-1 flex-1 px-3 py-2.5 justify-center">
           <p className="text-[12px] font-medium text-slate-800">Nilai Pinjaman</p>
-          <p className="text-sm font-semibold text-[#023dff]">Rp 4.500.000</p>
+          <p className="text-sm font-semibold text-[#023dff]">Rp {item.nilai.toLocaleString('id-ID')}</p>
         </div>
-        <button className="bg-[#023dff] text-white text-sm font-semibold py-2.5 text-center rounded-br-lg">
-          {action}
+        <button
+          className="bg-[#023dff] text-white text-sm font-semibold py-2.5 text-center rounded-br-lg"
+          onClick={item.action === 'Bayar' ? onBayar : undefined}
+        >
+          {item.action}
         </button>
       </div>
     </div>
@@ -126,6 +167,9 @@ function AssetCard({ action }: { action: "Bayar" | "Gadai Lagi" }) {
 
 export default function Homepage() {
   const navigate = useNavigate()
+  const [poinBalance] = useState(() =>
+    parseInt(localStorage.getItem('pandai_poin') ?? '20000', 10)
+  )
   return (
     <div className="w-[375px] bg-slate-50 flex flex-col overflow-hidden rounded-3xl shadow-2xl relative" style={{ height: 812 }}>
 
@@ -175,7 +219,7 @@ export default function Homepage() {
                 <img src={imgPoinEmas} alt="" className="size-[18px] object-contain" />
                 <span className="text-[12px] font-medium text-[#7e480f]">Poin Pandai</span>
               </div>
-              <p className="text-lg font-bold text-black">20.000 poin</p>
+              <p className="text-lg font-bold text-black">{poinBalance.toLocaleString('id-ID')} poin</p>
             </div>
             {/* fix 3: shimmer animation on Klaim poin button */}
             <button onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })} className="relative overflow-hidden bg-[#ffcd05] border border-[#fffdc6] rounded-lg px-3 py-1.5">
@@ -235,8 +279,13 @@ export default function Homepage() {
             </button>
           </div>
           <div className="hide-scrollbar flex gap-2 overflow-x-auto pb-1 -mr-4 pr-4">
-            <AssetCard action="Bayar" />
-            <AssetCard action="Gadai Lagi" />
+            {pinjamanItems.map((item) => (
+              <AssetCard
+                key={item.id}
+                item={item}
+                onBayar={() => navigate('/pinjaman/detail', { state: { pinjaman: item } })}
+              />
+            ))}
           </div>
         </div>
 
@@ -301,7 +350,7 @@ export default function Homepage() {
         className="flex items-center gap-2 px-4 py-2 w-full text-left"
         style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
         <div className="flex flex-col flex-1">
-          <p className="text-sm font-semibold text-[#492504]">Klaim 4.000 Poin Pandai</p>
+          <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
           <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

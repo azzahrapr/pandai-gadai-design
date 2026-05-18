@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 // Local static assets
 const imgDate               = "/assets/status-date.svg";
@@ -13,6 +13,10 @@ const imgPoinEmasFillSm     = "/assets/poin-fill-sm.svg";
 
 export default function PoinPandaiSuccess() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const state = location.state as { claimed?: number; newTotal?: number } | null
+  const claimed: number = state?.claimed ?? 4000
+  const newTotal: number = state?.newTotal ?? claimed
 
   return (
     <div
@@ -60,7 +64,7 @@ export default function PoinPandaiSuccess() {
             {/* Green pill — sits above card */}
             <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-10">
               <div className="bg-[#22c55e] px-3 py-1 rounded-full">
-                <span className="text-base font-bold text-white tracking-[-0.08px]">+ 4.000 poin</span>
+                <span className="text-base font-bold text-white tracking-[-0.08px]">+ {claimed.toLocaleString('id-ID')} poin</span>
               </div>
             </div>
 
@@ -76,7 +80,7 @@ export default function PoinPandaiSuccess() {
                   </div>
                 </div>
                 <p className="text-xl font-semibold leading-7 text-slate-900 tracking-[-0.1px] whitespace-nowrap">
-                  4.000 poin
+                  {newTotal.toLocaleString('id-ID')} poin
                 </p>
               </div>
 

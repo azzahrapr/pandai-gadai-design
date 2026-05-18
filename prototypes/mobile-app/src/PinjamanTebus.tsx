@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 const imgTebus = "/assets/tebus-illus-grp.svg"
 
-const NOMINAL_TEBUS = 850000
 const POIN_BALANCE: number = 12000
 const POIN_EARN     = 2000
 
-// Change to 0 to demo the "Insufficient Balance" state
-const DEMO_POIN_BALANCE = POIN_BALANCE
+interface PinjamanItem {
+  nilai: number
+  name?: string
+  [key: string]: unknown
+}
+
 
 function fmt(n: number) {
   return 'Rp' + n.toLocaleString('id-ID')
@@ -45,15 +48,20 @@ function IconPoinEmas({ faded }: { faded?: boolean }) {
 
 export default function PinjamanTebus() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const pinjaman = (location.state as { pinjaman?: PinjamanItem } | null)?.pinjaman
+  const nominalTebus = pinjaman?.nilai ?? 850000
+
   const [agreed, setAgreed] = useState(false)
   const [poinOn, setPoinOn] = useState(false)
   const [promoCode, setPromoCode] = useState('')
 
+  const DEMO_POIN_BALANCE = POIN_BALANCE
   const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance'
 
   const poinDiscount = poinState === 'selected' ? DEMO_POIN_BALANCE : 0
-  const total = NOMINAL_TEBUS - poinDiscount
+  const total = nominalTebus - poinDiscount
 
   function getPoinSubtext() {
     switch (poinState) {
@@ -115,12 +123,12 @@ export default function PinjamanTebus() {
           <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-4 py-3 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-[14px] text-[#64748b]">Nominal Tebus</span>
-              <span className="text-[14px] text-[#020617]">{fmt(NOMINAL_TEBUS)}</span>
+              <span className="text-[14px] text-[#020617]">{fmt(nominalTebus)}</span>
             </div>
             <div className="h-px bg-[#e2e8f0]" />
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-semibold text-[#020617]">Subtotal</span>
-              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(NOMINAL_TEBUS)}</span>
+              <span className="text-[16px] font-semibold text-[#023dff]">{fmt(nominalTebus)}</span>
             </div>
           </div>
         </div>
@@ -206,7 +214,7 @@ export default function PinjamanTebus() {
               <div className="flex items-baseline gap-2">
                 <p className="text-[20px] font-bold text-[#023dff]">{fmt(total)}</p>
                 {poinState === 'selected' && (
-                  <p className="text-[14px] text-[#94a3b8] line-through">{fmt(NOMINAL_TEBUS)}</p>
+                  <p className="text-[14px] text-[#94a3b8] line-through">{fmt(nominalTebus)}</p>
                 )}
               </div>
             </div>

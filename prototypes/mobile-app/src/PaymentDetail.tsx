@@ -334,7 +334,7 @@ export default function PaymentDetail() {
       <div className="flex items-center justify-between px-4 py-2"
         style={{ background: 'linear-gradient(to right, #fefdea 10%, #fffcaf 61%, #ffec4f)' }}>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-semibold leading-5 text-[#492504]">Klaim 4.000 Poin Pandai</p>
+          <p className="text-[14px] font-semibold leading-5 text-[#492504]">Klaim 12.000 Poin Pandai</p>
           <p className="text-[12px] font-medium leading-5 text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

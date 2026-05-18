@@ -307,7 +307,7 @@ export default function HomepageUnverified() {
         style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}
       >
         <div className="flex flex-col flex-1 text-left">
-          <p className="text-sm font-semibold text-[#492504]">Klaim 4.000 Poin Pandai</p>
+          <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
           <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

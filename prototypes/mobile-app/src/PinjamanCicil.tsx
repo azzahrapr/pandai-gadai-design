@@ -1,12 +1,17 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
-const NILAI_PINJAMAN    = 850000
 const POIN_BALANCE: number = 12000
 const DEMO_POIN_BALANCE = POIN_BALANCE
+
+interface PinjamanItem {
+  nilai: number
+  name?: string
+  [key: string]: unknown
+}
 
 function fmt(n: number) {
   return 'Rp' + n.toLocaleString('id-ID')
@@ -41,12 +46,16 @@ function IconPoinEmas({ faded }: { faded?: boolean }) {
 
 export default function PinjamanCicil() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const pinjaman = (location.state as { pinjaman?: PinjamanItem } | null)?.pinjaman
+  const nilaiPinjaman = pinjaman?.nilai ?? 850000
+
   const [nominalCicilStr, setNominalCicilStr] = useState('')
   const [promoCode, setPromoCode] = useState('')
   const [poinOn, setPoinOn] = useState(false)
 
   const parsedNominal = parseInt(nominalCicilStr.replace(/\D/g, ''), 10) || 0
-  const nilaiPinjamanBaru = parsedNominal > 0 ? NILAI_PINJAMAN - parsedNominal : null
+  const nilaiPinjamanBaru = parsedNominal > 0 ? nilaiPinjaman - parsedNominal : null
 
   const poinState = (DEMO_POIN_BALANCE === 0 ? 'insufficient' : poinOn ? 'selected' : 'available') as PoinState
   const poinDisabled = poinState === 'insufficient' || poinState === 'maintenance' || DEMO_POIN_BALANCE > parsedNominal
@@ -97,7 +106,7 @@ export default function PinjamanCicil() {
         <div className="bg-white border border-[#e2e8f0] rounded-lg px-3 py-3 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[14px] text-[#64748b]">Nilai Pinjaman</span>
-            <span className="text-[14px] text-[#0f1729]">{fmt(NILAI_PINJAMAN)}</span>
+            <span className="text-[14px] text-[#0f1729]">{fmt(nilaiPinjaman)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[14px] text-[#64748b]">Nilai Pinjaman Baru</span>
