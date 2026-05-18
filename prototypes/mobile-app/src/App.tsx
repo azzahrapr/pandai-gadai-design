@@ -20,6 +20,10 @@ import InputPIN from './InputPIN'
 import TYPSuccess from './TYPSuccess'
 import DaftarPinjaman from './DaftarPinjaman'
 import Akun from './Akun'
+import GuestSplash from './GuestSplash'
+import GuestLogin from './GuestLogin'
+import GuestHomepage from './GuestHomepage'
+import DSTest from './DSTest'
 
 function App() {
   return (
@@ -46,6 +50,10 @@ function App() {
           <Route path="/pinjaman/pin" element={<InputPIN />} />
           <Route path="/payment-success" element={<TYPSuccess />} />
           <Route path="/akun" element={<Akun />} />
+          <Route path="/guest" element={<GuestSplash />} />
+          <Route path="/guest/login" element={<GuestLogin />} />
+          <Route path="/guest/home" element={<GuestHomepage />} />
+          <Route path="/ds-test" element={<DSTest />} />
         </Routes>
       </BrowserRouter>
     </div>
