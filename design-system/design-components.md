@@ -38,6 +38,7 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Badge | `badge-status` | component_set | `831717d904e0c80de8e6ddcda4f71c5ac4c8c906` |
 | Banner Info | `banner - desktop` | component_set | `f82ebac1f10ef3c6525daa5af9c3d15afd5a3522` |
 | Banner Info | `banner - mobile` | component_set | `4013bbe387c4f23cdd1a13ccc8f3ea4be08dcae8` |
+| Bottom Navbar | `bottom-navbar` | component | `a50f58766c5d07a331c312dd7e7d814a25d4d0a3` |
 | Bottom Navbar | `menu-home` | component_set | `7240d9b532ef9b3174961f6669b9531180e4d56f` |
 | Bottom Navbar | `menu-pinjaman` | component_set | `82ebc8630181d121492570f715cb3cafad949bd5` |
 | Bottom Navbar | `menu-emas` | component_set | `36bb3fd3dddf3ed52e68e475521071da18649f25` |
@@ -52,6 +53,7 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Date Picker | `Datepicker` | component_set | `64e77069ffe7ed4e0a24abd889f9ef0d261eb4fb` |
 | Divider | `Divider` | component_set | `6cccd81beb1ce35c18cf47ddd6e72f2fa08206c7` |
 | List | `list` | component_set | `3a6da05fccd3531549c8512e9fe213f871ba687a` |
+| List | `action` | component_set | `c264a3f0da7d41d700c14aa6d893b5b25057d816` |
 | Loader: general | `loader/general` | component_set | `5099ab3fdff8d53fa7d4c4ae1dafcf6e4c355b71` |
 | Loader: skeleton | `loader/skeleton` | component_set | `cc668b5c695073e24faaee9adb6827fc9561d040` |
 | Modal | `modal` | component_set | `65be5fa0cfcbd115bbbafded69d4358ab7921fbc` |
@@ -510,4 +512,4 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 
 ---
 
-*Last indexed: 2026-04-22 — If new components are added to the DS, re-run the indexing and update this file.*
+*Last indexed: 2026-05-18 — Added `bottom-navbar` (assembled component) and `action` (List page component set). If new components are added to the DS, re-run the indexing and update this file.*
