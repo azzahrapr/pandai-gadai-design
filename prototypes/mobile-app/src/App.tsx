@@ -23,6 +23,7 @@ import Akun from './Akun'
 import GuestSplash from './GuestSplash'
 import GuestLogin from './GuestLogin'
 import GuestHomepage from './GuestHomepage'
+import PrototypeIndex from './PrototypeIndex'
 import DSTest from './DSTest'
 
 function App() {
@@ -30,7 +31,8 @@ function App() {
     <div className="min-h-screen bg-gray-300 flex items-start justify-center py-8">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Homepage />} />
+          <Route path="/" element={<PrototypeIndex />} />
+          <Route path="/home" element={<Homepage />} />
           <Route path="/unverified" element={<HomepageUnverified />} />
           <Route path="/verifikasi" element={<VerifikasiIntro />} />
           <Route path="/verifikasi/form" element={<VerifikasiForm />} />
@@ -51,7 +53,7 @@ function App() {
           <Route path="/payment-success" element={<TYPSuccess />} />
           <Route path="/akun" element={<Akun />} />
           <Route path="/guest" element={<GuestSplash />} />
-          <Route path="/guest/login" element={<GuestLogin />} />
+          <Route path="/guest/login" element={<GuestSplash startAtLogin />} />
           <Route path="/guest/home" element={<GuestHomepage />} />
           <Route path="/ds-test" element={<DSTest />} />
         </Routes>
