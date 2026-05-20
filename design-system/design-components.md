@@ -38,6 +38,9 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Badge | `badge-status` | component_set | `831717d904e0c80de8e6ddcda4f71c5ac4c8c906` |
 | Banner Info | `banner - desktop` | component_set | `f82ebac1f10ef3c6525daa5af9c3d15afd5a3522` |
 | Banner Info | `banner - mobile` | component_set | `4013bbe387c4f23cdd1a13ccc8f3ea4be08dcae8` |
+| Benefits Strip | `icon.cuan-pandai` | local asset | `public/assets/icon.cuan-pandai.png` |
+| Benefits Strip | `icon.poin-emas` | local asset | `public/assets/icon.poin-emas.png` |
+| Benefits Strip | `icon.transaksi` | local asset | `public/assets/icon.transaksi.png` |
 | Bottom Navbar | `bottom-navbar` | component | `a50f58766c5d07a331c312dd7e7d814a25d4d0a3` |
 | Bottom Navbar | `menu-home` | component_set | `7240d9b532ef9b3174961f6669b9531180e4d56f` |
 | Bottom Navbar | `menu-pinjaman` | component_set | `82ebc8630181d121492570f715cb3cafad949bd5` |
@@ -165,17 +168,23 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | State=Unselected | `17b8603e4a08f62d0810e6f4f1dd151170670a33` |
 | State=Selected | `ad7438ac0cb27c1c25af729c2229dc6721de0b97` |
 
+**Local asset:** `public/assets/credit-card.png` (use for Unselected state in prototype)
+
 ### menu-emas
 | Variant | Key |
 |---|---|
 | State=Unselected | `15a4ca31ea98c1081f097196feab880851d19947` |
 | State=Selected | `bcc6b2e44ecf832df23dffc10b2daf973d28f30f` |
 
+**Local asset:** `public/assets/poinemas.outline.png` (use for Unselected state in prototype)
+
 ### menu-profile
 | Variant | Key |
 |---|---|
 | State=Unselected | `34733afd4afec84f50736e8364696bb2745e0369` |
 | State=Selected | `3f1002cf769db5e6124bb202457f61146abe5aca` |
+
+**Local asset:** `public/assets/smile.png` (use for Unselected state in prototype)
 
 ### bottom sheet
 | Variant | Key |

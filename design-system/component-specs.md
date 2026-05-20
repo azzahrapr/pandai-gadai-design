@@ -11,6 +11,25 @@ All token names refer to values defined in `design-tokens.md`. No Figma keys app
 2. Each component section describes anatomy, variant dimensions, and which tokens to apply per state.
 3. Font family for all components: **Geist**.
 
+### Height vs Padding rule
+
+When a component lists both a **fixed height** and **vertical padding**, the height is the CSS constraint — not the padding. The vertical padding value in the spec is a Figma design measurement (distance from edge to text), not a CSS `padding-top/bottom`.
+
+**Correct pattern:**
+```
+display: inline-flex;
+align-items: center;
+height: [spec height]px;
+padding: 0 [spec horizontal padding]px;   /* vertical padding = 0 */
+```
+
+**Wrong pattern:**
+```
+padding: [spec vertical padding]px [spec horizontal padding]px;   /* makes the element taller than spec */
+```
+
+This applies to any component where `height` is explicitly listed alongside `padding`. If height is not listed (auto-height), apply padding on all sides as written.
+
 ---
 
 ## Components
@@ -138,6 +157,8 @@ Compact label used to tag a product or category.
 **Radius:** `rounded-full`  
 **Padding:** 2px top/bottom · 8px left/right
 
+> **Implementation:** height is the constraint. Use `inline-flex items-center h-5 px-2` (Tailwind) or `display:inline-flex; align-items:center; height:20px; padding:0 8px`. Do NOT set `py-[2px]` — it overshoots the fixed height.
+
 ---
 
 ## Badge Status
@@ -155,6 +176,8 @@ Semantic status label used on items, lists, and tables.
 **Radius:** `rounded-full`  
 **Padding:** 2px top/bottom · 8px left/right  
 **Typography:** Label 2 — 10px Bold
+
+> **Implementation:** height is the constraint. Use `inline-flex items-center h-4 px-2 leading-none` (Tailwind) or `display:inline-flex; align-items:center; height:16px; padding:0 8px`. Do NOT set `py-[2px]` — it overshoots the fixed height.
 
 **Tokens — light type:**
 | State | bg | border | text |
@@ -213,6 +236,14 @@ Fixed bottom navigation bar containing 4 tab items.
 - 80 × 44px each
 - `State`: `Unselected` · `Selected`
 
+**Local assets (prototype):**
+| Menu item | Unselected icon | Selected icon |
+|---|---|---|
+| `menu-home` | `nav-home-solid.svg` | `nav-home-solid.svg` |
+| `menu-pinjaman` | `credit-card.png` | `credit-card.png` |
+| `menu-emas` | `poinemas.outline.png` | `poin-fill-active.svg` |
+| `menu-profile` | `smile.png` | `smile.png` |
+
 **Tokens:**
 | Element | State | Token |
 |---|---|---|
@@ -270,6 +301,8 @@ Primary interactive control for triggering actions.
 | Medium | 38px | 16px (`spacing-4`) | 8px (`spacing-2`) |
 | Small | 30px | 8px (`spacing-2`) | 4px (`spacing-1`) |
 | Extra Small | 24px | 8px (`spacing-2`) | 4px (`spacing-1`) |
+
+> **Implementation:** height is the constraint. Set height explicitly and use `flex items-center` — do NOT set vertical padding. Tailwind: `h-11 px-4` (Large) · `h-[38px] px-4` (Medium) · `h-[30px] px-2` (Small) · `h-6 px-2` (Extra Small).
 
 **Radius:** `rounded-lg` (8px)  
 **Typography:** Subtitle 2 — 14px SemiBold
@@ -336,6 +369,8 @@ Compact selection pill, used for filters and multi-select.
 **Radius:** `rounded-3xl` (16px)  
 **Padding:** 6px top/bottom · 12px left/right  
 **Typography:** Subtitle 2 — 14px SemiBold
+
+> **Implementation:** height is the constraint. Use `inline-flex items-center h-8 px-3` (Tailwind) or `display:inline-flex; align-items:center; height:32px; padding:0 12px`. Do NOT set `py-[6px]`.
 
 | State | bg | border | text |
 |---|---|---|---|
