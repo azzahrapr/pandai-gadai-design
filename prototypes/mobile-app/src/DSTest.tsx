@@ -884,24 +884,25 @@ function TopNavbar({ title }: { title: string }) {
 }
 
 // ── Bottom Navbar ──────────────────────────────────────────────────────────────
+const NAV_ICONS = [
+  { label: 'Beranda',  src: '/assets/nav-home-solid.svg' },
+  { label: 'Pinjaman', src: '/assets/credit-card.png' },
+  { label: 'Emas',     src: '/assets/poinemas.outline.png' },
+  { label: 'Profil',   src: '/assets/smile.png' },
+]
+
 function BottomNavbar({ active }: { active: number }) {
-  const items = [
-    { label: 'Beranda',  icon: (c: string) => <Icon.Home color={c} /> },
-    { label: 'Pinjaman', icon: (c: string) => <Icon.CreditCard color={c} /> },
-    { label: 'Emas',     icon: (c: string) => <Icon.Star color={c} /> },
-    { label: 'Profil',   icon: (c: string) => <Icon.User color={c} /> },
-  ]
   return (
     <div style={{
       height: 84, backgroundColor: T.bg.neutral, borderTop: `1px solid ${T.border.subtle}`,
       display: 'flex', alignItems: 'flex-start', paddingTop: 8,
     }}>
-      {items.map((item, i) => {
+      {NAV_ICONS.map((item, i) => {
         const isActive = i === active
         const color = isActive ? T.icon.info : T.icon.subtle
         return (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            {item.icon(color)}
+            <img src={item.src} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />
             <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, color }}>{item.label}</span>
           </div>
         )
@@ -1363,14 +1364,13 @@ export default function DSTest() {
             <div style={{ borderRadius: T.radius.xl, overflow: 'hidden', border: `1px solid ${T.border.subtle}` }}>
               <SubLabel><span style={{ display: 'block', padding: '8px 16px 0' }}>Tap to switch active tab</span></SubLabel>
               <div style={{ display: 'flex', backgroundColor: T.bg.neutral }}>
-                {['Beranda', 'Pinjaman', 'Emas', 'Profil'].map((label, i) => {
+                {NAV_ICONS.map((item, i) => {
                   const isActive = i === activeNav
-                  const icons = [(c: string) => <Icon.Home color={c} />, (c: string) => <Icon.CreditCard color={c} />, (c: string) => <Icon.Star color={c} />, (c: string) => <Icon.User color={c} />]
                   const color = isActive ? T.icon.info : T.icon.subtle
                   return (
                     <div key={i} onClick={() => setActiveNav(i)} style={{ flex: 1, height: 64, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, cursor: 'pointer' }}>
-                      {icons[i](color)}
-                      <span style={{ fontSize: 10, color, fontWeight: isActive ? 600 : 400 }}>{label}</span>
+                      <img src={item.src} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                      <span style={{ fontSize: 10, color, fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
                     </div>
                   )
                 })}

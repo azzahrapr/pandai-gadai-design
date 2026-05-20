@@ -194,7 +194,7 @@ export default function PoinPandaiUnverified() {
       {/* Bottom Navbar */}
       <div className="bg-white flex items-center justify-between px-4 pt-4 pb-8">
         {/* Beranda */}
-        <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate('/home')} className="flex flex-col items-center gap-1 w-20">
           <div className="relative size-6 overflow-hidden">
             <div className="absolute inset-[0.09%_0_-0.03%_0]">
               <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgHomeVec} />

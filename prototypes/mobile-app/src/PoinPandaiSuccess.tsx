@@ -107,7 +107,7 @@ export default function PoinPandaiSuccess() {
         <div className="flex gap-3 mb-4">
           {/* Beranda */}
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="flex-1 flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-xl py-3"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

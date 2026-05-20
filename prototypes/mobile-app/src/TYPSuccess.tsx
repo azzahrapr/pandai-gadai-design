@@ -159,7 +159,7 @@ export default function TYPSuccess() {
         style={{ boxShadow: '4px 0px 3px rgba(0,0,0,0.1), 0px 2px 2px rgba(0,0,0,0.1)' }}>
         <div className="flex gap-3 px-4 pt-4">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="flex-1 bg-white border border-[#e2e8f0] rounded-xl p-3 flex items-center justify-center gap-2"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#020617" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

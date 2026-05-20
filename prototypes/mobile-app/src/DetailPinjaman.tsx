@@ -97,8 +97,8 @@ export default function DetailPinjaman() {
 
       {/* Status bar */}
       <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px] bg-white shrink-0">
-        <img src={imgDate}  alt="" className="h-[11px]" />
-        <img src={imgRight} alt="" className="h-[11px]" />
+        <img src={imgDate}  alt="" className="h-[11px] w-[28px] shrink-0" />
+        <img src={imgRight} alt="" className="h-[11px] w-[67px] shrink-0" />
       </div>
 
       {/* Header */}

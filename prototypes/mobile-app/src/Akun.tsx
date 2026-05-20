@@ -252,7 +252,7 @@ export default function Akun() {
 
       {/* Bottom navbar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 bg-white flex items-center justify-between px-4 pt-4 pb-8">
-        <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate('/home')} className="flex flex-col items-center gap-1 w-20">
           <img src={imgNavHome} alt="" className="size-6 object-contain" />
           <span className="text-[12px] font-bold text-slate-500">Beranda</span>
         </button>

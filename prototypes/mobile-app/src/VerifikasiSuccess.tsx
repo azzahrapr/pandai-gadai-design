@@ -61,8 +61,8 @@ export default function VerifikasiSuccess() {
 
       {/* Status bar */}
       <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px] bg-white shrink-0">
-        <img src={imgDate}  alt="" className="h-[11px]" />
-        <img src={imgRight} alt="" className="h-[11px]" />
+        <img src={imgDate}  alt="" className="h-[11px] w-[28px] shrink-0" />
+        <img src={imgRight} alt="" className="h-[11px] w-[67px] shrink-0" />
       </div>
 
       {/* Hero: decorative background + card */}
@@ -102,7 +102,7 @@ export default function VerifikasiSuccess() {
       {/* CTA button */}
       <div className="px-4 pt-4 shrink-0">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/home')}
           className="w-full bg-[#023dff] rounded-[6px] py-[10px] flex items-center justify-center gap-2"
         >
           <span className="text-[14px] font-medium text-[#f8fafc]">Yuk, Telusuri Aplikasinya</span>

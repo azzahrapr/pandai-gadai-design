@@ -177,8 +177,8 @@ export default function DaftarPinjaman() {
 
       {/* Status bar */}
       <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px] bg-white shrink-0">
-        <img src={imgDate} alt="" className="h-[11px]" />
-        <img src={imgRight} alt="" className="h-[11px]" />
+        <img src={imgDate} alt="" className="h-[11px] w-[28px] shrink-0" />
+        <img src={imgRight} alt="" className="h-[11px] w-[67px] shrink-0" />
       </div>
 
       {/* Header */}
@@ -224,7 +224,7 @@ export default function DaftarPinjaman() {
 
       {/* Bottom navbar */}
       <div className="bg-white flex items-center justify-between px-4 pt-4 pb-8 shrink-0">
-        <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate('/home')} className="flex flex-col items-center gap-1 w-20">
           <img src={imgHomeOutline} alt="" className="size-6 object-contain" />
           <span className="text-[12px] font-bold text-slate-500">Beranda</span>
         </button>

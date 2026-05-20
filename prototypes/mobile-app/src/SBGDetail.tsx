@@ -12,8 +12,8 @@ function BasePage({ onBayar, children }: { onBayar: () => void; children?: React
     <div className="w-[375px] flex flex-col overflow-hidden rounded-3xl shadow-2xl relative" style={{ height: 812 }}>
       {/* Status bar */}
       <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px] bg-white shrink-0">
-        <img src={imgDate}  alt="" className="h-[11px]" />
-        <img src={imgRight} alt="" className="h-[11px]" />
+        <img src={imgDate}  alt="" className="h-[11px] w-[28px] shrink-0" />
+        <img src={imgRight} alt="" className="h-[11px] w-[67px] shrink-0" />
       </div>
 
       {/* Header */}

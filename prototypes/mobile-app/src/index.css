@@ -29,6 +29,16 @@
   font-family: 'Geist Sans', sans-serif;
 }
 
+@keyframes glimmer-pulse {
+  0%   { box-shadow: 0 0 0 0px rgba(2,61,255,0); border-color: #65758b; }
+  35%  { box-shadow: 0 0 0 4px rgba(2,61,255,0.35); border-color: #023dff; }
+  70%  { box-shadow: 0 0 0 2px rgba(2,61,255,0.12); border-color: #023dff; }
+  100% { box-shadow: 0 0 0 0px rgba(2,61,255,0); border-color: #65758b; }
+}
+.glimmer {
+  animation: glimmer-pulse 0.7s ease-out;
+}
+
 @keyframes shimmer-slide {
   0%   { transform: translateX(-150%) rotate(17deg); }
   100% { transform: translateX(600%) rotate(17deg); }

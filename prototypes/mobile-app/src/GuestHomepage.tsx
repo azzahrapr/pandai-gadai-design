@@ -4,63 +4,38 @@ import { useNavigate } from 'react-router-dom'
 const imgDate = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 const imgPoinEmasActive = "/assets/poin-fill-active.svg"
+const imgPoinOutline = "/assets/poinemas.outline.png"
+const imgCuanIcon = "/assets/icon.cuan-pandai.png"
+const imgPoinEmasIcon = "/assets/icon.poin-emas.png"
+const imgTransaksiIcon = "/assets/icon.transaksi.png"
 const imgHomeVec = "/assets/nav-home-solid.svg"
-const imgSmileIcon = "/assets/nav-smile.svg"
+const imgSmileIcon = "/assets/smile.png"
+const imgNavPinjaman = "/assets/credit-card.png"
 
 const howToSteps = [
   {
     num: 1,
     title: 'Visit Cabang Pandai Gadai',
     desc: 'Cuma perlu bawa barang dan KTP kamu.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="24" width="48" height="32" rx="3" fill="#dbeafe"/>
-        <rect x="20" y="36" width="10" height="20" rx="1" fill="#93c5fd"/>
-        <rect x="34" y="36" width="10" height="12" rx="1" fill="#bfdbfe"/>
-        <path d="M4 26L32 8l28 18" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        <rect x="26" y="16" width="12" height="10" rx="1" fill="#93c5fd"/>
-      </svg>
-    ),
+    img: '/assets/mi-cabang.png',
   },
   {
     num: 2,
     title: 'Pencairan instan',
     desc: 'Langsung dapat pencairan, lebih hemat lewat Saldo Pandai.',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="20" width="48" height="32" rx="4" fill="#dbeafe"/>
-        <rect x="8" y="28" width="48" height="8" fill="#93c5fd"/>
-        <rect x="14" y="40" width="12" height="6" rx="2" fill="#60a5fa"/>
-        <circle cx="48" cy="43" r="4" fill="#bfdbfe"/>
-      </svg>
-    ),
+    img: '/assets/mi-high-disbursement-rate.png',
   },
   {
     num: 3,
     title: 'Tebus, Perpanjang, Cicil Online',
     desc: 'Gak perlu ke cabang. Semua bisa dilakukan lewat aplikasi!',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-        <rect x="18" y="6" width="28" height="52" rx="4" fill="#dbeafe"/>
-        <rect x="22" y="14" width="20" height="32" rx="2" fill="#bfdbfe"/>
-        <circle cx="32" cy="52" r="2" fill="#93c5fd"/>
-        <rect x="26" y="10" width="12" height="2" rx="1" fill="#93c5fd"/>
-      </svg>
-    ),
+    img: '/assets/mi-payment.png',
   },
   {
     num: 4,
     title: 'Bayar lewat aplikasi, dapat diskon',
     desc: 'Bayar pinjaman lewat aplikasi, pasti dapat potongan dari Poin Pandai!',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="24" fill="#fef9c3"/>
-        <path d="M20 32l8 8 16-16" stroke="#ca8a04" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="22" cy="22" r="4" fill="#fde047" stroke="#ca8a04" strokeWidth="1.5"/>
-        <circle cx="42" cy="42" r="4" fill="#fde047" stroke="#ca8a04" strokeWidth="1.5"/>
-        <line x1="22" y1="42" x2="42" y2="22" stroke="#ca8a04" strokeWidth="1.5"/>
-      </svg>
-    ),
+    img: '/assets/mi.discount.png',
   },
 ]
 
@@ -76,11 +51,9 @@ export default function GuestHomepage() {
         className="relative shrink-0"
         style={{
           height: 300,
-          backgroundColor: 'rgba(70,150,248,0.3)',
-          backgroundImage: "url('/assets/glass-bg.png')",
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: '-212px -135px',
-          backgroundSize: '774px 857px',
+          backgroundImage: "url('/assets/splash-bg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
         }}
       >
 
@@ -89,8 +62,8 @@ export default function GuestHomepage() {
 
           {/* Status bar */}
           <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px]">
-            <img src={imgDate} alt="" className="h-[11px]" />
-            <img src={imgRight} alt="" className="h-[11px]" />
+            <img src={imgDate} alt="" className="h-[11px] w-[28px] shrink-0" />
+            <img src={imgRight} alt="" className="h-[11px] w-[67px] shrink-0" />
           </div>
 
           {/* Header */}
@@ -138,61 +111,60 @@ export default function GuestHomepage() {
         {/* Branch card */}
         <div className="px-4 pt-4 pb-0">
           <div className="border border-[#e2e8f0] rounded-xl p-3 flex items-center gap-2">
-            <div className="flex-1 flex flex-col gap-1 min-w-0">
-              <div className="flex items-center gap-2">
+            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+              <div className="flex items-center gap-1">
                 <span className="text-[14px] font-semibold text-[#020617]">Bendungan Hilir</span>
-                <div className="bg-[#f0fdf4] border border-[#16a34a] rounded-full px-2 py-[1px]">
-                  <span className="text-[10px] font-bold text-[#15803d]">Terdekat</span>
+                {/* Badge Status — success/light — h-4 fixed height, no vertical padding, matches DSTest */}
+                <div className="inline-flex items-center h-4 px-2 bg-[#f0fdf4] border border-[#16a34a] rounded-full shrink-0">
+                  <span className="text-[10px] font-bold text-[#15803d] leading-none">Terdekat</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#64748b">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#64748b" className="shrink-0">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <span className="text-[12px] font-medium text-[#64748b]">2,5 km dari lokasimu</span>
               </div>
             </div>
-            <button className="bg-[#023dff] rounded-[8px] px-3 h-[30px] flex items-center shrink-0">
+            <button className="bg-[#023dff] rounded-[8px] px-2 h-[30px] flex items-center shrink-0">
               <span className="text-[14px] font-semibold text-white">Buat Janji</span>
             </button>
           </div>
         </div>
 
         {/* Features strip */}
-        <div className="px-4 py-4">
-          <div className="flex items-center py-4">
+        <div className="px-4">
+          <div className="flex items-stretch py-4 gap-2">
             {/* Cuan Pandai */}
-            <div className="flex-1 flex flex-col items-center gap-1 px-1">
-              <div className="size-6 rounded-full bg-[#e0f2fe] flex items-center justify-center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a5 5 0 0 1 5 5v1h2l2 14H3L5 8h2V7a5 5 0 0 1 5-5z"/>
-                  <circle cx="12" cy="9" r="1" fill="#0284c7"/>
-                </svg>
+            <div className="flex-1 flex flex-col items-center justify-center gap-1 min-w-0">
+              <div className="size-6 overflow-hidden shrink-0">
+                <img alt="" className="size-full object-contain" src={imgCuanIcon} />
               </div>
               <p className="text-[12px] font-bold text-[#020617] text-center leading-4">Cuan Pandai</p>
               <p className="text-[10px] text-[#64748b] text-center leading-3">Kerjakan misi, dapatkan diskon tambahan!</p>
             </div>
 
-            <div className="w-px h-14 bg-[#e2e8f0] shrink-0" />
+            <div className="flex items-center justify-center shrink-0 w-0">
+              <div className="w-px h-[13px] bg-[#e2e8f0]" />
+            </div>
 
             {/* Poin Pandai */}
-            <div className="flex-1 flex flex-col items-center gap-1 px-1">
+            <div className="flex-1 flex flex-col items-center justify-center gap-1 min-w-0">
               <div className="size-6 overflow-hidden shrink-0">
-                <img alt="" className="size-full object-contain" src={imgPoinEmasActive} />
+                <img alt="" className="size-full object-contain" src={imgPoinEmasIcon} />
               </div>
               <p className="text-[12px] font-bold text-[#020617] text-center leading-4">Poin Pandai</p>
               <p className="text-[10px] text-[#64748b] text-center leading-3">Kumpulkan poin dan pakai untuk potong biaya gadai</p>
             </div>
 
-            <div className="w-px h-14 bg-[#e2e8f0] shrink-0" />
+            <div className="flex items-center justify-center shrink-0 w-0">
+              <div className="w-px h-[13px] bg-[#e2e8f0]" />
+            </div>
 
             {/* Transaksi mudah */}
-            <div className="flex-1 flex flex-col items-center gap-1 px-1">
-              <div className="size-6 rounded-full bg-[#e0f2fe] flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="4" width="20" height="16" rx="2"/>
-                  <line x1="2" y1="10" x2="22" y2="10"/>
-                </svg>
+            <div className="flex-1 flex flex-col items-center justify-center gap-1 min-w-0">
+              <div className="size-6 overflow-hidden shrink-0">
+                <img alt="" className="size-full object-contain" src={imgTransaksiIcon} />
               </div>
               <p className="text-[12px] font-bold text-[#020617] text-center leading-4">Transaksi mudah</p>
               <p className="text-[10px] text-[#64748b] text-center leading-3">Tebus, perpanjang, cicil pinjaman tanpa perlu ke cabang!</p>
@@ -205,7 +177,7 @@ export default function GuestHomepage() {
           <p className="text-[16px] font-semibold text-[#020617] mb-4">Cara Gadai?</p>
 
           {/* Carousel card */}
-          <div className="bg-[#f8fafc] rounded-xl px-4 py-3 flex items-center gap-4">
+          <div className="bg-[#f8fafc] rounded-xl px-4 py-3 flex items-center gap-4 h-[102px]">
             <div className="flex-1 flex flex-col gap-2 min-w-0">
               {/* Step counter */}
               <div className="relative inline-flex items-center justify-center size-4 shrink-0">
@@ -218,7 +190,7 @@ export default function GuestHomepage() {
               </div>
             </div>
             <div className="shrink-0 size-16 flex items-center justify-center">
-              {howToSteps[step].icon}
+              <img src={howToSteps[step].img} alt="" className="size-16 object-contain" />
             </div>
           </div>
 
@@ -249,17 +221,16 @@ export default function GuestHomepage() {
           <span className="text-[12px] font-bold text-[#023dff]">Beranda</span>
         </button>
 
-        <button className="flex flex-col items-center gap-1 w-20">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#65758b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="1" y="4" width="22" height="16" rx="2"/>
-            <line x1="1" y1="10" x2="23" y2="10"/>
-          </svg>
+        <button onClick={() => navigate('/guest/login')} className="flex flex-col items-center gap-1 w-20">
+          <div className="size-6 overflow-hidden">
+            <img alt="" className="size-full object-contain" src={imgNavPinjaman} />
+          </div>
           <span className="text-[12px] font-bold text-slate-500">Pinjaman</span>
         </button>
 
-        <button className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate('/poin-pandai/unverified')} className="flex flex-col items-center gap-1 w-20">
           <div className="size-6 overflow-hidden">
-            <img alt="" className="size-full object-contain" src={imgPoinEmasActive} style={{ filter: 'grayscale(100%) brightness(1.5)' }} />
+            <img alt="" className="size-full object-contain" src={imgPoinOutline} />
           </div>
           <span className="text-[12px] font-bold text-slate-500">Poin Pandai</span>
         </button>
@@ -270,6 +241,7 @@ export default function GuestHomepage() {
           </div>
           <span className="text-[12px] font-bold text-slate-500">Akun</span>
         </button>
+
       </div>
     </div>
   )
