@@ -23,6 +23,7 @@ import Akun from './Akun'
 import GuestSplash from './GuestSplash'
 import GuestLogin from './GuestLogin'
 import GuestHomepage from './GuestHomepage'
+import GuestCabangList from './GuestCabangList'
 import PrototypeIndex from './PrototypeIndex'
 import DSTest from './DSTest'
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="/guest" element={<GuestSplash />} />
           <Route path="/guest/login" element={<GuestSplash startAtLogin />} />
           <Route path="/guest/home" element={<GuestHomepage />} />
+          <Route path="/guest/cabang" element={<GuestCabangList />} />
           <Route path="/ds-test" element={<DSTest />} />
         </Routes>
       </BrowserRouter>

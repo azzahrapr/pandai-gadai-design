@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 // Local static assets
 const imgDate         = "/assets/status-date.svg";
@@ -32,6 +32,8 @@ function ArrowRightSmall({ className = "size-3" }: { className?: string }) {
 
 export default function PoinPandaiUnverified() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isGuest = searchParams.get('guest') === 'true'
   return (
     <div className="w-[375px] bg-white flex flex-col overflow-hidden rounded-3xl shadow-2xl" style={{ height: 812 }}>
 
@@ -76,7 +78,7 @@ export default function PoinPandaiUnverified() {
           {/* Panda + CTA button */}
           <div className="flex flex-col items-center gap-0 w-full relative">
             <img src={imgPose81} alt="Panda mascot" className="size-[120px] object-cover z-10 relative" />
-            <button onClick={() => navigate('/verifikasi')} className="w-full bg-[#ffcd05] rounded-lg flex items-center justify-center gap-2 py-3 -mt-3 shadow-lg">
+            <button onClick={() => navigate(isGuest ? '/guest/login' : '/verifikasi')} className="w-full bg-[#ffcd05] rounded-lg flex items-center justify-center gap-2 py-3 -mt-3 shadow-lg">
               <span className="text-sm font-semibold text-slate-900">
                 Ambil <span className="text-[#7e480f]">4.000 Poin Pandai</span> sekarang
               </span>
@@ -125,18 +127,21 @@ export default function PoinPandaiUnverified() {
         </div>
 
         {/* About Poin Pandai */}
-        <div className="relative bg-slate-50 rounded-t-2xl shadow-[0_-4px_6px_rgba(0,0,0,0.05)] px-4 py-3 overflow-hidden">
-          {/* Decorative background pattern */}
-          <div className="absolute right-[-20px] top-[-42px] size-[255px] pointer-events-none opacity-80"
-            style={{ transform: "rotate(-6deg)" }}>
-            <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgDecoPattern} />
-          </div>
-          <div className="relative flex flex-col gap-0.5">
-            <p className="text-sm font-semibold text-slate-900">Apa itu Poin Pandai?</p>
-            <p className="text-[12px] text-slate-700 leading-4">
-              Poin yang bisa kamu pakai untuk kurangi biaya tebus atau ditukar jadi voucher diskon.{" "}
-              <span className="font-semibold text-[#001cdb]">Baca Selengkapnya</span>
-            </p>
+        <div className="relative h-[78px] drop-shadow-[0px_-4px_3px_rgba(0,0,0,0.05)]">
+          <div className="absolute left-0 top-0 w-full bg-[#f8fafc] rounded-t-[16px] px-4 py-3 overflow-hidden">
+            <div
+              className="absolute pointer-events-none opacity-80 z-0"
+              style={{ left: '191px', top: '-43px', width: '255px', height: '230px', transform: 'rotate(-6deg)' }}
+            >
+              <img alt="" className="block w-full h-full object-contain" src={imgDecoPattern} />
+            </div>
+            <div className="relative z-10 flex flex-col gap-0.5">
+              <p className="text-[14px] font-semibold text-[#020617] leading-5">Apa itu Poin Pandai?</p>
+              <p className="text-[12px] text-[#0f1729] leading-4">
+                Poin yang bisa kamu pakai untuk kurangi biaya tebus atau ditukar jadi voucher diskon.{" "}
+                <span className="font-semibold text-[#001cdb]">Baca Selengkapnya</span>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -177,24 +182,26 @@ export default function PoinPandaiUnverified() {
       </div>
 
       {/* Klaim strip */}
-      <div className="flex items-center gap-2 px-4 py-2"
-        style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
-        <div className="flex flex-col flex-1">
-          <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
-          <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="bg-[#ffda14] px-2.5 py-0.5 rounded-full">
-            <span className="text-[12px] font-semibold text-slate-900">6 hari 3 jam lagi</span>
+      {!isGuest && (
+        <div className="flex items-center gap-2 px-4 py-2"
+          style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
+          <div className="flex flex-col flex-1">
+            <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
+            <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
           </div>
-          <ArrowRightSmall className="size-5 text-[#492504]" />
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="bg-[#ffda14] px-2.5 py-0.5 rounded-full">
+              <span className="text-[12px] font-semibold text-slate-900">6 hari 3 jam lagi</span>
+            </div>
+            <ArrowRightSmall className="size-5 text-[#492504]" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Navbar */}
       <div className="bg-white flex items-center justify-between px-4 pt-4 pb-8">
         {/* Beranda */}
-        <button onClick={() => navigate('/home')} className="flex flex-col items-center gap-1 w-20">
+        <button onClick={() => navigate(isGuest ? '/guest/home' : '/home')} className="flex flex-col items-center gap-1 w-20">
           <div className="relative size-6 overflow-hidden">
             <div className="absolute inset-[0.09%_0_-0.03%_0]">
               <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgHomeVec} />
@@ -223,7 +230,7 @@ export default function PoinPandaiUnverified() {
         </button>
 
         {/* Akun */}
-        <button onClick={() => navigate('/akun')} className="flex flex-col items-center gap-1 w-20 relative">
+        <button onClick={() => navigate(isGuest ? '/guest/login' : '/akun')} className="flex flex-col items-center gap-1 w-20 relative">
           <div className="relative">
             <div className="relative size-6 overflow-hidden">
               <img alt="" className="absolute inset-0 block size-full max-w-none object-contain" src={imgSmileIcon} />
