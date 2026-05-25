@@ -10,9 +10,7 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
   const navigate = useNavigate()
   const [showLogin, setShowLogin] = useState(startAtLogin)
   const [nik, setNik] = useState('')
-  const [nikError, setNikError] = useState(false)
   const [tncChecked, setTncChecked] = useState(false)
-  const [tncGlimmer, setTncGlimmer] = useState(false)
 
   useEffect(() => {
     if (startAtLogin) return
@@ -102,23 +100,12 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
               type="text"
               placeholder="Pandai ID/NIK"
               value={nik}
-              onChange={e => { setNik(e.target.value); setNikError(false) }}
-              className={`w-full border rounded-[6px] px-3 py-3 text-[14px] outline-none bg-white ${nikError ? 'border-red-500 text-[#020617]' : 'border-[#cbd5e1] text-[#64748b]'}`}
+              onChange={e => setNik(e.target.value)}
+              className="w-full border border-[#cbd5e1] rounded-[6px] px-3 py-3 text-[14px] outline-none bg-white text-[#64748b]"
             />
-            {nikError && (
-              <p className="text-[12px] text-red-500 font-medium">Pandai ID/NIK tidak boleh kosong.</p>
-            )}
           </div>
           <button
-            onClick={() => {
-              if (!nik.trim()) { setNikError(true) }
-              if (!tncChecked) {
-                setTncGlimmer(false)
-                requestAnimationFrame(() => setTncGlimmer(true))
-              }
-              if (!nik.trim() || !tncChecked) return
-              navigate('/home')
-            }}
+            onClick={() => {}}
             className="w-full bg-[#023dff] rounded-[8px] py-3 text-[14px] font-semibold text-white"
           >
             Masuk dengan Pandai ID/NIK
@@ -128,11 +115,10 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
               type="checkbox"
               className="sr-only"
               checked={tncChecked}
-              onChange={() => { setTncChecked(v => !v); setTncGlimmer(false) }}
+              onChange={() => setTncChecked(v => !v)}
             />
             <div
-              className={`shrink-0 mt-[3px] size-[14px] border rounded-[3px] flex items-center justify-center ${tncGlimmer ? 'glimmer' : ''} ${tncChecked ? 'bg-[#023dff] border-[#023dff]' : 'border-[#65758b]'}`}
-              onAnimationEnd={() => setTncGlimmer(false)}
+              className={`shrink-0 mt-[3px] size-[14px] border rounded-[3px] flex items-center justify-center ${tncChecked ? 'bg-[#023dff] border-[#023dff]' : 'border-[#65758b]'}`}
             >
               {tncChecked && (
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
