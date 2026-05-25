@@ -128,7 +128,7 @@ export default function GuestHomepage() {
               <button
                 onClick={() => {
                   if (!selectedItem) { setGlimmerField(true); return }
-                  window.location.href = '/landing-page/simulasi-gadai.html'
+                  window.location.href = '/landing-page/simulasi-gadai.html?guest=true'
                 }}
                 className="flex items-center justify-center gap-1 py-1"
               >
@@ -467,7 +467,7 @@ export default function GuestHomepage() {
                     onClick={() => {
                       setSelectedItem(item)
                       setShowItemSheet(false)
-                      window.location.href = '/landing-page/simulasi-gadai.html'
+                      window.location.href = '/landing-page/simulasi-gadai.html?guest=true'
                     }}
                   >
                     <span className="text-[14px] text-[#0f1729] leading-5">{item}</span>
