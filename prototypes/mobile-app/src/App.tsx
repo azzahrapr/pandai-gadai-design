@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import './index.css'
 import Homepage from './Homepage'
 import HomepageUnverified from './HomepageUnverified'
@@ -21,16 +21,28 @@ import TYPSuccess from './TYPSuccess'
 import DaftarPinjaman from './DaftarPinjaman'
 import Akun from './Akun'
 import GuestSplash from './GuestSplash'
-import GuestLogin from './GuestLogin'
 import GuestHomepage from './GuestHomepage'
 import GuestCabangList from './GuestCabangList'
+import CuanPandai from './CuanPandai'
 import PrototypeIndex from './PrototypeIndex'
 import DSTest from './DSTest'
 
+function GuestBanner() {
+  const { pathname } = useLocation()
+  if (!pathname.startsWith('/guest')) return null
+  return (
+    <div className="bg-[#0f1729]/85 backdrop-blur-sm text-white text-[13px] font-medium px-5 py-3 rounded-2xl shadow-xl max-w-sm text-center leading-5">
+      Kamu sedang melihat prototipe Pandai Gadai. Setelah selesai eksplorasi, tutup tab ini untuk kembali ke sesi sebelumnya.
+    </div>
+  )
+}
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-300 flex items-start justify-center py-8">
+    <div className="min-h-screen bg-gray-300 flex items-start justify-center pt-4 pb-8">
       <BrowserRouter>
+        <div className="flex flex-col items-center gap-4">
+        <GuestBanner />
         <Routes>
           <Route path="/" element={<PrototypeIndex />} />
           <Route path="/home" element={<Homepage />} />
@@ -57,8 +69,10 @@ function App() {
           <Route path="/guest/login" element={<GuestSplash startAtLogin />} />
           <Route path="/guest/home" element={<GuestHomepage />} />
           <Route path="/guest/cabang" element={<GuestCabangList />} />
+          <Route path="/cuan-pandai" element={<CuanPandai />} />
           <Route path="/ds-test" element={<DSTest />} />
         </Routes>
+        </div>
       </BrowserRouter>
     </div>
   )

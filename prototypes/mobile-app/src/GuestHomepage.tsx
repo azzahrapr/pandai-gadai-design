@@ -55,15 +55,12 @@ export default function GuestHomepage() {
   const [showMisiSheet, setShowMisiSheet] = useState(false)
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const [glimmerField, setGlimmerField] = useState(false)
-  const dragStartX = useRef<number>(0)
+  const carouselRef = useRef<HTMLDivElement>(null)
 
-  const onCarouselPointerDown = (e: React.PointerEvent) => {
-    dragStartX.current = e.clientX
-  }
-  const onCarouselPointerUp = (e: React.PointerEvent) => {
-    const delta = e.clientX - dragStartX.current
-    if (delta < -40) setStep(s => Math.min(s + 1, howToSteps.length - 1))
-    else if (delta > 40) setStep(s => Math.max(s - 1, 0))
+  const onCarouselScroll = () => {
+    const el = carouselRef.current
+    if (!el) return
+    setStep(Math.round(el.scrollLeft / el.clientWidth))
   }
 
   return (
@@ -241,26 +238,32 @@ export default function GuestHomepage() {
         <div className="px-4 pb-4">
           <p className="text-[16px] font-semibold text-[#020617] mb-4">Cara Gadai?</p>
 
-          {/* Carousel card */}
+          {/* Carousel */}
           <div
-            className="bg-[#f8fafc] rounded-xl px-4 py-3 flex items-center gap-4 h-[102px] cursor-grab active:cursor-grabbing select-none"
-            onPointerDown={onCarouselPointerDown}
-            onPointerUp={onCarouselPointerUp}
+            ref={carouselRef}
+            className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory rounded-xl"
+            onScroll={onCarouselScroll}
           >
-            <div className="flex-1 flex flex-col gap-2 min-w-0">
-              {/* Step counter */}
-              <div className="relative inline-flex items-center justify-center size-4 shrink-0">
-                <div className="absolute inset-0 rounded-full bg-[#023dff]" />
-                <span className="relative text-[10px] font-bold text-white leading-none">{howToSteps[step].num}</span>
+            {howToSteps.map((s) => (
+              <div
+                key={s.num}
+                className="snap-start shrink-0 w-full bg-[#f8fafc] px-4 py-3 flex items-center gap-4 h-[102px]"
+              >
+                <div className="flex-1 flex flex-col gap-2 min-w-0">
+                  <div className="relative inline-flex items-center justify-center size-4 shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-[#023dff]" />
+                    <span className="relative text-[10px] font-bold text-white leading-none">{s.num}</span>
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#020617] leading-5">{s.title}</p>
+                    <p className="text-[12px] font-medium text-[#64748b] leading-4 mt-0.5">{s.desc}</p>
+                  </div>
+                </div>
+                <div className="shrink-0 size-16 flex items-center justify-center">
+                  <img src={s.img} alt="" className="size-16 object-contain" />
+                </div>
               </div>
-              <div>
-                <p className="text-[14px] font-semibold text-[#020617] leading-5">{howToSteps[step].title}</p>
-                <p className="text-[12px] font-medium text-[#64748b] leading-4 mt-0.5">{howToSteps[step].desc}</p>
-              </div>
-            </div>
-            <div className="shrink-0 size-16 flex items-center justify-center">
-              <img src={howToSteps[step].img} alt="" className="size-16 object-contain" />
-            </div>
+            ))}
           </div>
 
           {/* Dot pagination */}
@@ -268,7 +271,9 @@ export default function GuestHomepage() {
             {howToSteps.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setStep(i)}
+                onClick={() => {
+                  carouselRef.current?.scrollTo({ left: i * (carouselRef.current.clientWidth), behavior: 'smooth' })
+                }}
                 className="rounded-full transition-all"
                 style={{
                   width: i === step ? 20 : 8,
