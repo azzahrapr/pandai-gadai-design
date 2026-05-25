@@ -935,6 +935,11 @@
   </style>
 </head>
 <body>
+  <div style="max-width:480px;margin:12px auto 0;padding:0 16px">
+    <div style="background:rgba(15,23,41,0.85);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:500;text-align:center;padding:10px 16px;border-radius:16px;line-height:1.5;font-family:'Geist',sans-serif">
+      Kamu sedang melihat prototipe Pandai Gadai. Setelah selesai eksplorasi, tutup tab ini untuk kembali ke sesi sebelumnya.
+    </div>
+  </div>
   <div id="app">
 
     <!-- HEADER -->
@@ -1625,8 +1630,6 @@
     // ── INIT ──────────────────────────────────────────────────────────────────
     setStep(1);
     fetchProducts('');
-    // Show lead sheet after a short delay so the page content is visible first
-    setTimeout(openLeadSheet, 700);
   </script>
 </body>
 </html>

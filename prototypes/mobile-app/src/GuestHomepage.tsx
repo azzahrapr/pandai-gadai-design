@@ -420,7 +420,10 @@ export default function GuestHomepage() {
 
             {/* Sticky CTA */}
             <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-[#e1e6ef] p-4">
-              <button className="w-full h-12 bg-[#ff8138] rounded-[12px] flex items-center justify-center">
+              <button
+                className="w-full h-12 bg-[#ff8138] rounded-[12px] flex items-center justify-center"
+                onClick={() => { setShowMisiSheet(false); navigate('/cuan-pandai?guest=true') }}
+              >
                 <span className="text-[15px] font-bold text-white">Ambil Misi</span>
               </button>
             </div>
