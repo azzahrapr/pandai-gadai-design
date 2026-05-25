@@ -16,26 +16,26 @@ const imgMissionCard = "https://www.figma.com/api/mcp/asset/5358cb3f-0249-4871-9
 const howToSteps = [
   {
     num: 1,
-    title: 'Visit Cabang Pandai Gadai',
-    desc: 'Cuma perlu bawa barang dan KTP kamu.',
+    title: 'Datang ke cabang terdekat',
+    desc: 'Cuma perlu bawa barang dan KTP kamu, langsung dapat nilai taksiran.',
     img: '/assets/mi-cabang.png',
   },
   {
     num: 2,
-    title: 'Pencairan instan',
-    desc: 'Langsung dapat pencairan, lebih hemat lewat Saldo Pandai.',
+    title: 'Dana Langsung Cair',
+    desc: 'Pencairan instan di cabang lewat bank, tunai, hingga e-wallet.',
     img: '/assets/mi-high-disbursement-rate.png',
   },
   {
     num: 3,
     title: 'Tebus, Perpanjang, Cicil Online',
-    desc: 'Gak perlu ke cabang. Semua bisa dilakukan lewat aplikasi!',
+    desc: 'Gak perlu ke cabang, semua pembayaran bisa dilakukan lewat aplikasi!',
     img: '/assets/mi-payment.png',
   },
   {
     num: 4,
-    title: 'Bayar lewat aplikasi, dapat diskon',
-    desc: 'Bayar pinjaman lewat aplikasi, pasti dapat potongan dari Poin Pandai!',
+    title: 'Ambil Barang di Cabang',
+    desc: 'Jangan lupa ambil barangmu sebelum jatuh tempo.',
     img: '/assets/mi.discount.png',
   },
 ]
@@ -43,7 +43,7 @@ const howToSteps = [
 const BARANG_ITEMS = ['Handphone', 'Laptop', 'TV', 'Smartwatch', 'Game Console', 'Kamera', 'Emas', 'BPKB']
 
 const missionCards = [
-  { title: 'Download dan Main Games', points: '+50.000 poin' },
+  { title: 'Download & Main Game', points: '+50.000 poin' },
   { title: 'Daftar & Verifikasi Akun', points: 'Dapatkan 700.000 poin' },
   { title: 'Gadai Pertamamu', points: 'Dapatkan 700.000 poin' },
 ]
@@ -338,7 +338,7 @@ export default function GuestHomepage() {
                 <div className="size-10 rounded-[12px] border border-[#e1e6ef] overflow-hidden shrink-0">
                   <img alt="" className="size-full object-cover" src={imgMissionCard} />
                 </div>
-                <p className="flex-1 text-[15px] font-medium text-[#001533] leading-5">Download dan Main Games</p>
+                <p className="flex-1 text-[15px] font-medium text-[#001533] leading-5">Download &amp; Main Game</p>
               </div>
 
               {/* Reward card */}
@@ -351,7 +351,7 @@ export default function GuestHomepage() {
                   </svg>
                   <div className="flex flex-col gap-1">
                     <p className="text-[12px] text-[#001533] leading-[18px]">
-                      Dapat <span className="font-bold text-[#16a34a]">Rp50.000</span> Hanya dengan Main Games!
+                      Dapat <span className="font-bold text-[#16a34a]">Rp50.000</span> per Game
                     </p>
                     <p className="text-[10px] text-[#5f6c85] leading-3">
                       Setara dengan <span className="font-bold">50.000</span> Poin Pandai
@@ -387,15 +387,11 @@ export default function GuestHomepage() {
               {/* Persyaratan */}
               <div className="bg-[#f8f9fc] border border-[#e1e6ef] rounded-[8px] px-4 py-3 flex flex-col gap-2">
                 <p className="text-[13px] font-bold text-[#001533] leading-5">Persyaratan</p>
-                <ol className="list-decimal pl-4 flex flex-col gap-1">
-                  <li className="text-[12px] text-[#001533] leading-[18px]">
-                    <span className="font-bold">Hanya untuk pengguna baru dan menggunakan link yang diberikan</span>
-                  </li>
-                  <li className="text-[12px] text-[#001533] leading-[18px]">
-                    Top up Rp50.000 dan <span className="font-bold">simpan saldo selama 1x24 jam</span>
-                  </li>
-                  <li className="text-[12px] text-[#001533] leading-[18px]">Wajib Join WhatsApp Group</li>
-                </ol>
+                <div className="text-[12px] text-[#001533] leading-[18px] flex flex-col gap-0">
+                  <p className="underline decoration-solid">Khusus pengguna aplikasi Pintarnya.</p>
+                  <p className="font-bold">Matikan VPN, Custom DNS, Adblock, Proxy, atau sejenisnya termasuk 1.1.1.1/WARP sebelum klik Ambil Misi.</p>
+                  <p>Penggunaan tools tersebut menyebabkan pemblokiran akun Pintarnya.</p>
+                </div>
                 <button className="self-start">
                   <span className="text-[12px] font-bold text-[#2a83fd]">Lihat syarat &amp; ketentuan lainnya</span>
                 </button>
@@ -404,17 +400,14 @@ export default function GuestHomepage() {
               {/* Langkah Kerja */}
               <div className="bg-[#f8f9fc] border border-[#e1e6ef] rounded-[8px] px-4 py-3 flex flex-col gap-2">
                 <p className="text-[13px] font-bold text-[#001533] leading-5">Langkah Kerja</p>
-                <ul className="list-disc pl-4 flex flex-col gap-1">
+                <ol className="list-decimal pl-[18px] flex flex-col gap-1">
                   <li className="text-[12px] text-[#001533] leading-[18px]">
-                    Download aplikasi hanya melalui link setelah klik <span className="font-bold">Ambil Misi</span>
+                    Klik Ambil Misi dan mainkan game nya~
                   </li>
                   <li className="text-[12px] text-[#001533] leading-[18px]">
-                    Top Up Rp50.000 setelah buka rekening
+                    Reward masuk ke wallet <span className="font-bold">1x24 jam</span>
                   </li>
-                  <li className="text-[12px] text-[#001533] leading-[18px]">
-                    Submit bunga harian yang kamu dapatkan dan Pintarnya akan memberikan Bonus Rp35.000 ke rekening Bank Saqu kamu!
-                  </li>
-                </ul>
+                </ol>
               </div>
             </div>
 

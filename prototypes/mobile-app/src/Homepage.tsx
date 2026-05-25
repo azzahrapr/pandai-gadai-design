@@ -252,7 +252,7 @@ export default function Homepage() {
               </div>
             </div>
             {/* Cuan Pandai */}
-            <div className="bg-white flex-1 rounded-xl p-3 shadow-sm flex flex-col gap-1">
+            <div className="bg-white flex-1 rounded-xl p-3 shadow-sm flex flex-col gap-1 cursor-pointer" onClick={() => navigate('/cuan-pandai')}>
               <div className="flex items-center gap-1">
                 <img src={imgCuanIcon} alt="" className="size-5 object-contain" />
                 <span className="text-[12px] font-medium text-slate-700">Cuan Pandai</span>
