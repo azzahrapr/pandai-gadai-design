@@ -75,7 +75,7 @@ export default function GuestCabangList() {
         {/* Nav bar */}
         <div className="flex items-center justify-between h-[52px] px-2 pb-1">
           <button
-            onClick={() => navigate('/guest/home')}
+            onClick={() => navigate(-1)}
             className="size-10 flex items-center justify-center rounded-lg shrink-0"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">

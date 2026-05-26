@@ -179,6 +179,105 @@ export default function PoinPandaiUnverified() {
             ))}
           </div>
         </div>
+
+        {/* Cari Cuan section */}
+        <div className="px-4 py-4 flex flex-col gap-4"
+          style={{ background: "linear-gradient(180deg, #ffffff 8.78%, #fefdea 100%)" }}>
+
+          {/* Header */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] font-semibold text-[#020617] leading-5">✨ Yuk, Ambil Poin Pandaimu!</p>
+              <div className="flex items-center gap-1 bg-[#f0fdf4] border border-[#16a34a] px-1.5 py-0.5 rounded-full" style={{ borderWidth: '0.5px' }}>
+                <div className="size-[10px] overflow-hidden shrink-0 relative">
+                  <div className="absolute inset-[0_6.53%_0_6.5%]">
+                    <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasSm} />
+                  </div>
+                </div>
+                <p className="text-[10px] text-[#16a34a] leading-4 whitespace-nowrap">
+                  <span className="font-black">25rb</span>
+                  <span className="font-medium"> didapat Andrew</span>
+                </p>
+              </div>
+            </div>
+            <p className="text-[12px] text-[#64748b] leading-4">
+              Ribuan pengguna udah kumpulin cuan dari sini — yuk cek kategorinya sebelum kehabisan🔥
+            </p>
+          </div>
+
+          {/* Category cards */}
+          <div className="flex flex-col gap-2">
+            {/* Survey */}
+            <div className="flex flex-col border border-[#e2e8f0] rounded-[16px] overflow-hidden cursor-pointer" onClick={() => navigate('/cuan-pandai')}>
+              <div className="flex items-center justify-between px-3 py-2"
+                style={{ background: "linear-gradient(90deg, #fffdc6 22%, #ffec4f 100%)" }}>
+                <span className="text-[12px] font-medium text-[#020617]">3.200+ pengguna ikut minggu ini</span>
+                <img src="/assets/Quota.png" alt="Lagi Ramai!" className="h-6 w-auto shrink-0 self-center" />
+              </div>
+              <div className="bg-white flex items-center gap-3 px-3 py-3">
+                <img src="/assets/splash-screen-mascot.png" alt="" className="size-10 shrink-0 object-contain" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[14px] font-semibold text-[#020617] leading-5">Survey</span>
+                    <ArrowRightSmall className="size-3.5 text-[#020617]" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1">
+                      <div className="size-3 overflow-hidden shrink-0 relative">
+                        <div className="absolute inset-[0_6.53%_0_6.5%]">
+                          <img alt="" className="absolute inset-0 block size-full max-w-none" src={imgPoinEmasSm} />
+                        </div>
+                      </div>
+                      <span className="text-[12px] font-medium text-[#ca8a04]">Hingga 75.000 poin</span>
+                    </div>
+                    <div className="size-1 bg-[#94a3b8] rounded-full shrink-0" />
+                    <div className="flex items-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#94a3b8"/>
+                        <polyline points="14 2 14 8 20 8" fill="none" stroke="white" strokeWidth="2"/>
+                      </svg>
+                      <span className="text-[12px] font-medium text-[#94a3b8]">Hingga 4 misi+</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Registrasi */}
+            <div className="flex flex-col border border-[#e2e8f0] rounded-[16px] overflow-hidden cursor-pointer" onClick={() => navigate('/cuan-pandai')}>
+              <div className="flex items-center justify-between px-3 py-2"
+                style={{ background: "linear-gradient(90deg, #fffdc6 22%, #ffec4f 100%)" }}>
+                <span className="text-[12px] font-medium text-[#020617]">6.210+ pengguna ikut minggu ini</span>
+                <img src="/assets/Quota.png" alt="Lagi Ramai!" className="h-6 w-auto shrink-0 self-center" />
+              </div>
+              <div className="bg-white flex items-center gap-3 px-3 py-3">
+                <img src="/assets/splash-screen-mascot.png" alt="" className="size-10 shrink-0 object-contain" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[14px] font-semibold text-[#020617] leading-5">Registrasi</span>
+                    <ArrowRightSmall className="size-3.5 text-[#020617]" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#ca8a04">
+                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+                      </svg>
+                      <span className="text-[12px] font-medium text-[#ca8a04]">Hingga 250mg+</span>
+                    </div>
+                    <div className="size-1 bg-[#94a3b8] rounded-full shrink-0" />
+                    <div className="flex items-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#94a3b8"/>
+                        <polyline points="14 2 14 8 20 8" fill="none" stroke="white" strokeWidth="2"/>
+                      </svg>
+                      <span className="text-[12px] font-medium text-[#94a3b8]">Hingga 20 misi+</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Klaim strip */}

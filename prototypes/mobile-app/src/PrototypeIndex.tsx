@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const links = [
@@ -6,8 +7,25 @@ const links = [
   { label: 'Homepage (Unverified)', path: '/unverified', desc: 'Logged in, not yet verified' },
 ]
 
+function ResetIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+    </svg>
+  )
+}
+
 export default function PrototypeIndex() {
   const navigate = useNavigate()
+  const [resetDone, setResetDone] = useState(false)
+
+  const handleReset = () => {
+    localStorage.removeItem('pandai_claimed_titles')
+    localStorage.removeItem('pandai_poin')
+    setResetDone(true)
+    setTimeout(() => setResetDone(false), 2000)
+  }
 
   return (
     <div className="w-[375px] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden" style={{ height: 812 }}>
@@ -36,6 +54,24 @@ export default function PrototypeIndex() {
             </svg>
           </button>
         ))}
+      </div>
+
+      {/* Reset state */}
+      <div className="px-6 mt-auto pb-8">
+        <button
+          onClick={handleReset}
+          className="flex items-center justify-center gap-2 w-full border rounded-xl px-4 py-3 transition-colors"
+          style={{
+            borderColor: resetDone ? '#16a34a' : '#e2e8f0',
+            color: resetDone ? '#16a34a' : '#94a3b8',
+          }}
+        >
+          <ResetIcon />
+          <span className="text-[13px] font-medium">
+            {resetDone ? 'State reset!' : 'Reset prototype state'}
+          </span>
+        </button>
+        <p className="text-[11px] text-[#cbd5e1] text-center mt-2">Clears klaim poin progress</p>
       </div>
     </div>
   )

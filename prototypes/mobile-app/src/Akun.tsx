@@ -5,15 +5,10 @@ const imgNavHome         = "/assets/nav-home-outline.svg"
 const imgPoinEmasOutline = "/assets/nav-poin-outline.svg"
 const imgNavSmile        = "/assets/nav-smile.svg"
 
-// Figma CDN assets — node 3114:6576, expire ~7 days from design fetch
-const imgCardBg     = "https://www.figma.com/api/mcp/asset/7db03511-7b86-4aa8-af1f-c1cff50cc986"
-const imgPandaiLogo = "https://www.figma.com/api/mcp/asset/d731b817-a956-4623-b69c-9c0c7cfabd79"
-const imgCardNumber = "https://www.figma.com/api/mcp/asset/37ef09d7-d5ed-468a-b890-d30a6156ad24"
-const imgCopyIcon   = "https://www.figma.com/api/mcp/asset/f9f12d50-a328-4cce-8ad4-fc76595b9524"
-const imgShareIcon  = "https://www.figma.com/api/mcp/asset/07d7650f-cba0-4865-9126-df6ac6d9c8c4"
-const imgVerified1  = "https://www.figma.com/api/mcp/asset/ad144b6e-337d-4692-9b1b-2f67fb8e78f9"
-const imgVerified2  = "https://www.figma.com/api/mcp/asset/e86df361-f5dc-4e10-9e6c-ce3b8e431d22"
-const imgOjk        = "https://www.figma.com/api/mcp/asset/15900bae-082d-4b94-ae82-e176e6f00161"
+const imgPandaiLogo = "/assets/4.1.1%20Profile/InitialProfile/card-panda.png"
+const imgCardNumber = "/assets/4.1.1%20Profile/InitialProfile/card-numbers.png"
+const imgShareIcon  = "/assets/share-icon.svg"
+const imgVerified   = "/assets/4.1.1%20Profile/InitialProfile/verified.png"
 
 function StatusBar() {
   return (
@@ -84,11 +79,7 @@ export default function Akun() {
             Background: imgCardBg fills 343×194. Content is absolutely overlaid
             at left:20px top:16.78px width:303px matching Figma node 3114:30058. */}
         <div className="px-4 pb-4 shrink-0 relative z-10">
-          <div className="rounded-xl overflow-hidden relative" style={{ width: 343, height: 194 }}>
-
-            {/* Card artwork */}
-            <img src={imgCardBg} alt=""
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'fill' }} />
+          <div className="rounded-xl overflow-hidden relative bg-white shadow-md" style={{ width: 343, height: 194 }}>
 
             {/* Content overlay — matches Figma left:20 top:16.78 w:303 gap:9 */}
             <div style={{
@@ -134,8 +125,10 @@ export default function Akun() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <img src={imgCardNumber} alt="Card number"
                     style={{ width: 268.2, height: 15.515, objectFit: 'contain', flexShrink: 0 }} />
-                  <img src={imgCopyIcon} alt="Copy"
-                    style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
                 </div>
 
                 {/* Name + verified badge */}
@@ -143,19 +136,7 @@ export default function Akun() {
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#023dff', lineHeight: '20px', whiteSpace: 'nowrap' }}>
                     Azzahra Putri Ramadhanty
                   </span>
-                  {/* Verified badge — two-layer vector icon from Figma */}
-                  <div style={{ position: 'relative', width: 20, height: 20, overflow: 'hidden', flexShrink: 0 }}>
-                    <div style={{ position: 'absolute', top: '12.5%', right: '12.92%', bottom: '12.5%', left: '12.08%' }}>
-                      <div style={{ position: 'absolute', inset: '-2.08%' }}>
-                        <img src={imgVerified1} alt="" style={{ display: 'block', width: '100%', height: '100%' }} />
-                      </div>
-                    </div>
-                    <div style={{ position: 'absolute', top: '41.67%', right: '37.5%', bottom: '41.67%', left: '37.5%' }}>
-                      <div style={{ position: 'absolute', inset: '-9.38% -6.25%' }}>
-                        <img src={imgVerified2} alt="" style={{ display: 'block', width: '100%', height: '100%' }} />
-                      </div>
-                    </div>
-                  </div>
+                  <img src={imgVerified} alt="" style={{ width: 20, height: 20, flexShrink: 0 }} />
                 </div>
 
               </div>
@@ -242,7 +223,9 @@ export default function Akun() {
 
           {/* OJK badge */}
           <div className="flex items-center gap-2">
-            <img src={imgOjk} alt="OJK" style={{ width: 100, height: 44, objectFit: 'contain' }} className="shrink-0" />
+            <div className="shrink-0 border border-[#e2e8f0] rounded px-2 py-1">
+              <span className="text-[10px] font-bold text-[#64748b]">OJK</span>
+            </div>
             <p className="text-[10px] text-[#64748b] leading-[1.4] font-medium">
               Pandai Gadai telah berizin dan diawasi langsung oleh Otoritas Jasa Keuangan
             </p>

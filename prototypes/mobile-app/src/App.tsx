@@ -24,6 +24,8 @@ import GuestSplash from './GuestSplash'
 import GuestHomepage from './GuestHomepage'
 import GuestCabangList from './GuestCabangList'
 import CuanPandai from './CuanPandai'
+import SaldoPandai from './SaldoPandai'
+import RiwayatPoinPandai from './RiwayatPoinPandai'
 import PrototypeIndex from './PrototypeIndex'
 import DSTest from './DSTest'
 
@@ -69,7 +71,10 @@ function App() {
           <Route path="/guest/login" element={<GuestSplash startAtLogin />} />
           <Route path="/guest/home" element={<GuestHomepage />} />
           <Route path="/guest/cabang" element={<GuestCabangList />} />
+          <Route path="/cabang" element={<GuestCabangList />} />
           <Route path="/cuan-pandai" element={<CuanPandai />} />
+          <Route path="/saldo-pandai" element={<SaldoPandai />} />
+          <Route path="/riwayat-poin-pandai" element={<RiwayatPoinPandai />} />
           <Route path="/ds-test" element={<DSTest />} />
         </Routes>
         </div>

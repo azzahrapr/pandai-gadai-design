@@ -101,10 +101,11 @@ interface PinjamanItem {
   id: string
   name: string
   category: string
-  iconType: 'phone' | 'tv'
+  iconType: 'phone' | 'tv' | 'watch'
   nilai: number
   jatuhTempo: string
   action: 'Bayar' | 'Gadai Lagi'
+  status: 'aktif' | 'selesai'
 }
 
 const pinjamanItems: PinjamanItem[] = [
@@ -116,36 +117,63 @@ const pinjamanItems: PinjamanItem[] = [
     nilai: 4500000,
     jatuhTempo: '30 Sep 2025',
     action: 'Bayar',
+    status: 'aktif',
   },
   {
     id: 'p2',
-    name: 'SAMSUNG SMART TV 50"',
+    name: 'SAMSUNG 4K CRYSTAL UHD SMART TV',
     category: 'Elektronik - TV',
     iconType: 'tv',
-    nilai: 2800000,
-    jatuhTempo: '15 Okt 2025',
+    nilai: 1350000,
+    jatuhTempo: '27 Apr 2026',
     action: 'Gadai Lagi',
+    status: 'selesai',
+  },
+  {
+    id: 'p3',
+    name: 'GARMIN FENIX 8 SAPPHIRE AMOLED JAM TANGAN GPS MULTISPORT',
+    category: 'Elektronik - Smartwatch',
+    iconType: 'watch',
+    nilai: 699000,
+    jatuhTempo: '15 Mar 2026',
+    action: 'Gadai Lagi',
+    status: 'selesai',
   },
 ]
 
-function AssetCard({ item, onBayar }: { item: PinjamanItem; onBayar?: () => void }) {
+function AssetCardIcon({ type }: { type: PinjamanItem['iconType'] }) {
+  if (type === 'tv') return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+    </svg>
+  )
+  if (type === 'watch') return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="6"/>
+      <polyline points="12 9 12 12 13.5 13.5"/>
+      <path d="M16 5.5l-.5-3.5H8.5L8 5.5M8 18.5l.5 3.5h7l.5-3.5"/>
+    </svg>
+  )
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2"/>
+      <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
+    </svg>
+  )
+}
+
+function AssetCard({ item, onAction }: { item: PinjamanItem; onAction: () => void }) {
   return (
     <div className="pressable bg-white border border-slate-200 flex h-28 items-center overflow-hidden rounded-2xl shrink-0 w-80">
       <div className="flex flex-col gap-2 flex-1 pl-4 pr-2 py-3 border-r border-slate-200 h-full justify-center">
         <div className="flex flex-col gap-2">
-          {item.iconType === 'phone' ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="5" y="2" width="14" height="20" rx="2"/>
-              <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3"/>
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-            </svg>
-          )}
-          <p className="font-semibold text-sm text-slate-900 leading-4">{item.name}</p>
+          <AssetCardIcon type={item.iconType} />
+          <p className="font-semibold text-sm text-slate-900 leading-4 overflow-hidden"
+            style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' } as React.CSSProperties}>
+            {item.name}
+          </p>
         </div>
-        {item.action === "Bayar" && (
+        {item.action === 'Bayar' && (
           <p className="text-[12px] font-medium text-slate-500">Jatuh tempo {item.jatuhTempo}</p>
         )}
       </div>
@@ -156,13 +184,13 @@ function AssetCard({ item, onBayar }: { item: PinjamanItem; onBayar?: () => void
         </div>
         <button
           className="bg-[#023dff] text-white text-sm font-semibold py-2.5 text-center rounded-br-lg"
-          onClick={item.action === 'Bayar' ? onBayar : undefined}
+          onClick={onAction}
         >
           {item.action}
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 export default function Homepage() {
@@ -170,6 +198,11 @@ export default function Homepage() {
   const [poinBalance] = useState(() =>
     parseInt(localStorage.getItem('pandai_poin') ?? '20000', 10)
   )
+  const claimedTitles: string[] = JSON.parse(localStorage.getItem('pandai_claimed_titles') ?? '[]')
+  const allClaimed = claimedTitles.length >= 3
+  const remainingPoin = [2000, 2000, 2000]
+    .slice(0, 3 - claimedTitles.length)
+    .reduce((s, p) => s + p, 0)
   return (
     <div className="w-[375px] bg-slate-50 flex flex-col overflow-hidden rounded-3xl shadow-2xl relative" style={{ height: 812 }}>
 
@@ -221,12 +254,20 @@ export default function Homepage() {
               </div>
               <p className="text-lg font-bold text-black">{poinBalance.toLocaleString('id-ID')} poin</p>
             </div>
-            {/* fix 3: shimmer animation on Klaim poin button */}
-            <button onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })} className="relative overflow-hidden bg-[#ffcd05] border border-[#fffdc6] rounded-lg px-3 py-1.5">
-              <span className="text-sm font-semibold text-[#492504] relative z-10">Klaim poin</span>
-              <div className="shimmer-btn absolute top-[-14px] left-0 w-6 h-16 opacity-60"
-                style={{ background: "linear-gradient(266deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 100%)" }} />
-            </button>
+            {allClaimed ? (
+              <button
+                onClick={() => navigate('/poin-pandai')}
+                className="border border-[#7e480f] rounded-[8px] px-[10px] py-[6px]"
+              >
+                <span className="text-[14px] font-semibold text-[#492504]">Lihat detail</span>
+              </button>
+            ) : (
+              <button onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })} className="relative overflow-hidden bg-[#ffcd05] border border-[#fffdc6] rounded-lg px-3 py-1.5">
+                <span className="text-sm font-semibold text-[#492504] relative z-10">Klaim poin</span>
+                <div className="shimmer-btn absolute top-[-14px] left-0 w-6 h-16 opacity-60"
+                  style={{ background: "linear-gradient(266deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 100%)" }} />
+              </button>
+            )}
           </div>
 
           {/* Dark hook strip */}
@@ -240,7 +281,7 @@ export default function Homepage() {
           {/* Saldo row */}
           <div className="bg-slate-50 flex gap-3 px-3 pt-3 pb-10">
             {/* Saldo Pandai */}
-            <div className="bg-white flex-1 rounded-xl p-3 shadow-sm flex flex-col gap-1">
+            <div className="bg-white flex-1 rounded-xl p-3 shadow-sm flex flex-col gap-1 cursor-pointer" onClick={() => navigate('/saldo-pandai')}>
               <div className="flex items-center gap-1">
                 <img src={imgSaldoIcon} alt="" className="size-5 object-contain" />
                 <span className="text-[12px] font-medium text-slate-700">Saldo Pandai</span>
@@ -283,7 +324,7 @@ export default function Homepage() {
               <AssetCard
                 key={item.id}
                 item={item}
-                onBayar={() => navigate('/pinjaman/detail', { state: { pinjaman: item } })}
+                onAction={() => navigate('/pinjaman/detail', { state: { pinjaman: item } })}
               />
             ))}
           </div>
@@ -296,12 +337,12 @@ export default function Homepage() {
           {/* Quick actions */}
           <div className="flex items-start justify-between">
             {([
-              { icon: icons.tarikSaldo, label: "Tarik saldo" },
-              { icon: icons.pulsa,      label: "Pulsa/\nPaket Data" },
-              { icon: icons.listrik,    label: "Listrik PLN" },
-              { icon: icons.pdam,       label: "Tagihan PDAM" },
-            ] as const).map(({ icon, label }) => (
-              <button key={label} className="flex flex-col items-center gap-2 flex-1 p-2">
+              { icon: icons.tarikSaldo, label: "Tarik saldo",      path: '/saldo-pandai' },
+              { icon: icons.pulsa,      label: "Pulsa/\nPaket Data", path: '/saldo-pandai' },
+              { icon: icons.listrik,    label: "Listrik PLN",       path: '/saldo-pandai' },
+              { icon: icons.pdam,       label: "Tagihan PDAM",      path: '/saldo-pandai' },
+            ] as const).map(({ icon, label, path }) => (
+              <button key={label} className="flex flex-col items-center gap-2 flex-1 p-2" onClick={() => navigate(path)}>
                 <QuickIcon icon={icon} />
                 <span className="text-[12px] font-medium text-slate-900 text-center whitespace-pre-line leading-4">{label}</span>
               </button>
@@ -310,14 +351,19 @@ export default function Homepage() {
 
           {/* Simulasi + Lokasi */}
           <div className="flex gap-2">
-            <button className="bg-white border border-slate-200 flex-1 flex items-center gap-2 px-3 py-3 rounded-2xl">
+            <button
+              className="bg-white border border-slate-200 flex-1 flex items-center gap-2 px-3 py-3 rounded-2xl"
+            >
               <img src={imgCalcIcon} alt="" className="size-5 shrink-0 object-contain" />
               <div className="flex flex-col items-start">
                 <span className="text-sm font-semibold text-slate-900">Simulasi Gadai</span>
                 <span className="text-[12px] font-medium text-slate-500">Cek nilai taksiran</span>
               </div>
             </button>
-            <button className="bg-white border border-slate-200 flex-1 flex items-center gap-2 px-3 py-3 rounded-2xl">
+            <button
+              className="bg-white border border-slate-200 flex-1 flex items-center gap-2 px-3 py-3 rounded-2xl"
+              onClick={() => navigate('/cabang')}
+            >
               <img src={imgLocationIcon} alt="" className="size-5 shrink-0 object-contain" />
               <div className="flex flex-col items-start">
                 <span className="text-sm font-semibold text-slate-900">Lokasi Cabang</span>
@@ -344,22 +390,28 @@ export default function Homepage() {
 
       </div>{/* end scrollable area */}
 
-      {/* ── Klaim Poin strip */}
-      <button
-        onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })}
-        className="flex items-center gap-2 px-4 py-2 w-full text-left"
-        style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
-        <div className="flex flex-col flex-1">
-          <p className="text-sm font-semibold text-[#492504]">Klaim 12.000 Poin Pandai</p>
-          <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
+      {/* ── Klaim Poin strip — hidden when all claimed */}
+      {!allClaimed && (
+        <div
+          className="flex items-center gap-2 px-4 py-2 w-full"
+          style={{ background: "linear-gradient(90deg, #fefdea 10%, #fffcaf 61%, #ffec4f 100%)" }}>
+          <button
+            onClick={() => navigate('/poin-pandai', { state: { openKlaim: true } })}
+            className="flex items-center gap-2 w-full text-left"
+          >
+            <div className="flex flex-col flex-1">
+              <p className="text-sm font-semibold text-[#492504]">Klaim {remainingPoin.toLocaleString('id-ID')} Poin Pandai</p>
+              <p className="text-[12px] font-medium text-[#492504]">Pakai poin untuk bayar pinjaman!</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="bg-[#ffda14] px-3 py-0.5 rounded-full">
+                <span className="text-[12px] font-semibold text-slate-900">6 hari 3 jam lagi</span>
+              </div>
+              <ArrowRightSmall className="size-5 text-[#492504]" />
+            </div>
+          </button>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="bg-[#ffda14] px-3 py-0.5 rounded-full">
-            <span className="text-[12px] font-semibold text-slate-900">6 hari 3 jam lagi</span>
-          </div>
-          <ArrowRightSmall className="size-5 text-[#492504]" />
-        </div>
-      </button>
+      )}
 
       {/* ── Bottom Navbar */}
       <div className="bg-white flex items-center justify-between px-4 pt-4 pb-8">
