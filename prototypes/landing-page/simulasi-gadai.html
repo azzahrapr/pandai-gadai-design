@@ -934,119 +934,104 @@
     }
 
     /* ── INSPECT OVERLAY ── */
-    body.inspect-mode * { cursor: crosshair !important; }
+    body.inspect-mode [data-inspectable] { cursor: crosshair !important; }
     #inspect-badge {
       position: fixed;
       top: 12px;
       right: 12px;
       z-index: 99999;
-      background: #0255CA;
       color: #fff;
       font-family: 'Geist', monospace;
       font-size: 11px;
       font-weight: 600;
-      padding: 5px 10px;
+      padding: 5px 12px;
       border-radius: 20px;
-      letter-spacing: 0.02em;
-      box-shadow: 0 2px 8px rgba(2,84,202,0.35);
-      pointer-events: none;
-      display: none;
-    }
-    body.inspect-mode #inspect-badge { display: block; }
-    #inspect-tooltip {
-      position: fixed;
-      z-index: 99998;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       pointer-events: auto;
-      display: none;
-      max-width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+      background: #475569;
+      transition: background 0.15s;
+    }
+    #inspect-badge:hover { background: #344256; }
+    body.inspect-mode #inspect-badge { background: #0255CA; box-shadow: 0 2px 8px rgba(2,84,202,0.4); }
+    body.inspect-mode #inspect-badge:hover { background: #001cdb; }
+
+    #inspect-panel {
+      position: fixed;
+      top: 44px;
+      right: 12px;
+      z-index: 99998;
+      width: 280px;
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
       background: #021431;
-      border-radius: 8px;
-      padding: 10px 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
       font-family: 'Geist', monospace;
       font-size: 11px;
       line-height: 1.6;
       color: #e2e8f0;
+      display: none;
     }
-    #inspect-tooltip .it-component {
-      font-size: 12px;
-      font-weight: 700;
-      color: #60a5fa;
-      margin-bottom: 4px;
+    body.inspect-mode #inspect-panel { display: block; }
+    #inspect-panel .ip-hint {
+      padding: 16px 14px;
+      color: #475569;
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.6;
     }
-    #inspect-tooltip .it-class {
-      color: #94a3b8;
-      font-size: 10px;
-      margin-bottom: 6px;
+    #inspect-panel .ip-close {
+      position: absolute;
+      top: 8px; right: 10px;
+      background: none; border: none;
+      color: #475569; font-size: 16px;
+      cursor: pointer; line-height: 1;
+      display: none;
     }
-    #inspect-tooltip .it-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
+    #inspect-panel .ip-close:hover { color: #e2e8f0; }
+    #inspect-panel .ip-body { padding: 10px 12px 12px; }
+    .it-component { font-size: 12px; font-weight: 700; color: #60a5fa; margin-bottom: 4px; }
+    .it-class { color: #94a3b8; font-size: 10px; margin-bottom: 6px; }
+    .it-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .it-label { color: #64748b; min-width: 72px; font-size: 10px; flex-shrink: 0; }
+    .it-value { color: #f1f5f9; font-size: 11px; }
+    .it-swatch {
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 2px; border: 1px solid rgba(255,255,255,0.2);
+      vertical-align: middle; margin-right: 4px;
     }
-    #inspect-tooltip .it-label {
-      color: #64748b;
-      min-width: 68px;
-      font-size: 10px;
+    .it-token { color: #34d399; font-size: 10px; }
+    .it-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+    .it-section { color: #f59e0b; font-weight: 700; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .it-state-tag {
+      display: inline-block; background: rgba(255,255,255,0.08);
+      border-radius: 3px; padding: 1px 5px; font-size: 10px;
+      color: #f59e0b; margin-bottom: 3px; font-weight: 600;
     }
-    #inspect-tooltip .it-value { color: #f1f5f9; }
-    #inspect-tooltip .it-swatch {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      border: 1px solid rgba(255,255,255,0.2);
-      vertical-align: middle;
-      margin-right: 4px;
+    .it-state-props { font-size: 10px; color: #94a3b8; margin-bottom: 8px; padding-left: 4px; line-height: 1.7; }
+    .it-copy-btn {
+      margin-top: 6px; width: 100%; padding: 5px 0;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 5px; color: #94a3b8; font-family: 'Geist', monospace;
+      font-size: 10px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
     }
-    #inspect-tooltip .it-token { color: #34d399; }
-    #inspect-tooltip .it-divider {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      margin: 6px 0;
-    }
-    #inspect-tooltip .it-state-tag {
-      display: inline-block;
-      background: rgba(255,255,255,0.08);
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-size: 10px;
-      color: #f59e0b;
-      margin-bottom: 3px;
-      font-weight: 600;
-    }
-    #inspect-tooltip .it-state-props {
-      font-size: 10px;
-      color: #94a3b8;
-      margin-bottom: 8px;
-      padding-left: 4px;
-      line-height: 1.7;
-    }
-    #inspect-tooltip .it-copy-btn {
-      margin-top: 8px;
-      width: 100%;
-      padding: 5px 0;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 5px;
-      color: #94a3b8;
-      font-family: 'Geist', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-    }
-    #inspect-tooltip .it-copy-btn:hover { background: rgba(255,255,255,0.13); color: #f1f5f9; }
-    #inspect-tooltip .it-copy-btn.copied { color: #34d399; border-color: #34d399; }
-    .inspect-highlight-ring {
-      outline: 2px solid #0255CA !important;
-      outline-offset: 2px !important;
-    }
+    .it-copy-btn:hover { background: rgba(255,255,255,0.13); color: #f1f5f9; }
+    .it-copy-btn.copied { color: #34d399; border-color: #34d399; }
+    .inspect-highlight-ring { outline: 2px solid #0255CA !important; outline-offset: 2px !important; }
+    .inspect-hover-ring { outline: 2px dashed rgba(2,85,202,0.5) !important; outline-offset: 2px !important; }
   </style>
 </head>
 <body>
-  <div id="inspect-badge">&#128269; Inspect Mode</div>
-  <div id="inspect-tooltip"></div>
+  <div id="inspect-badge" onclick="ipToggleInspect()">&#128269; Inspect</div>
+  <div id="inspect-panel">
+    <p class="ip-hint">Click any element on the page to inspect it.</p>
+    <button class="ip-close" id="ip-close-btn" onclick="ipUnlock()">&#215;</button>
+  </div>
   <div id="app">
 
     <!-- HEADER -->
@@ -1725,9 +1710,9 @@
 
     // ── INSPECT OVERLAY ──────────────────────────────────────────────────────
     (function initInspect() {
-      if (new URLSearchParams(location.search).get('inspect') !== 'true') return;
-
-      document.body.classList.add('inspect-mode');
+      if (new URLSearchParams(location.search).get('inspect') === 'true') {
+        document.body.classList.add('inspect-mode');
+      }
 
       const COMPONENT_MAP = {
         'header':                'Header / NavBar',
@@ -1938,10 +1923,39 @@
       }
 
       const tooltip = document.getElementById('inspect-tooltip');
-      let lastHighlighted = null;
-      let hideTimer = null;
-      const snippetStore = {};
+      let hoveredEl = null;
+      let lockedEl  = null;
+      window.snippetStore = {};
+      const snippetStore = window.snippetStore;
       let snippetId = 0;
+
+      window.ipExport = function(btn, imgEl, scale) {
+        const original = btn.textContent;
+        btn.textContent = '...';
+        const canvas = document.createElement('canvas');
+        // Mirror Figma: base on display size × scale, not naturalWidth × scale
+        const dw = Math.round(imgEl.offsetWidth);
+        const dh = Math.round(imgEl.offsetHeight);
+        canvas.width  = dw * scale;
+        canvas.height = dh * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob) {
+          if (!blob) { btn.textContent = 'Error'; return; }
+          const url = URL.createObjectURL(blob);
+          const src = imgEl.getAttribute('src') || 'image';
+          const base = src.split('/').pop().replace(/\.[^.]+$/, '');
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = base + '@' + scale + 'x.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          btn.textContent = '✓';
+          setTimeout(function() { btn.textContent = original; }, 1500);
+        }, 'image/png');
+      };
 
       window.ipCopy = function(btn, id) {
         const text = snippetStore[id];
@@ -1970,15 +1984,28 @@
         document.body.removeChild(ta);
       }
 
-      function showTooltip(el, comp) {
-        clearTimeout(hideTimer);
+      const panel = document.getElementById('inspect-panel');
+      const closeBtn = document.getElementById('ip-close-btn');
 
-        if (lastHighlighted && lastHighlighted !== el) {
-          lastHighlighted.classList.remove('inspect-highlight-ring');
-        }
-        el.classList.add('inspect-highlight-ring');
-        lastHighlighted = el;
+      function getInspectTarget(el) {
+        if (el.tagName === 'IMG') return { type: 'image', el: el };
+        const svgEl = el.tagName === 'svg' ? el : el.closest('svg');
+        if (svgEl) return { type: 'svg', el: svgEl };
+        const comp = getComponentName(el);
+        if (comp) return { type: 'component', el: el, comp: comp };
+        return null;
+      }
 
+      function annotateProps(propsStr) {
+        return propsStr.split(';').map(function(p) {
+          p = p.trim(); if (!p) return '';
+          const hex = (p.match(/#([0-9a-fA-F]{6})/) || [])[0];
+          const tok = hex ? tokenLabel(hex) : null;
+          return p + (tok ? ' /* ' + tok + ' */' : '');
+        }).filter(Boolean).join('; ');
+      }
+
+      function renderComponentPanel(el, comp) {
         const cs = getComputedStyle(el);
         const colorHex  = rgbToHex(cs.color);
         const bgHex     = rgbToHex(cs.backgroundColor);
@@ -1988,54 +2015,37 @@
         const typoTok   = typographyToken(cs.fontSize, cs.fontWeight);
         const w = Math.round(el.offsetWidth) + 'px';
         const h = Math.round(el.offsetHeight) + 'px';
-
         const stateRules = getStateRules(comp.key);
-
-        function annotateProps(propsStr) {
-          return propsStr.split(';').map(function(p) {
-            p = p.trim();
-            if (!p) return '';
-            const hex = (p.match(/#([0-9a-fA-F]{6})/) || [])[0];
-            const tok = hex ? tokenLabel(hex) : null;
-            return p + (tok ? ' /* ' + tok + ' */' : '');
-          }).filter(Boolean).join('; ');
-        }
 
         const statesHtml = stateRules.length ? `
           <hr class="it-divider">
-          <div class="it-label" style="color:#f59e0b;font-weight:700;font-size:10px;margin-bottom:6px">STATES</div>
-          ${stateRules.map(function(s, i) {
-            const stateSid = ++snippetId;
-            snippetStore[stateSid] = `.${comp.key}${s.state} {\n  ${annotateProps(s.props).split('; ').join(';\n  ')}\n}`;
-            return `
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-                <span class="it-state-tag">${s.state}</span>
-                <button class="it-copy-btn" style="margin-top:0;width:auto;padding:2px 8px;font-size:9px" onclick="ipCopy(this,${stateSid})">Copy</button>
-              </div>
-              <div class="it-state-props">${annotateProps(s.props)}</div>`;
-          }).join('')}
-        ` : '';
+          <div class="it-section">States</div>
+          ${stateRules.map(function(s) {
+            const sid = ++snippetId;
+            snippetStore[sid] = `.${comp.key}${s.state} {\n  ${annotateProps(s.props).split('; ').join(';\n  ')}\n}`;
+            return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+              <span class="it-state-tag">${s.state}</span>
+              <button class="it-copy-btn" style="margin-top:0;width:auto;padding:2px 8px;font-size:9px" onclick="ipCopy(this,${sid})">Copy</button>
+            </div>
+            <div class="it-state-props">${annotateProps(s.props)}</div>`;
+          }).join('')}` : '';
 
         const cssLines = [
-          colorHex ? `  color: ${colorHex};${tokenLabel(colorHex) ? ' /* ' + tokenLabel(colorHex) + ' */' : ''}` : '',
-          bgHex    ? `  background: ${bgHex};${tokenLabel(bgHex) ? ' /* ' + tokenLabel(bgHex) + ' */' : ''}` : '',
-          borderHex && borderHex !== colorHex ? `  border-color: ${borderHex};${tokenLabel(borderHex) ? ' /* ' + tokenLabel(borderHex) + ' */' : ''}` : '',
-          `  font-size: ${cs.fontSize};`,
-          `  font-weight: ${cs.fontWeight};`,
+          colorHex ? `  color: ${colorHex};${tokenLabel(colorHex) ? ' /* '+tokenLabel(colorHex)+' */' : ''}` : '',
+          bgHex    ? `  background: ${bgHex};${tokenLabel(bgHex) ? ' /* '+tokenLabel(bgHex)+' */' : ''}` : '',
+          borderHex && borderHex !== colorHex ? `  border-color: ${borderHex};${tokenLabel(borderHex) ? ' /* '+tokenLabel(borderHex)+' */' : ''}` : '',
+          `  font-size: ${cs.fontSize};`, `  font-weight: ${cs.fontWeight};`,
           `  padding: ${cs.padding};`,
           radius !== '0px' ? `  border-radius: ${radius};` : '',
-          `  width: ${w};`,
-          `  height: ${h};`,
+          `  width: ${w};`, `  height: ${h};`,
         ].filter(Boolean).join('\n');
-
-        const statesCssLines = stateRules.map(function(s) {
+        const statesCss = stateRules.map(function(s) {
           return `.${comp.key}${s.state} {\n  ${annotateProps(s.props).split('; ').join(';\n  ')}\n}`;
         }).join('\n\n');
-
         const sid = ++snippetId;
-        snippetStore[sid] = `.${comp.key} {\n${cssLines}\n}` + (statesCssLines ? '\n\n' + statesCssLines : '');
+        snippetStore[sid] = `.${comp.key} {\n${cssLines}\n}` + (statesCss ? '\n\n'+statesCss : '');
 
-        tooltip.innerHTML = `
+        return `<div class="ip-body">
           <div class="it-component">${comp.name}</div>
           <div class="it-class">.${comp.key}</div>
           <hr class="it-divider">
@@ -2047,47 +2057,136 @@
           <div class="it-row"><span class="it-label">font-weight</span><span class="it-value">${cs.fontWeight}</span></div>
           ${typoTok ? `<div class="it-row"><span class="it-label">type token</span><span class="it-value it-token">${typoTok}</span></div>` : ''}
           <div class="it-row"><span class="it-label">padding</span><span class="it-value">${cs.padding}</span></div>
-          ${radius !== '0px' ? `<div class="it-row"><span class="it-label">border-radius</span><span class="it-value">${radius}${radTok ? ` <span class="it-token">(${radTok})</span>` : ''}</span></div>` : ''}
+          ${radius !== '0px' ? `<div class="it-row"><span class="it-label">border-radius</span><span class="it-value">${radius}${radTok ? ' <span class="it-token">('+radTok+')</span>' : ''}</span></div>` : ''}
           <div class="it-row"><span class="it-label">width</span><span class="it-value">${w}</span></div>
           <div class="it-row"><span class="it-label">height</span><span class="it-value">${h}</span></div>
           ${statesHtml}
-          <button class="it-copy-btn" onclick="ipCopy(this, ${sid})">Copy All CSS${stateRules.length ? ' + States' : ''}</button>
-        `;
-
-        // Position relative to the element's bounding box, not the cursor
-        tooltip.style.display = 'block';
-        const rect = el.getBoundingClientRect();
-        const tw = tooltip.offsetWidth;
-        const th = tooltip.offsetHeight;
-        let x = rect.right + 12;
-        let y = rect.top;
-        if (x + tw > window.innerWidth)  x = rect.left - tw - 12;
-        if (y + th > window.innerHeight) y = window.innerHeight - th - 8;
-        if (y < 8) y = 8;
-        tooltip.style.left = x + 'px';
-        tooltip.style.top  = y + 'px';
+          <button class="it-copy-btn" onclick="ipCopy(this,${sid})">Copy All CSS${stateRules.length ? ' + States' : ''}</button>
+        </div>`;
       }
 
-      function scheduleHide() {
-        hideTimer = setTimeout(function() {
-          tooltip.style.display = 'none';
-          if (lastHighlighted) { lastHighlighted.classList.remove('inspect-highlight-ring'); lastHighlighted = null; }
-        }, 120);
-      }
+      function renderImagePanel(imgEl) {
+        const src = imgEl.getAttribute('src') || '';
+        const filename = src.split('/').pop() || src;
+        const dw = Math.round(imgEl.offsetWidth);
+        const dh = Math.round(imgEl.offsetHeight);
+        const nw = imgEl.naturalWidth;
+        const nh = imgEl.naturalHeight;
+        const sid = ++snippetId; snippetStore[sid] = src;
+        const eid = ++snippetId; snippetStore[eid] = imgEl;
 
-      document.addEventListener('mouseover', function(e) {
-        const el = e.target;
-        if (el === tooltip || tooltip.contains(el) || el.id === 'inspect-badge') {
-          clearTimeout(hideTimer);
-          return;
+        function scaleBtn(scale) {
+          const ow = dw * scale, oh = dh * scale;
+          const blurry = ow > nw || oh > nh;
+          const st = blurry ? 'margin-top:0;color:#f59e0b;border-color:rgba(245,158,11,0.35)' : 'margin-top:0';
+          const tip = blurry
+            ? 'Source ' + nw + '\xd7' + nh + 'px — will upscale (blurry)'
+            : ow + '\xd7' + oh + 'px — lossless';
+          return `<button class="it-copy-btn" style="${st}" title="${tip}" onclick="ipExport(this,snippetStore[${eid}],${scale})">${scale}x &middot; ${ow}px</button>`;
         }
-        const comp = getComponentName(el);
-        if (!comp) { scheduleHide(); return; }
-        showTooltip(el, comp);
+
+        const lowRes = nw < dw * 2;
+        return `<div class="ip-body">
+          <div class="it-component">Image Asset</div>
+          <div class="it-class">&lt;img&gt;</div>
+          <hr class="it-divider">
+          <div class="it-row"><span class="it-label">file</span><span class="it-value" style="word-break:break-all;font-size:10px">${filename}</span></div>
+          <div class="it-row"><span class="it-label">display</span><span class="it-value">${dw}&times;${dh}px</span></div>
+          <div class="it-row"><span class="it-label">source</span><span class="it-value">${nw}&times;${nh}px${lowRes ? ' <span style="color:#f59e0b">&middot; low-res</span>' : ''}</span></div>
+          <hr class="it-divider">
+          <div class="it-section">Export</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px">
+            ${scaleBtn(1)}${scaleBtn(2)}${scaleBtn(3)}${scaleBtn(4)}
+          </div>
+          ${lowRes ? '<p style="font-size:9px;color:#f59e0b;line-height:1.5;margin-bottom:6px">⚠ Source is low-res. Re-export from Figma at 2x+ for crisp downloads.</p>' : ''}
+          <button class="it-copy-btn" onclick="ipCopy(this,${sid})">Copy src path</button>
+        </div>`;
+      }
+
+      function renderSvgPanel(svgEl) {
+        const w = Math.round(svgEl.offsetWidth) + 'px';
+        const h = Math.round(svgEl.offsetHeight) + 'px';
+        const sid = ++snippetId; snippetStore[sid] = svgEl.outerHTML;
+        return `<div class="ip-body">
+          <div class="it-component">SVG Icon</div>
+          <div class="it-class">&lt;svg&gt; — inline</div>
+          <hr class="it-divider">
+          <div class="it-row"><span class="it-label">width</span><span class="it-value">${w}</span></div>
+          <div class="it-row"><span class="it-label">height</span><span class="it-value">${h}</span></div>
+          <div class="it-row" style="margin-top:4px"><span class="it-label" style="color:#f59e0b">Note</span><span class="it-value" style="font-size:10px;color:#94a3b8">Inline SVG — no Expo icon name. Copy markup or redraw.</span></div>
+          <hr class="it-divider">
+          <button class="it-copy-btn" onclick="ipCopy(this,${sid})">Copy SVG markup</button>
+        </div>`;
+      }
+
+      function lockElement(target) {
+        if (lockedEl) lockedEl.classList.remove('inspect-highlight-ring');
+        if (hoveredEl) hoveredEl.classList.remove('inspect-hover-ring');
+        lockedEl = target.el;
+        lockedEl.classList.add('inspect-highlight-ring');
+
+        let html = '';
+        if (target.type === 'image')     html = renderImagePanel(target.el);
+        else if (target.type === 'svg')  html = renderSvgPanel(target.el);
+        else                             html = renderComponentPanel(target.el, target.comp);
+
+        panel.innerHTML = html;
+        closeBtn.style.display = 'block';
+        panel.prepend(closeBtn);
+      }
+
+      window.ipToggleInspect = function() {
+        const isOn = document.body.classList.toggle('inspect-mode');
+        if (!isOn) {
+          ipUnlock();
+          if (hoveredEl) { hoveredEl.classList.remove('inspect-hover-ring'); hoveredEl = null; }
+        }
+      };
+
+      window.ipUnlock = function() {
+        if (lockedEl) { lockedEl.classList.remove('inspect-highlight-ring'); lockedEl = null; }
+        panel.innerHTML = '<p class="ip-hint">Click any element on the page to inspect it.</p>';
+        closeBtn.style.display = 'none';
+        panel.prepend(closeBtn);
+      };
+
+      // Hover — dashed ring preview only
+      document.addEventListener('mouseover', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (panel.contains(el) || el.id === 'inspect-badge' || el.id === 'ip-close-btn') return;
+        if (hoveredEl && hoveredEl !== lockedEl) hoveredEl.classList.remove('inspect-hover-ring');
+        const target = getInspectTarget(el);
+        if (!target) { hoveredEl = null; return; }
+        if (target.el === lockedEl) { hoveredEl = null; return; }
+        target.el.classList.add('inspect-hover-ring');
+        hoveredEl = target.el;
       });
 
-      tooltip.addEventListener('mouseleave', scheduleHide);
-      document.addEventListener('mouseleave', scheduleHide);
+      document.addEventListener('mouseout', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (el !== lockedEl) el.classList.remove('inspect-hover-ring');
+      });
+
+      // Click — lock element and show panel
+      document.addEventListener('click', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (panel.contains(el) || el.id === 'inspect-badge') return;
+        // Let clicks inside overlays/sheets pass through normally
+        if (el.closest('#leadOverlay') || el.closest('#branchOverlay')) return;
+        const target = getInspectTarget(el);
+        if (!target) { ipUnlock(); return; }
+        e.preventDefault();
+        e.stopPropagation();
+        lockElement(target);
+      }, true);
+
+      document.addEventListener('keydown', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        if (e.key === 'Escape') ipUnlock();
+      });
     })();
 
     // ── INIT ──────────────────────────────────────────────────────────────────
