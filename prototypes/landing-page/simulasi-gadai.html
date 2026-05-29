@@ -932,9 +932,121 @@
       text-decoration: none;
       margin-top: 8px;
     }
+
+    /* ── INSPECT OVERLAY ── */
+    body.inspect-mode * { cursor: crosshair !important; }
+    #inspect-badge {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 99999;
+      background: #0255CA;
+      color: #fff;
+      font-family: 'Geist', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 8px rgba(2,84,202,0.35);
+      pointer-events: none;
+      display: none;
+    }
+    body.inspect-mode #inspect-badge { display: block; }
+    #inspect-tooltip {
+      position: fixed;
+      z-index: 99998;
+      pointer-events: auto;
+      display: none;
+      max-width: 280px;
+      background: #021431;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      font-family: 'Geist', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+    #inspect-tooltip .it-component {
+      font-size: 12px;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 4px;
+    }
+    #inspect-tooltip .it-class {
+      color: #94a3b8;
+      font-size: 10px;
+      margin-bottom: 6px;
+    }
+    #inspect-tooltip .it-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    #inspect-tooltip .it-label {
+      color: #64748b;
+      min-width: 68px;
+      font-size: 10px;
+    }
+    #inspect-tooltip .it-value { color: #f1f5f9; }
+    #inspect-tooltip .it-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.2);
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    #inspect-tooltip .it-token { color: #34d399; }
+    #inspect-tooltip .it-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 6px 0;
+    }
+    #inspect-tooltip .it-state-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 10px;
+      color: #f59e0b;
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+    #inspect-tooltip .it-state-props {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      padding-left: 4px;
+      line-height: 1.7;
+    }
+    #inspect-tooltip .it-copy-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 5px 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 5px;
+      color: #94a3b8;
+      font-family: 'Geist', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+    }
+    #inspect-tooltip .it-copy-btn:hover { background: rgba(255,255,255,0.13); color: #f1f5f9; }
+    #inspect-tooltip .it-copy-btn.copied { color: #34d399; border-color: #34d399; }
+    .inspect-highlight-ring {
+      outline: 2px solid #0255CA !important;
+      outline-offset: 2px !important;
+    }
   </style>
 </head>
 <body>
+  <div id="inspect-badge">&#128269; Inspect Mode</div>
+  <div id="inspect-tooltip"></div>
   <div id="app">
 
     <!-- HEADER -->
@@ -1610,6 +1722,373 @@
         sheet.style.transform = '';
       }, 300);
     }
+
+    // ── INSPECT OVERLAY ──────────────────────────────────────────────────────
+    (function initInspect() {
+      if (new URLSearchParams(location.search).get('inspect') !== 'true') return;
+
+      document.body.classList.add('inspect-mode');
+
+      const COMPONENT_MAP = {
+        'header':                'Header / NavBar',
+        'header-left':           'Header Left Group',
+        'back-btn':              'Back Button',
+        'header-title':          'Page Title',
+        'help-btn':              'Help Button',
+        'step-bar':              'Step Indicator',
+        'step-item':             'Step Item',
+        'step-circle':           'Step Circle',
+        'step-connector':        'Step Connector',
+        'step-label':            'Step Label',
+        'content':               'Scrollable Content',
+        'top-banner':            'Top Banner (Gadai Emas & BPKB)',
+        'banner-card':           'Banner Card',
+        'banner-card-emas':      'Banner Card — Emas variant',
+        'banner-card-bpkb':      'Banner Card — BPKB variant',
+        'banner-card-label':     'Banner Card Label',
+        'banner-card-sub':       'Banner Card Subtitle',
+        'search-title':          'Search Section Title',
+        'search-box':            'Search Input',
+        'product-grid':          'Product Grid',
+        'product-card':          'Product Card',
+        'product-img':           'Product Image',
+        'product-name':          'Product Name Label',
+        'missing-footer':        'Missing Item Banner',
+        'chat-wa-btn':           'Chat WA Button',
+        'not-found':             'Empty State',
+        'product-detail-card':   'Product Detail Card',
+        'product-detail-top':    'Product Detail — Top Section',
+        'product-detail-bottom': 'Product Detail — Loan Range',
+        'loan-label':            'Loan Amount Label',
+        'loan-range':            'Loan Amount Value',
+        'shiny-bar':             'Shimmer Effect',
+        'product-info-note':     'Info Note',
+        'separator':             'Section Separator',
+        'no-bi-box':             'No BI Checking Info Box',
+        'promo-section':         'Promo Section',
+        'promo-title':           'Promo Section Title',
+        'promo-item':            'Promo Card',
+        'promo-radio':           'Promo Radio Button',
+        'promo-label':           'Promo Label',
+        'booking-section':       'Booking Form Section',
+        'booking-section-title': 'Form Section Title',
+        'time-group':            'Arrival Time Selector',
+        'time-option':           'Time Option',
+        'time-label':            'Time Label',
+        'radio-dot':             'Radio Dot',
+        'branch-select-btn':     'Branch Selector Button',
+        'branch-box':            'Selected Branch Card',
+        'branch-info':           'Branch Info',
+        'branch-name':           'Branch Name',
+        'branch-addr':           'Branch Address',
+        'branch-change-btn':     'Change Branch Button',
+        'form-group':            'Form Field Group',
+        'form-label':            'Form Label',
+        'form-input':            'Text Input',
+        'error-text':            'Error Message',
+        'footer-bar':            'Footer CTA Bar',
+        'btn-lanjut':            'Primary CTA Button',
+        'btn-cek-lain':          'Secondary Button',
+        'branch-sheet':          'Branch Bottom Sheet',
+        'branch-list-item':      'Branch List Item',
+        'lead-sheet':            'Lead Capture Bottom Sheet',
+        'lead-cta':              'Lead Submit Button',
+        'step-success':          'Success State',
+      };
+
+      // Cortes semantic tokens — hex → token name
+      // Exact matches first, then prototype approximations marked with ~
+      const TOKEN_MAP = {
+        // background
+        '#023dff': 'background/primary',
+        '#001cdb': 'background/primary-darker',
+        '#ffcd05': 'background/secondary',
+        '#ffffff': 'background/neutral',
+        '#f8fafc': 'background/subtle',
+        '#e1e7ef': 'background/disabled',
+        '#0f1729': 'background/dark',
+        '#344256': 'background/dark-secondary',
+        '#16a34a': 'background/success',
+        '#f0fdf4': 'background/success-subtle',
+        '#e0a200': 'background/warning',
+        '#fefdea': 'background/warning-subtle',
+        '#dc2626': 'background/error',
+        '#fef2f2': 'background/error-subtle',
+        '#e5f2ff': 'background/info-subtle',
+        // text
+        '#15803d': 'text/success',
+        '#b27202': 'text/warning',
+        '#b91c1c': 'text/error',
+        // border
+        '#cbd5e1': 'border/default',
+        '#94a3b8': 'border/hover',
+        // decoration
+        '#fff88f': 'decoration/warm-light',
+        '#94590a': 'decoration/warm-dark',
+        '#e9d5ff': 'decoration/cool-light',
+        '#a855f7': 'decoration/cool',
+        '#6b21a8': 'decoration/cool-dark',
+        // prototype values → nearest Cortes semantic token
+        '#021431': 'text/default ~',       // ≈ slate/900 #0F1729
+        '#001533': 'text/default ~',
+        '#5f6c85': 'text/subtle ~',        // ≈ slate/500 #65758B
+        '#65758b': 'text/subtle',
+        '#94a0b8': 'text/disabled ~',      // ≈ slate/400 #94A3B8
+        '#0255ca': 'background/primary ~', // ≈ blue/500 #023DFF
+        '#28832d': 'background/success ~', // ≈ green/600 #16A34A
+        '#e85c3d': 'background/error ~',
+        '#e1e6ef': 'border/subtle ~',      // ≈ slate/200 #E1E7EF
+        '#ebf5ff': 'background/info-subtle ~', // ≈ blue/50 #E5F2FF
+        '#fffdc6': 'yellow/100',
+        '#e6ecff': 'blue/100 ~',
+        '#d3f1d4': 'background/success-subtle ~',
+        '#f1f3f9': 'background/subtle ~',
+        '#f8f9fc': 'background/subtle ~',
+        '#f3f4f6': 'background/subtle ~',
+        '#492504': 'yellow/950',
+        '#2e1065': 'purple/950 ~',
+        '#6d28d9': 'purple/700 ~',
+        '#f5f3ff': 'purple/50 ~',
+        '#8b5cf6': 'purple/500 ~',
+      };
+
+      const RADIUS_MAP = {
+        '0px':    'rounded-none',
+        '4px':    'rounded-sm',
+        '6px':    'rounded',
+        '8px':    'rounded-lg',
+        '10px':   'rounded-xl',
+        '12px':   'rounded-2xl',
+        '16px':   'rounded-3xl',
+        '9999px': 'rounded-full',
+        '50%':    'rounded-full',
+      };
+
+      function radiusToken(val) {
+        if (!val || val === '0px') return null;
+        // grab first value (border-radius can be shorthand)
+        const first = val.split(' ')[0];
+        return RADIUS_MAP[first] || null;
+      }
+
+      function typographyToken(sizePx, weight) {
+        const s = Math.round(parseFloat(sizePx));
+        const w = parseInt(weight);
+        if (s === 48 && w >= 700) return 'font-styles/heading-1';
+        if (s === 36 && w >= 700) return 'font-styles/heading-2';
+        if (s === 28 && w >= 700) return 'font-styles/heading-3';
+        if (s === 20 && w >= 700) return 'font-styles/title-1';
+        if (s === 18 && w >= 600) return 'font-styles/title-2';
+        if (s === 16 && w >= 600) return 'font-styles/subtitle-1';
+        if (s === 14 && w >= 600) return 'font-styles/subtitle-2';
+        if (s === 16)             return 'font-styles/body-1';
+        if (s === 14)             return 'font-styles/body-2';
+        if (s === 12 && w >= 700) return 'font-styles/label-1';
+        if (s === 10 && w >= 700) return 'font-styles/label-2';
+        if (s === 12)             return 'font-styles/caption-1';
+        if (s === 10)             return 'font-styles/caption-2';
+        return null;
+      }
+
+      function rgbToHex(rgb) {
+        const m = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!m) return null;
+        return '#' + [m[1],m[2],m[3]].map(n => (+n).toString(16).padStart(2,'0')).join('');
+      }
+
+      function tokenLabel(hex) {
+        if (!hex) return null;
+        return TOKEN_MAP[hex.toLowerCase()] || null;
+      }
+
+      function colorRow(label, hex) {
+        if (!hex || hex === '#000000') return '';
+        const tok = tokenLabel(hex);
+        return `<div class="it-row">
+          <span class="it-label">${label}</span>
+          <span class="it-value">
+            <span class="it-swatch" style="background:${hex}"></span>${hex}${tok ? ` <span class="it-token">(${tok})</span>` : ''}
+          </span>
+        </div>`;
+      }
+
+      function getStateRules(className) {
+        const states = [];
+        for (const sheet of document.styleSheets) {
+          try {
+            for (const rule of sheet.cssRules || []) {
+              if (!rule.selectorText || !rule.style.cssText) continue;
+              const sel = rule.selectorText;
+              if (sel.includes('.' + className) && sel.trim() !== '.' + className) {
+                const statePart = sel.replace(new RegExp('\\.?' + className), '').trim();
+                if (statePart) states.push({ state: statePart, props: rule.style.cssText });
+              }
+            }
+          } catch(e) {}
+        }
+        return states;
+      }
+
+      function getComponentName(el) {
+        const classes = Array.from(el.classList);
+        for (const cls of classes) {
+          if (COMPONENT_MAP[cls]) return { name: COMPONENT_MAP[cls], key: cls };
+        }
+        return null;
+      }
+
+      const tooltip = document.getElementById('inspect-tooltip');
+      let lastHighlighted = null;
+      let hideTimer = null;
+      const snippetStore = {};
+      let snippetId = 0;
+
+      window.ipCopy = function(btn, id) {
+        const text = snippetStore[id];
+        if (!text) return;
+        const doFeedback = function() {
+          btn.textContent = '✓ Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() { btn.textContent = 'Copy CSS'; btn.classList.remove('copied'); }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(doFeedback).catch(function() {
+            fallbackCopy(text); doFeedback();
+          });
+        } else {
+          fallbackCopy(text); doFeedback();
+        }
+      };
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+
+      function showTooltip(el, comp) {
+        clearTimeout(hideTimer);
+
+        if (lastHighlighted && lastHighlighted !== el) {
+          lastHighlighted.classList.remove('inspect-highlight-ring');
+        }
+        el.classList.add('inspect-highlight-ring');
+        lastHighlighted = el;
+
+        const cs = getComputedStyle(el);
+        const colorHex  = rgbToHex(cs.color);
+        const bgHex     = rgbToHex(cs.backgroundColor);
+        const borderHex = rgbToHex(cs.borderTopColor);
+        const radius    = cs.borderRadius;
+        const radTok    = radiusToken(radius);
+        const typoTok   = typographyToken(cs.fontSize, cs.fontWeight);
+        const w = Math.round(el.offsetWidth) + 'px';
+        const h = Math.round(el.offsetHeight) + 'px';
+
+        const stateRules = getStateRules(comp.key);
+
+        function annotateProps(propsStr) {
+          return propsStr.split(';').map(function(p) {
+            p = p.trim();
+            if (!p) return '';
+            const hex = (p.match(/#([0-9a-fA-F]{6})/) || [])[0];
+            const tok = hex ? tokenLabel(hex) : null;
+            return p + (tok ? ' /* ' + tok + ' */' : '');
+          }).filter(Boolean).join('; ');
+        }
+
+        const statesHtml = stateRules.length ? `
+          <hr class="it-divider">
+          <div class="it-label" style="color:#f59e0b;font-weight:700;font-size:10px;margin-bottom:6px">STATES</div>
+          ${stateRules.map(function(s, i) {
+            const stateSid = ++snippetId;
+            snippetStore[stateSid] = `.${comp.key}${s.state} {\n  ${annotateProps(s.props).split('; ').join(';\n  ')}\n}`;
+            return `
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+                <span class="it-state-tag">${s.state}</span>
+                <button class="it-copy-btn" style="margin-top:0;width:auto;padding:2px 8px;font-size:9px" onclick="ipCopy(this,${stateSid})">Copy</button>
+              </div>
+              <div class="it-state-props">${annotateProps(s.props)}</div>`;
+          }).join('')}
+        ` : '';
+
+        const cssLines = [
+          colorHex ? `  color: ${colorHex};${tokenLabel(colorHex) ? ' /* ' + tokenLabel(colorHex) + ' */' : ''}` : '',
+          bgHex    ? `  background: ${bgHex};${tokenLabel(bgHex) ? ' /* ' + tokenLabel(bgHex) + ' */' : ''}` : '',
+          borderHex && borderHex !== colorHex ? `  border-color: ${borderHex};${tokenLabel(borderHex) ? ' /* ' + tokenLabel(borderHex) + ' */' : ''}` : '',
+          `  font-size: ${cs.fontSize};`,
+          `  font-weight: ${cs.fontWeight};`,
+          `  padding: ${cs.padding};`,
+          radius !== '0px' ? `  border-radius: ${radius};` : '',
+          `  width: ${w};`,
+          `  height: ${h};`,
+        ].filter(Boolean).join('\n');
+
+        const statesCssLines = stateRules.map(function(s) {
+          return `.${comp.key}${s.state} {\n  ${annotateProps(s.props).split('; ').join(';\n  ')}\n}`;
+        }).join('\n\n');
+
+        const sid = ++snippetId;
+        snippetStore[sid] = `.${comp.key} {\n${cssLines}\n}` + (statesCssLines ? '\n\n' + statesCssLines : '');
+
+        tooltip.innerHTML = `
+          <div class="it-component">${comp.name}</div>
+          <div class="it-class">.${comp.key}</div>
+          <hr class="it-divider">
+          ${colorRow('color', colorHex)}
+          ${bgHex ? colorRow('background', bgHex) : ''}
+          ${borderHex && borderHex !== colorHex ? colorRow('border', borderHex) : ''}
+          <hr class="it-divider">
+          <div class="it-row"><span class="it-label">font-size</span><span class="it-value">${cs.fontSize}</span></div>
+          <div class="it-row"><span class="it-label">font-weight</span><span class="it-value">${cs.fontWeight}</span></div>
+          ${typoTok ? `<div class="it-row"><span class="it-label">type token</span><span class="it-value it-token">${typoTok}</span></div>` : ''}
+          <div class="it-row"><span class="it-label">padding</span><span class="it-value">${cs.padding}</span></div>
+          ${radius !== '0px' ? `<div class="it-row"><span class="it-label">border-radius</span><span class="it-value">${radius}${radTok ? ` <span class="it-token">(${radTok})</span>` : ''}</span></div>` : ''}
+          <div class="it-row"><span class="it-label">width</span><span class="it-value">${w}</span></div>
+          <div class="it-row"><span class="it-label">height</span><span class="it-value">${h}</span></div>
+          ${statesHtml}
+          <button class="it-copy-btn" onclick="ipCopy(this, ${sid})">Copy All CSS${stateRules.length ? ' + States' : ''}</button>
+        `;
+
+        // Position relative to the element's bounding box, not the cursor
+        tooltip.style.display = 'block';
+        const rect = el.getBoundingClientRect();
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+        let x = rect.right + 12;
+        let y = rect.top;
+        if (x + tw > window.innerWidth)  x = rect.left - tw - 12;
+        if (y + th > window.innerHeight) y = window.innerHeight - th - 8;
+        if (y < 8) y = 8;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top  = y + 'px';
+      }
+
+      function scheduleHide() {
+        hideTimer = setTimeout(function() {
+          tooltip.style.display = 'none';
+          if (lastHighlighted) { lastHighlighted.classList.remove('inspect-highlight-ring'); lastHighlighted = null; }
+        }, 120);
+      }
+
+      document.addEventListener('mouseover', function(e) {
+        const el = e.target;
+        if (el === tooltip || tooltip.contains(el) || el.id === 'inspect-badge') {
+          clearTimeout(hideTimer);
+          return;
+        }
+        const comp = getComponentName(el);
+        if (!comp) { scheduleHide(); return; }
+        showTooltip(el, comp);
+      });
+
+      tooltip.addEventListener('mouseleave', scheduleHide);
+      document.addEventListener('mouseleave', scheduleHide);
+    })();
 
     // ── INIT ──────────────────────────────────────────────────────────────────
     setStep(1);
