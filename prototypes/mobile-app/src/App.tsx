@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Homepage from './Homepage'
 import HomepageUnverified from './HomepageUnverified'
@@ -28,23 +28,23 @@ import SaldoPandai from './SaldoPandai'
 import RiwayatPoinPandai from './RiwayatPoinPandai'
 import PrototypeIndex from './PrototypeIndex'
 import DSTest from './DSTest'
+import { InspectProvider } from './InspectContext'
+import { InspectPanel } from './InspectPanel'
+import { InspectOverlay } from './InspectOverlay'
+import SimulasiGadai from './SimulasiGadai'
+import SimulasiEstimasi from './SimulasiEstimasi'
+import SimulasiPromo from './SimulasiPromo'
+import SimulasiSukses from './SimulasiSukses'
 
-function GuestBanner() {
-  const { pathname } = useLocation()
-  if (!pathname.startsWith('/guest')) return null
-  return (
-    <div className="bg-[#0f1729]/85 backdrop-blur-sm text-white text-[13px] font-medium px-5 py-3 rounded-2xl shadow-xl max-w-sm text-center leading-5">
-      Kamu sedang melihat prototipe Pandai Gadai. Setelah selesai eksplorasi, tutup tab ini untuk kembali ke sesi sebelumnya.
-    </div>
-  )
-}
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-300 flex items-start justify-center pt-4 pb-8">
+      <InspectProvider>
+      <div className="flex items-start gap-6">
+      <div className="relative">
       <BrowserRouter>
         <div className="flex flex-col items-center gap-4">
-        <GuestBanner />
         <Routes>
           <Route path="/" element={<PrototypeIndex />} />
           <Route path="/home" element={<Homepage />} />
@@ -76,9 +76,18 @@ function App() {
           <Route path="/saldo-pandai" element={<SaldoPandai />} />
           <Route path="/riwayat-poin-pandai" element={<RiwayatPoinPandai />} />
           <Route path="/ds-test" element={<DSTest />} />
+          <Route path="/simulasi" element={<SimulasiGadai />} />
+          <Route path="/simulasi/estimasi" element={<SimulasiEstimasi />} />
+          <Route path="/simulasi/promo" element={<SimulasiPromo />} />
+          <Route path="/simulasi/sukses" element={<SimulasiSukses />} />
         </Routes>
         </div>
       </BrowserRouter>
+      <InspectOverlay />
+      </div>
+      <InspectPanel />
+      </div>
+      </InspectProvider>
     </div>
   )
 }
