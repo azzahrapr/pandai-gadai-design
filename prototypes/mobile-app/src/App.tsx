@@ -35,6 +35,7 @@ import SimulasiGadai from './SimulasiGadai'
 import SimulasiEstimasi from './SimulasiEstimasi'
 import SimulasiPromo from './SimulasiPromo'
 import SimulasiSukses from './SimulasiSukses'
+import SimulasiPromoSukses from './SimulasiPromoSukses'
 
 
 function App() {
@@ -80,6 +81,7 @@ function App() {
           <Route path="/simulasi/estimasi" element={<SimulasiEstimasi />} />
           <Route path="/simulasi/promo" element={<SimulasiPromo />} />
           <Route path="/simulasi/sukses" element={<SimulasiSukses />} />
+          <Route path="/simulasi/promo-sukses" element={<SimulasiPromoSukses />} />
         </Routes>
         </div>
       </BrowserRouter>

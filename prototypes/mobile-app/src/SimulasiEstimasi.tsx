@@ -36,40 +36,53 @@ const SYARAT_DEFAULT = [
 const SYARAT_BPKB = [
   'Tahun 2015—sekarang',
   'Plat B, F, atau T',
-  'Bukan merk Suzuki',
+  'Ber-domisili di Jabodetabek & Karawang',
   'Pajak hidup (atau mati maks. 6 bulan)',
 ]
 
 export default function SimulasiEstimasi() {
   const navigate = useNavigate()
   const location = useLocation()
-  const state = location.state as { item?: string; category?: string; bpkbPlat?: string; bpkbPajak?: string } | null
+  const state = location.state as { item?: string; category?: string; bpkbPlat?: string; bpkbPajak?: string; bpkbKota?: string; name?: string } | null
   const item = state?.item ?? ''
   const category = state?.category ?? 'Handphone'
   const bpkbPlat = state?.bpkbPlat ?? ''
   const bpkbPajak = state?.bpkbPajak ?? ''
+  const bpkbKota = state?.bpkbKota ?? ''
+  const name = state?.name ?? ''
   const isBPKB = category === 'BPKB Motor' || category === 'BPKB Mobil'
 
   // Per-criterion BPKB Instan eligibility
   const yearMatch = item.match(/\b(20\d{2})\b/)
   const vehicleYear = yearMatch ? parseInt(yearMatch[1]) : 0
-  const eligYear  = vehicleYear >= 2015
-  const eligPlat  = ['Plat B', 'Plat F', 'Plat T'].includes(bpkbPlat)
-  const eligBrand = !item.toLowerCase().includes('suzuki')
-  const eligPajak = bpkbPajak === 'Pajak Hidup' || bpkbPajak === 'Pajak Mati Maks. 6 Bulan'
-  const isEligible = !isBPKB || (eligYear && eligPlat && eligBrand && eligPajak)
+  const eligYear     = vehicleYear >= 2015
+  const eligPlat     = ['Plat B', 'Plat F', 'Plat T'].includes(bpkbPlat)
+  const eligDomisili = bpkbKota !== '' && bpkbKota !== 'Lainnya'
+  const eligPajak    = bpkbPajak === 'Pajak Hidup' || bpkbPajak === 'Pajak Mati Maks. 6 Bulan'
+  const isEligible = !isBPKB || (eligYear && eligPlat && eligDomisili && eligPajak)
 
   const SYARAT_BPKB_CHECKS = [
     { text: 'Tahun 2015—sekarang', ok: eligYear },
     { text: 'Plat B, F, atau T', ok: eligPlat },
-    { text: 'Bukan merk Suzuki', ok: eligBrand },
+    { text: 'Ber-domisili di Jabodetabek & Karawang', ok: eligDomisili },
     { text: 'Pajak hidup (atau mati maks. 6 bulan)', ok: eligPajak },
   ]
 
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const [showPromoSheet, setShowPromoSheet] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const [selectedPromo, setSelectedPromo] = useState(0)
+  const [promoApplied, setPromoApplied] = useState(false)
+  const [promoLoading, setPromoLoading] = useState(false)
+
+  const handlePakaiPromo = () => {
+    setShowPromoSheet(false)
+    setPromoLoading(true)
+    setTimeout(() => {
+      setPromoLoading(false)
+      setPromoApplied(true)
+    }, 1200)
+  }
 
   const PROMOS = [
     { title: 'Extra Pinjaman 100rb', bullets: ['Minimum pinjaman Rp2.000.000', 'Hanya berlaku untuk gadai pertama'] },
@@ -302,7 +315,7 @@ export default function SimulasiEstimasi() {
                   <div className="flex flex-col items-start shrink-0 w-full">
                     <p className="font-normal leading-[16px] text-[#65758b] text-[12px] text-center w-full">Nilai pinjaman maks.</p>
                     <div className="flex gap-[2px] items-center justify-center shrink-0 w-full">
-                      <p className="font-bold leading-[32px] text-[#001cdb] text-[20px] text-center whitespace-nowrap">Rp8.900.000</p>
+                      <p className="font-bold leading-[32px] text-[#001cdb] text-[20px] text-center whitespace-nowrap">{promoApplied ? 'Rp8.900.000' : 'Rp8.800.000'}</p>
                       <button onClick={() => setExpanded(e => !e)} className="shrink-0 size-[18px] flex items-center justify-center">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="transition-transform duration-200" style={{ transform: expanded ? 'rotate(0deg)' : 'rotate(180deg)' }}>
                           <path d="M18 15l-6-6-6 6" stroke="#001cdb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -318,36 +331,67 @@ export default function SimulasiEstimasi() {
                       <p className="relative shrink-0 text-[#65758b]">Nilai Barang</p>
                       <p className="relative shrink-0 text-[#0f1729]">Rp8.800.000</p>
                     </div>
-                    <Separator />
-                    <div className="flex font-normal items-start justify-between leading-[20px] px-[8px] py-[4px] shrink-0 text-[14px] w-full whitespace-nowrap">
-                      <p className="relative shrink-0 text-[#65758b]">Promo</p>
-                      <p className="relative shrink-0 text-[#15803d]">+Rp100.000</p>
-                    </div>
+                    {promoApplied && (
+                      <>
+                        <Separator />
+                        <div className="flex font-normal items-start justify-between leading-[20px] px-[8px] py-[4px] shrink-0 text-[14px] w-full whitespace-nowrap">
+                          <p className="relative shrink-0 text-[#65758b]">Promo</p>
+                          <p className="relative shrink-0 text-[#15803d]">+Rp100.000</p>
+                        </div>
+                      </>
+                    )}
                     <Separator />
                     <div className="flex font-semibold items-center justify-between leading-[22px] px-[8px] py-[4px] rounded-[4px] shrink-0 text-[#0f1729] text-[14px] w-full whitespace-nowrap">
                       <p className="relative shrink-0">Nilai Pinjaman</p>
-                      <p className="relative shrink-0">Rp8.900.000</p>
+                      <p className="relative shrink-0">{promoApplied ? 'Rp8.900.000' : 'Rp8.800.000'}</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Promo banner */}
-              <button
-                onClick={() => setShowPromoSheet(true)}
-                className="bg-[#f8fafc] border border-[#e1e7ef] flex items-center justify-between px-[12px] py-[8px] rounded-[8px] shrink-0 w-full"
-              >
-                <div className="flex flex-col items-start gap-[2px]">
-                  <div className="flex gap-[4px] items-center">
-                    <img src="/assets/discount.png" alt="" className="shrink-0 size-[14px] object-contain" />
-                    <p className="font-semibold leading-[22px] text-[#023dff] text-[14px] whitespace-nowrap">Extra Pinjaman 100rb</p>
+              {promoApplied ? (
+                <button
+                  onClick={() => setShowPromoSheet(true)}
+                  className="bg-gradient-to-b from-[#9333ea] to-[#6b21a8] border border-[#e1e7ef] flex items-center justify-between px-[12px] py-[8px] rounded-[8px] shrink-0 w-full"
+                >
+                  <div className="flex flex-col items-start gap-[2px]">
+                    <div className="flex gap-[4px] items-center">
+                      <img src="/assets/discount.png" alt="" className="shrink-0 size-[14px] object-contain brightness-0 invert" />
+                      <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">{PROMOS[selectedPromo].title}</p>
+                    </div>
+                    <p className="font-normal leading-[18px] text-[12px] text-white">Khusus gadai pertama, min. pinjaman Rp2jt</p>
                   </div>
-                  <p className="font-normal leading-[18px] text-[12px] text-[#65758b]">Khusus gadai pertama, min. pinjaman Rp2jt</p>
+                  <img src="/assets/promo-applied.png" alt="" className="shrink-0 h-[34px] object-contain" />
+                </button>
+              ) : (
+                <div className="bg-[#f8fafc] border border-[#e1e7ef] flex items-center gap-[8px] px-[12px] py-[8px] rounded-[8px] shrink-0 w-full">
+                  <button onClick={() => setShowPromoSheet(true)} className="flex flex-col items-start gap-[2px] flex-1 min-w-px text-left">
+                    <div className="flex gap-[4px] items-center">
+                      <img src="/assets/discount.png" alt="" className="shrink-0 size-[14px] object-contain" />
+                      <p className="font-semibold leading-[22px] text-[#001cdb] text-[14px] whitespace-nowrap">{PROMOS[selectedPromo].title}</p>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                        <path d="M9 18l6-6-6-6" stroke="#023dff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <p className="font-normal leading-[18px] text-[12px] text-[#0f1729]">Khusus gadai pertama, min. pinjaman Rp2jt</p>
+                  </button>
+                  <button
+                    onClick={handlePakaiPromo}
+                    disabled={promoLoading}
+                    className="bg-[#023dff] flex items-center justify-center h-[30px] px-[8px] rounded-[8px] shrink-0"
+                  >
+                    {promoLoading ? (
+                      <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" strokeOpacity="0.3"/>
+                        <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    ) : (
+                      <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Pakai</p>
+                    )}
+                  </button>
                 </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                  <path d="M9 18l6-6-6-6" stroke="#65758b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              )}
             </div>
 
             {/* Syarat Barang */}
@@ -408,7 +452,7 @@ export default function SimulasiEstimasi() {
           ) : (
             <>
               <button
-                onClick={() => window.open('https://wa.me/6281234567890', '_blank')}
+                onClick={() => navigate('/simulasi/promo-sukses', { state: { item, category, name, promoApplied } })}
                 className="bg-[#023dff] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
               >
                 <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Saya Tertarik</p>
@@ -518,6 +562,14 @@ export default function SimulasiEstimasi() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div className="px-[16px] pb-[8px] w-full">
+                <button
+                  onClick={handlePakaiPromo}
+                  className="bg-[#023dff] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
+                >
+                  <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Pakai Promo</p>
+                </button>
               </div>
             </div>
           </div>

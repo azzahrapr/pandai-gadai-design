@@ -144,8 +144,6 @@ const ITEMS: Record<string, string[]> = {
     'Yamaha Mio M3 2021',
     'Kawasaki Ninja ZX-6R 2022',
     'Vespa Sprint 150 2022',
-    'Suzuki NEX II 2022',
-    'Suzuki Satria F150 2021',
   ],
   'BPKB Mobil': [
     'Toyota Avanza 1.5 G 2022',
@@ -155,7 +153,6 @@ const ITEMS: Record<string, string[]> = {
     'Honda HR-V SE 2022',
     'Honda CR-V Turbo 2022',
     'Daihatsu Xenia 1.3 R 2022',
-    'Suzuki Ertiga GX 2023',
     'Mitsubishi Xpander Cross 2022',
     'Hyundai Creta Prime 2023',
   ],
@@ -501,7 +498,7 @@ export default function SimulasiGadai() {
             onClick={() => {
               setSubmitted(true)
               const bpkbFieldsValid = !isBPKB || (bpkbPlat && bpkbPajak && kota)
-              if (searchValue && name.trim() && phone.trim() && bpkbFieldsValid) navigate('/simulasi/estimasi', { state: { item: searchValue, category: selectedCategory, bpkbPlat, bpkbPajak } })
+              if (searchValue && name.trim() && phone.trim() && bpkbFieldsValid) navigate('/simulasi/estimasi', { state: { item: searchValue, category: selectedCategory, bpkbPlat, bpkbPajak, bpkbKota: kota, name } })
             }}
             className="bg-[#023dff] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
           >
