@@ -4,6 +4,28 @@ Custom slash commands for this project. Open any file in this folder to see how 
 
 ---
 
+## Installing a skill
+
+### Via GitHub (if you have repo access)
+
+Once the repo is cloned, skills in `.claude/commands/` are automatically available in Claude Code. No extra steps needed — just pull and open the project.
+
+### Manually (no GitHub needed)
+
+1. Download the skill file (e.g. `add-inspect.md`) — via Slack, email, Google Drive, etc.
+2. Move it to your Claude Code commands folder:
+   - **Project-only** — drop it in your project's `.claude/commands/` folder. Skill works only in that project.
+   - **Global (recommended)** — drop it in `~/.claude/commands/`. Skill works in every project you open.
+
+```bash
+# example: install globally on Mac/Linux
+mv add-inspect.md ~/.claude/commands/add-inspect.md
+```
+
+3. Open Claude Code in any project — type `/add-inspect` and it's ready.
+
+---
+
 ## `/add-inspect`
 
 Adds a live inspect overlay to any prototype — click any element to see its design tokens, computed CSS, size, and export options.
