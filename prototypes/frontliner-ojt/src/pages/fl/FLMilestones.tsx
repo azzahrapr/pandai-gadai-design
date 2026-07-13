@@ -83,7 +83,7 @@ function MilestoneCard({ milestone: m, isActive, isLocked, isCompleted }: {
       <div className="flex flex-wrap gap-2">
         <InfoChip label={`${m.materials.length} materi`} />
         <InfoChip label={`${m.estimatedMinutes} menit`} />
-        {m.quiz && <InfoChip label="🔒 Mini Quiz" highlight />}
+        {m.quiz && <InfoChip label={isCompleted ? '🔓 Mini Quiz' : '🔒 Mini Quiz'} highlight />}
       </div>
       {!isLocked ? (
         <Link

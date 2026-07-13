@@ -15,7 +15,9 @@ export default function FLMilestoneDetail() {
     ? profile.quizScores![milestone.id]
     : null
 
-  const [expandedMaterial, setExpandedMaterial] = useState<string | null>(null)
+  const [expandedMaterial, setExpandedMaterial] = useState<string | null>(
+    () => isCompleted ? null : (milestone?.materials[0]?.id ?? null)
+  )
   const [completedMaterials, setCompletedMaterials] = useState<Set<string>>(() =>
     isCompleted ? new Set(milestone?.materials.map(m => m.id) ?? []) : new Set()
   )
@@ -178,7 +180,7 @@ export default function FLMilestoneDetail() {
                 ) : allMaterialsDone ? (
                   <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#FFF7ED] flex items-center justify-center text-base flex-shrink-0">📝</div>
+                      <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] flex items-center justify-center text-base flex-shrink-0">🔓</div>
                       <div>
                         <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
                         <p className="text-xs text-[#65758B] mt-0.5">Semua materi sudah dibaca. Kamu siap mengerjakan quiz!</p>
