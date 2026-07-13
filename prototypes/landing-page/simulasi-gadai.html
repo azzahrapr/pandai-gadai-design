@@ -933,105 +933,9 @@
       margin-top: 8px;
     }
 
-    /* ── INSPECT OVERLAY ── */
-    body.inspect-mode [data-inspectable] { cursor: crosshair !important; }
-    #inspect-badge {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 99999;
-      color: #fff;
-      font-family: 'Geist', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      border: none;
-      background: #475569;
-      transition: background 0.15s;
-    }
-    #inspect-badge:hover { background: #344256; }
-    body.inspect-mode #inspect-badge { background: #0255CA; box-shadow: 0 2px 8px rgba(2,84,202,0.4); }
-    body.inspect-mode #inspect-badge:hover { background: #001cdb; }
-
-    #inspect-panel {
-      position: fixed;
-      top: 44px;
-      right: 12px;
-      z-index: 99998;
-      width: 280px;
-      max-height: calc(100vh - 56px);
-      overflow-y: auto;
-      background: #021431;
-      border-radius: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-      font-family: 'Geist', monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      color: #e2e8f0;
-      display: none;
-    }
-    body.inspect-mode #inspect-panel { display: block; }
-    #inspect-panel .ip-hint {
-      padding: 16px 14px;
-      color: #475569;
-      font-size: 11px;
-      text-align: center;
-      line-height: 1.6;
-    }
-    #inspect-panel .ip-close {
-      position: absolute;
-      top: 8px; right: 10px;
-      background: none; border: none;
-      color: #475569; font-size: 16px;
-      cursor: pointer; line-height: 1;
-      display: none;
-    }
-    #inspect-panel .ip-close:hover { color: #e2e8f0; }
-    #inspect-panel .ip-body { padding: 10px 12px 12px; }
-    .it-component { font-size: 12px; font-weight: 700; color: #60a5fa; margin-bottom: 4px; }
-    .it-class { color: #94a3b8; font-size: 10px; margin-bottom: 6px; }
-    .it-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
-    .it-label { color: #64748b; min-width: 72px; font-size: 10px; flex-shrink: 0; }
-    .it-value { color: #f1f5f9; font-size: 11px; }
-    .it-swatch {
-      display: inline-block; width: 10px; height: 10px;
-      border-radius: 2px; border: 1px solid rgba(255,255,255,0.2);
-      vertical-align: middle; margin-right: 4px;
-    }
-    .it-token { color: #34d399; font-size: 10px; }
-    .it-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
-    .it-section { color: #f59e0b; font-weight: 700; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .it-state-tag {
-      display: inline-block; background: rgba(255,255,255,0.08);
-      border-radius: 3px; padding: 1px 5px; font-size: 10px;
-      color: #f59e0b; margin-bottom: 3px; font-weight: 600;
-    }
-    .it-state-props { font-size: 10px; color: #94a3b8; margin-bottom: 8px; padding-left: 4px; line-height: 1.7; }
-    .it-copy-btn {
-      margin-top: 6px; width: 100%; padding: 5px 0;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 5px; color: #94a3b8; font-family: 'Geist', monospace;
-      font-size: 10px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
-    }
-    .it-copy-btn:hover { background: rgba(255,255,255,0.13); color: #f1f5f9; }
-    .it-copy-btn.copied { color: #34d399; border-color: #34d399; }
-    .inspect-highlight-ring { outline: 2px solid #0255CA !important; outline-offset: 2px !important; }
-    .inspect-hover-ring { outline: 2px dashed rgba(2,85,202,0.5) !important; outline-offset: 2px !important; }
   </style>
 </head>
 <body>
-  <div id="inspect-badge" onclick="ipToggleInspect()">&#128269; Inspect</div>
-  <div id="inspect-panel">
-    <p class="ip-hint">Click any element on the page to inspect it.</p>
-    <button class="ip-close" id="ip-close-btn" onclick="ipUnlock()">&#215;</button>
-  </div>
   <div id="app">
 
     <!-- HEADER -->
@@ -1710,6 +1614,7 @@
 
     // ── INSPECT OVERLAY ──────────────────────────────────────────────────────
     (function initInspect() {
+      return; // inspect removed — use the React prototype's inspect instead
       if (new URLSearchParams(location.search).get('inspect') === 'true') {
         document.body.classList.add('inspect-mode');
       }
@@ -1932,29 +1837,101 @@
       window.ipExport = function(btn, imgEl, scale) {
         const original = btn.textContent;
         btn.textContent = '...';
-        const canvas = document.createElement('canvas');
-        // Mirror Figma: base on display size × scale, not naturalWidth × scale
+        const src = imgEl.getAttribute('src') || '';
+        const base = src.split('/').pop().replace(/\.[^.]+$/, '');
         const dw = Math.round(imgEl.offsetWidth);
         const dh = Math.round(imgEl.offsetHeight);
-        canvas.width  = dw * scale;
-        canvas.height = dh * scale;
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(function(blob) {
-          if (!blob) { btn.textContent = 'Error'; return; }
-          const url = URL.createObjectURL(blob);
-          const src = imgEl.getAttribute('src') || 'image';
-          const base = src.split('/').pop().replace(/\.[^.]+$/, '');
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = base + '@' + scale + 'x.png';
-          a.click();
-          URL.revokeObjectURL(url);
-          btn.textContent = '✓';
-          setTimeout(function() { btn.textContent = original; }, 1500);
-        }, 'image/png');
+
+        function finish(canvas) {
+          canvas.toBlob(function(blob) {
+            if (!blob) { btn.textContent = 'Error'; return; }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = base + '@' + scale + 'x.png';
+            a.click();
+            URL.revokeObjectURL(url);
+            btn.textContent = '✓';
+            setTimeout(function() { btn.textContent = original; }, 1500);
+          }, 'image/png');
+        }
+
+        if (src.toLowerCase().endsWith('.svg')) {
+          // SVG path: fetch raw markup and re-render at target resolution — always crisp
+          const tw = dw * scale, th = dh * scale;
+          fetch(src)
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+              const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+              const root = doc.documentElement;
+              if (!root.getAttribute('viewBox')) {
+                root.setAttribute('viewBox', '0 0 ' + (root.getAttribute('width') || dw) + ' ' + (root.getAttribute('height') || dh));
+              }
+              root.setAttribute('width', tw);
+              root.setAttribute('height', th);
+              const svgStr = new XMLSerializer().serializeToString(root);
+              const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+              const img = new Image();
+              img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = tw; canvas.height = th;
+                canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
+                try { finish(canvas); } catch(e) { btn.textContent = 'Error'; }
+              };
+              img.onerror = function() { btn.textContent = 'Error'; };
+              img.src = dataUrl;
+            })
+            .catch(function() { btn.textContent = 'Error'; });
+        } else {
+          // Raster path: never export below natural resolution
+          const nw = imgEl.naturalWidth;
+          const nh = imgEl.naturalHeight;
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.max(dw * scale, nw);
+          canvas.height = Math.max(dh * scale, nh);
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+          finish(canvas);
+        }
+      };
+
+      window.ipExportInlineSvg = function(btn, eid, scale) {
+        const svgEl = snippetStore[eid];
+        const original = btn.textContent;
+        btn.textContent = '...';
+        const rect = svgEl.getBoundingClientRect();
+        const dw = Math.round(rect.width), dh = Math.round(rect.height);
+        const tw = dw * scale, th = dh * scale;
+        // Clone the live element so namespace declarations are preserved
+        const clone = svgEl.cloneNode(true);
+        if (!clone.getAttribute('viewBox')) {
+          clone.setAttribute('viewBox', '0 0 ' + (clone.getAttribute('width') || dw) + ' ' + (clone.getAttribute('height') || dh));
+        }
+        clone.setAttribute('width', tw); clone.setAttribute('height', th);
+        // Data URL is more reliable than Blob URL for SVG→canvas across browsers
+        const svgStr = new XMLSerializer().serializeToString(clone);
+        const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = tw; canvas.height = th;
+          canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
+          try {
+            canvas.toBlob(function(pngBlob) {
+              if (!pngBlob) { btn.textContent = 'Error'; return; }
+              const url = URL.createObjectURL(pngBlob);
+              const a = document.createElement('a');
+              a.href = url; a.download = 'icon@' + scale + 'x.png'; a.click();
+              URL.revokeObjectURL(url);
+              btn.textContent = '✓';
+              setTimeout(function() { btn.textContent = original; }, 1500);
+            }, 'image/png');
+          } catch(e) { btn.textContent = 'Error'; }
+        };
+        img.onerror = function() { btn.textContent = 'Error'; };
+        img.src = dataUrl;
       };
 
       window.ipCopy = function(btn, id) {
@@ -2072,11 +2049,16 @@
         const dh = Math.round(imgEl.offsetHeight);
         const nw = imgEl.naturalWidth;
         const nh = imgEl.naturalHeight;
+        const isSvg = src.toLowerCase().endsWith('.svg');
         const sid = ++snippetId; snippetStore[sid] = src;
         const eid = ++snippetId; snippetStore[eid] = imgEl;
 
         function scaleBtn(scale) {
-          const ow = dw * scale, oh = dh * scale;
+          if (isSvg) {
+            const ow = dw * scale;
+            return `<button class="it-copy-btn" style="margin-top:0" title="${ow}\xd7${dh*scale}px — vector, lossless" onclick="ipExport(this,snippetStore[${eid}],${scale})">${scale}x &middot; ${ow}px</button>`;
+          }
+          const ow = Math.max(dw * scale, nw), oh = Math.max(dh * scale, nh);
           const blurry = ow > nw || oh > nh;
           const st = blurry ? 'margin-top:0;color:#f59e0b;border-color:rgba(245,158,11,0.35)' : 'margin-top:0';
           const tip = blurry
@@ -2085,36 +2067,47 @@
           return `<button class="it-copy-btn" style="${st}" title="${tip}" onclick="ipExport(this,snippetStore[${eid}],${scale})">${scale}x &middot; ${ow}px</button>`;
         }
 
-        const lowRes = nw < dw * 2;
+        const sourceRow = isSvg
+          ? `<div class="it-row"><span class="it-label">source</span><span class="it-value">SVG &middot; <span style="color:#22c55e">vector</span></span></div>`
+          : `<div class="it-row"><span class="it-label">source</span><span class="it-value">${nw}&times;${nh}px${nw < dw*2 ? ' <span style="color:#f59e0b">&middot; low-res</span>' : ''}</span></div>`;
+        const lowResWarning = !isSvg && nw < dw * 2
+          ? '<p style="font-size:9px;color:#f59e0b;line-height:1.5;margin-bottom:6px">⚠ Source is low-res. Re-export from Figma at 2x+ for crisp downloads.</p>'
+          : '';
         return `<div class="ip-body">
           <div class="it-component">Image Asset</div>
           <div class="it-class">&lt;img&gt;</div>
           <hr class="it-divider">
           <div class="it-row"><span class="it-label">file</span><span class="it-value" style="word-break:break-all;font-size:10px">${filename}</span></div>
           <div class="it-row"><span class="it-label">display</span><span class="it-value">${dw}&times;${dh}px</span></div>
-          <div class="it-row"><span class="it-label">source</span><span class="it-value">${nw}&times;${nh}px${lowRes ? ' <span style="color:#f59e0b">&middot; low-res</span>' : ''}</span></div>
+          ${sourceRow}
           <hr class="it-divider">
           <div class="it-section">Export</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px">
             ${scaleBtn(1)}${scaleBtn(2)}${scaleBtn(3)}${scaleBtn(4)}
           </div>
-          ${lowRes ? '<p style="font-size:9px;color:#f59e0b;line-height:1.5;margin-bottom:6px">⚠ Source is low-res. Re-export from Figma at 2x+ for crisp downloads.</p>' : ''}
+          ${lowResWarning}
           <button class="it-copy-btn" onclick="ipCopy(this,${sid})">Copy src path</button>
         </div>`;
       }
 
       function renderSvgPanel(svgEl) {
-        const w = Math.round(svgEl.offsetWidth) + 'px';
-        const h = Math.round(svgEl.offsetHeight) + 'px';
+        const rect = svgEl.getBoundingClientRect();
+        const dw = Math.round(rect.width), dh = Math.round(rect.height);
         const sid = ++snippetId; snippetStore[sid] = svgEl.outerHTML;
+        const eid = ++snippetId; snippetStore[eid] = svgEl;
+        function scaleBtn(scale) {
+          const ow = dw * scale;
+          return `<button class="it-copy-btn" style="margin-top:0" title="${ow}\xd7${dh*scale}px — vector, lossless" onclick="ipExportInlineSvg(this,${eid},${scale})">${scale}x &middot; ${ow}px</button>`;
+        }
         return `<div class="ip-body">
           <div class="it-component">SVG Icon</div>
           <div class="it-class">&lt;svg&gt; — inline</div>
           <hr class="it-divider">
-          <div class="it-row"><span class="it-label">width</span><span class="it-value">${w}</span></div>
-          <div class="it-row"><span class="it-label">height</span><span class="it-value">${h}</span></div>
-          <div class="it-row" style="margin-top:4px"><span class="it-label" style="color:#f59e0b">Note</span><span class="it-value" style="font-size:10px;color:#94a3b8">Inline SVG — no Expo icon name. Copy markup or redraw.</span></div>
+          <div class="it-row"><span class="it-label">display</span><span class="it-value">${dw}&times;${dh}px</span></div>
+          <div class="it-row"><span class="it-label">source</span><span class="it-value">SVG &middot; <span style="color:#22c55e">vector</span></span></div>
           <hr class="it-divider">
+          <div class="it-section">Export</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px">${scaleBtn(1)}${scaleBtn(2)}${scaleBtn(3)}${scaleBtn(4)}</div>
           <button class="it-copy-btn" onclick="ipCopy(this,${sid})">Copy SVG markup</button>
         </div>`;
       }
@@ -2135,13 +2128,6 @@
         panel.prepend(closeBtn);
       }
 
-      window.ipToggleInspect = function() {
-        const isOn = document.body.classList.toggle('inspect-mode');
-        if (!isOn) {
-          ipUnlock();
-          if (hoveredEl) { hoveredEl.classList.remove('inspect-hover-ring'); hoveredEl = null; }
-        }
-      };
 
       window.ipUnlock = function() {
         if (lockedEl) { lockedEl.classList.remove('inspect-highlight-ring'); lockedEl = null; }
