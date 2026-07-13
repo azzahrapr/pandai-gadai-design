@@ -9,7 +9,10 @@ export default function KanitReview() {
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
 
-  const [selectedFlId, setSelectedFlId] = useState<string>(flUsers[0]?.id ?? '')
+  const [selectedFlId, setSelectedFlId] = useState<string>(() => {
+    const withPending = flUsers.find(u => getFlChecklists(u.id).some(c => c.status === 'submitted'))
+    return withPending?.id ?? flUsers[0]?.id ?? ''
+  })
   const [justScored, setJustScored] = useState<string | null>(null)
   const [clItemYesNo, setClItemYesNo] = useState<Record<string, Record<string, boolean>>>({})
   const [clNotes, setClNotes] = useState<Record<string, string>>({})

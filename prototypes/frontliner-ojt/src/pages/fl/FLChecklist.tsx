@@ -98,35 +98,27 @@ export default function FLChecklist() {
       </div>
 
       {/* Overall progress bar */}
-      <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6 flex items-center gap-4">
-        <div className="flex-1">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-semibold text-[#0F1729]">Progress hari ini</span>
-            <span className="text-sm font-bold text-[#023DFF]">{doneCount}/{DAILY_TASKS.length} task selesai</span>
-          </div>
-          <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#023DFF] rounded-full transition-all duration-500"
-              style={{ width: `${(doneCount / DAILY_TASKS.length) * 100}%` }}
-            />
-          </div>
+      <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-semibold text-[#0F1729]">Progress hari ini</span>
+          <span className="text-sm font-bold text-[#023DFF]">{doneCount}/{DAILY_TASKS.length} task selesai</span>
+        </div>
+        <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[#023DFF] rounded-full transition-all duration-500"
+            style={{ width: `${(doneCount / DAILY_TASKS.length) * 100}%` }}
+          />
         </div>
         {allTasksDone && (
-          <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#F0FDF4] text-[#15803D] flex-shrink-0">
-            ✓ Semua selesai
-          </span>
+          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[#E1E7EF]">
+            <span className="text-lg">✅</span>
+            <div>
+              <p className="font-bold text-[#15803D] text-sm">Checklist hari ini sudah dikirim!</p>
+              <p className="text-xs text-[#15803D]/80 mt-0.5">Menunggu penilaian dari Kanit.</p>
+            </div>
+          </div>
         )}
       </div>
-
-      {allTasksDone && (
-        <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl p-4 mb-6 flex items-center gap-3">
-          <span className="text-xl">✅</span>
-          <div>
-            <p className="font-bold text-[#15803D] text-sm">Checklist hari ini sudah dikirim!</p>
-            <p className="text-xs text-[#15803D]/80 mt-0.5">Menunggu penilaian dari Kanit.</p>
-          </div>
-        </div>
-      )}
 
       {/* Task cards */}
       <div className="grid grid-cols-2 gap-4">
@@ -149,7 +141,7 @@ export default function FLChecklist() {
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                     isSubmitted ? 'bg-[#16A34A] text-white' : 'bg-[#E1E7EF] text-[#65758B]'
                   }`}>
-                    {isSubmitted ? '✓' : tIdx + 1}
+                    {tIdx + 1}
                   </div>
                   <p className="font-bold text-[#0F1729]">{task.name}</p>
                 </div>

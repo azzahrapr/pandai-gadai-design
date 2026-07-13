@@ -593,13 +593,13 @@ const fl003Checklists: DailyChecklist[] = [
 
 const pendingChecklists: DailyChecklist[] = [
   {
-    id: 'cl-fl001-7', day: 7, date: '2026-07-07', flId: 'fl-001',
+    id: 'cl-fl003-14', day: 14, date: '2026-07-13', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening berjalan lancar. Saldo awal langsung diverifikasi begitu sistem menyala.', submittedAt: '2026-07-07T08:30:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada 2 nasabah tanya soal produk perpanjangan, berhasil dijelaskan dan salah satunya langsung transaksi.', submittedAt: '2026-07-07T16:00:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c7'], reflection: 'Rekap kas selesai, ada sedikit selisih Rp 1.000 yang sudah ketemu dari kembalian nasabah sore.', submittedAt: '2026-07-07T17:30:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3'], reflection: 'Opening hari terakhir lancar. Semua prosedur sudah hafal tanpa perlu cek panduan.', submittedAt: '2026-07-13T08:15:00' },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3'], reflection: 'Pelayanan berjalan sangat baik. Sudah bisa handle nasabah komplain dengan tenang dan solutif.', submittedAt: '2026-07-13T16:00:00' },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6'], reflection: 'Closing tepat waktu dan rekap kas sesuai. Siap menghadapi assessment besok.', submittedAt: '2026-07-13T17:00:00' },
     ],
-    status: 'submitted', submittedAt: '2026-07-07T17:30:00',
+    status: 'submitted', submittedAt: '2026-07-13T17:00:00',
   },
   {
     id: 'cl-fl002-7', day: 7, date: '2026-07-07', flId: 'fl-002',
