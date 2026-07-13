@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
+  <title>Cek Harga Gadai HP, Laptop, Smartwatch, Kamera, PS & TV di Pandai Gadai</title>
+  <meta name="description" content="Cek simulasi harga gadai HP, laptop, smartwatch, kamera, PS, dan TV dan booking gadai secara online melalui website Pandai Gadai"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #f3f4f6;
+      font-family: 'Geist', sans-serif;
+    }
+
+    #app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid #E1E6EF;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: none;
+    }
+    .back-btn:hover { background: #F1F3F9; }
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #021431;
+    }
+    .help-btn {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0255CA;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 6px 10px;
+    }
+
+    /* ── STEP INDICATOR ── */
+    .step-bar {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid #E1E6EF;
+      gap: 0;
+      position: sticky;
+      top: 65px;
+      z-index: 99;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid #E1E6EF;
+      background: #fff;
+      color: #94A0B8;
+      transition: all 0.2s;
+      position: relative;
+      z-index: 2;
+    }
+    .step-circle.active {
+      border-color: #0255CA;
+      background: #0255CA;
+      color: #fff;
+    }
+    .step-circle.done {
+      border-color: #28832D;
+      background: #28832D;
+      color: #fff;
+    }
+    .step-label {
+      font-size: 10px;
+      color: #94A0B8;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .step-label.active { color: #0255CA; font-weight: 600; }
+    .step-label.done { color: #28832D; }
+    .step-connector {
+      flex: 1;
+      height: 2px;
+      background: #E1E6EF;
+      margin-bottom: 18px;
+      transition: background 0.2s;
+    }
+    .step-connector.done { background: #28832D; }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 100px;
+    }
+
+    /* ── BANNER TOP (Gadai Emas + BPKB) ── */
+    .top-banner {
+      background: #E5F2FF;
+      padding: 14px 15px;
+    }
+    .top-banner-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #021431;
+      margin-bottom: 10px;
+    }
+    .top-banner-cards {
+      display: flex;
+      gap: 10px;
+    }
+    .banner-card {
+      flex: 1;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .banner-card:active { opacity: 0.85; }
+    .banner-card-emas {
+      border: 1px solid #FFCD05;
+      background: #FFFDC6;
+    }
+    .banner-card-bpkb {
+      border: 1px solid #8B5CF6;
+      background: #F5F3FF;
+    }
+    .banner-card img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+    .banner-card-text { flex: 1; }
+    .banner-card-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .banner-card-emas .banner-card-label { color: #492504; }
+    .banner-card-bpkb .banner-card-label { color: #2E1065; }
+    .banner-card-sub {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+    .banner-card-emas .banner-card-sub { color: #94590A; }
+    .banner-card-bpkb .banner-card-sub { color: #6D28D9; }
+
+    /* ── SEARCH SECTION (Step 1) ── */
+    #step1 {}
+    .search-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #001533;
+      line-height: 20px;
+      margin: 18px 15px 14px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      background: #F8F9FC;
+      border: 1px solid #F1F3F9;
+      border-radius: 28px;
+      padding: 0 12px;
+      margin: 0 15px 18px;
+      gap: 10px;
+    }
+    .search-box svg { flex-shrink: 0; }
+    .search-box input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-family: 'Geist', sans-serif;
+      color: #021431;
+      outline: none;
+    }
+    .search-box input::placeholder { color: #94A0B8; }
+
+    /* ── PRODUCT GRID ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 0 8px;
+      gap: 0;
+    }
+    .product-col {
+      display: flex;
+      justify-content: center;
+      padding: 0 4px;
+      margin-bottom: 16px;
+    }
+    .product-card {
+      width: 100%;
+      border: 1px solid #E1E6EF;
+      border-radius: 8px;
+      padding-top: 4px;
+      gap: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #fff;
+      transition: opacity 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.09); opacity: 0.92; }
+    .product-card:active { opacity: 0.75; }
+    .product-img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .product-name {
+      font-size: 12px;
+      color: #021431;
+      padding: 0 8px 10px;
+      line-height: 1.4;
+    }
+
+    /* ── LOADING SPINNER ── */
+    .spinner-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 120px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #E6ECFF;
+      border-top-color: #0255CA;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── NOT FOUND ── */
+    .not-found {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      gap: 12px;
+    }
+    .not-found img { width: 100px; height: 100px; }
+    .not-found-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #021431;
+      text-align: center;
+    }
+    .not-found-desc {
+      font-size: 13px;
+      color: #5F6C85;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .not-found-btn {
+      width: 100%;
+      height: 48px;
+      background: #0255CA;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+    }
+
+    /* ── MISSING ITEMS FOOTER ── */
+    .missing-footer {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: calc(100% - 24px);
+      margin: 4px 12px 16px;
+      padding: 14px;
+      background: #EBF5FF;
+      border-radius: 8px;
+      gap: 10px;
+    }
+    .missing-footer img { width: 36px; height: 36px; }
+    .missing-footer-text { flex: 1; }
+    .missing-footer-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #021431;
+      line-height: 1.3;
+    }
+    .missing-footer-sub {
+      font-size: 12px;
+      color: #5F6C85;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .chat-wa-btn {
+      background: #0255CA;
+      border-radius: 8px;
+      height: 30px;
+      min-width: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+      padding: 0 10px;
+    }
+
+    /* ── STEP 2 - PRODUCT DETAIL ── */
+    #step2 { display: none; }
+    .product-detail-card {
+      margin: 16px 15px 0;
+      border: 1px solid #E1E6EF;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .product-detail-top {
+      padding: 12px 14px;
+    }
+    .product-detail-hurry {
+      font-size: 13px;
+      font-weight: 700;
+      color: #021431;
+      margin-bottom: 10px;
+    }
+    .product-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .product-detail-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .product-detail-info { flex: 1; }
+    .product-detail-name {
+      font-size: 13px;
+      color: #021431;
+      line-height: 20px;
+    }
+    .product-detail-cond {
+      font-size: 13px;
+      color: #5F6C85;
+    }
+    .product-detail-bottom {
+      background: #D3F1D4;
+      padding: 12px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .loan-label {
+      font-size: 12px;
+      color: #5F6C85;
+      line-height: 16px;
+    }
+    .loan-range {
+      font-size: 14px;
+      font-weight: 700;
+      color: #28832D;
+      line-height: 20px;
+    }
+    .loan-range span { color: #E85C3D; }
+    .shiny-bar {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+      animation: shimmer 3.5s infinite;
+      transform: rotate(20deg);
+    }
+    @keyframes shimmer {
+      0% { left: -80px; }
+      40% { left: 110%; }
+      100% { left: 110%; }
+    }
+    .product-info-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 15px 4px;
+    }
+    .product-info-note svg { flex-shrink: 0; margin-top: 1px; }
+    .product-info-note-text {
+      font-size: 12px;
+      color: #5F6C85;
+      line-height: 1.5;
+    }
+    .separator {
+      height: 6px;
+      background: #F1F3F9;
+      margin: 16px -0px;
+      width: 100%;
+    }
+    .no-bi-box {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background: #EBF5FF;
+      border-radius: 8px;
+      margin: 0 15px;
+      padding: 12px;
+      gap: 12px;
+    }
+    .no-bi-text {
+      font-size: 12px;
+      color: #5F6C85;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* ── PROMO SECTION ── */
+    .promo-section {
+      margin: 0 15px;
+    }
+    .promo-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #001533;
+      line-height: 24px;
+      margin-bottom: 12px;
+    }
+    .promo-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .promo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1.5px solid #E1E6EF;
+      border-radius: 10px;
+      padding: 14px 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fff;
+    }
+    .promo-item:last-child { margin-bottom: 0; }
+    .promo-item.selected {
+      border-color: #0255CA;
+      background: #F0F5FF;
+    }
+    .promo-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #CBD2E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s;
+    }
+    .promo-item.selected .promo-radio { border-color: #0255CA; }
+    .promo-radio-inner {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #0255CA;
+      display: none;
+    }
+    .promo-item.selected .promo-radio-inner { display: block; }
+    .promo-label {
+      font-size: 14px;
+      color: #021431;
+      line-height: 1.4;
+    }
+
+    /* ── STEP 3 - BOOKING ── */
+    #step3 { display: none; }
+    .booking-section {
+      padding: 0 15px;
+      margin-bottom: 20px;
+    }
+    .booking-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #001533;
+      margin-bottom: 10px;
+    }
+    /* Arrival time */
+    .time-group {
+      display: flex;
+      flex-direction: row;
+      border: 1.5px solid #E1E6EF;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .time-group.error { border-color: #E85C3D; }
+    .time-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 10px;
+      border-right: 1px solid #E1E6EF;
+      cursor: pointer;
+    }
+    .time-option:last-child { border-right: none; }
+    .time-option.selected { background: #E6ECFF; }
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #E1E6EF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .radio-dot.selected { border-color: #0255CA; }
+    .radio-dot.selected::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0255CA;
+    }
+    .time-label {
+      font-size: 14px;
+      color: #021431;
+    }
+    .time-label.selected { color: #0255CA; font-weight: 600; }
+    /* Branch */
+    .branch-select-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      width: 100%;
+      border: 1px solid #E85C3D;
+      border-radius: 8px;
+      padding: 0 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .branch-select-btn.selected {
+      border-color: #E1E6EF;
+    }
+    .branch-placeholder { font-size: 14px; color: #94A0B8; }
+    .branch-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #001533;
+    }
+    .branch-addr { font-size: 11px; color: #5F6C85; margin-top: 2px; }
+    .branch-change-btn {
+      height: 32px;
+      padding: 0 12px;
+      background: #E6ECFF;
+      border: 1px solid #0255CA;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0255CA;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .branch-box {
+      border: 1px solid #E1E6EF;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .branch-info { flex: 1; }
+    .branch-hours { font-size: 11px; color: #5F6C85; margin-top: 2px; }
+    .error-text { font-size: 12px; color: #E85C3D; font-weight: 600; margin-top: 6px; }
+    /* Form fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-label { font-size: 14px; color: #5F6C85; line-height: 20px; }
+    .form-hint { font-size: 12px; color: #94A0B8; }
+    .form-input {
+      height: 44px;
+      border: 1px solid #E1E6EF;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: 'Geist', sans-serif;
+      color: #021431;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: #0255CA; }
+    .form-input.error { border-color: #E85C3D; }
+    .form-error { font-size: 12px; color: #E85C3D; }
+    .tnc-note {
+      font-size: 12px;
+      color: #5F6C85;
+      line-height: 1.6;
+      margin: 0 15px 16px;
+    }
+    .tnc-note a { color: #0255CA; font-weight: 600; text-decoration: none; }
+
+    /* ── FOOTER ACTION BAR ── */
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-top: 1px solid #E1E6EF;
+      padding: 12px 15px;
+      z-index: 200;
+      display: none;
+    }
+    .footer-bar.visible { display: block; }
+    .price-estimate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .price-est-label { font-size: 12px; color: #5F6C85; }
+    .price-est-value { font-size: 13px; font-weight: 700; color: #001533; }
+    .btn-lanjut {
+      width: 100%;
+      height: 48px;
+      background: #0255CA;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+    .btn-lanjut:hover { opacity: 0.9; }
+    .btn-lanjut:active { opacity: 0.75; }
+    .btn-lanjut.disabled {
+      background: #F1F3F9;
+      color: #94A0B8;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      width: 100%;
+      height: 44px;
+      background: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0255CA;
+      cursor: pointer;
+      border: none;
+      margin-top: 8px;
+    }
+
+    /* ── BRANCH SELECTOR OVERLAY ── */
+    #branchOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 300;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    #branchOverlay.open { display: flex; }
+    .branch-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .branch-sheet-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #021431;
+      margin-bottom: 14px;
+    }
+    .branch-list-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #F1F3F9;
+      cursor: pointer;
+    }
+    .branch-list-item:last-child { border-bottom: none; }
+    .branch-list-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #001533;
+    }
+    .branch-list-addr {
+      font-size: 12px;
+      color: #5F6C85;
+      margin-top: 2px;
+    }
+    .branch-list-item:hover .branch-list-name { color: #0255CA; }
+
+    /* ── LEAD CAPTURE BOTTOMSHEET ── */
+    #leadOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 20, 49, 0.55);
+      z-index: 400;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeInOverlay 0.25s ease;
+    }
+    #leadOverlay.open { display: flex; }
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .lead-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 0 0 32px;
+      animation: slideUp 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      overflow: hidden;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .lead-sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: #E1E6EF;
+      border-radius: 99px;
+      margin: 12px auto 0;
+    }
+    .lead-sheet-hero {
+      padding: 20px 20px 4px;
+    }
+    .lead-badge { display: none; }
+    .lead-sheet-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #021431;
+      line-height: 1.3;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .lead-sheet-title span { color: #0255CA; }
+    .lead-sheet-sub {
+      font-size: 13px;
+      color: #5F6C85;
+      line-height: 1.55;
+    }
+    .lead-trust-row { display: none; }
+    .lead-form {
+      padding: 20px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .lead-field { display: flex; flex-direction: column; gap: 5px; }
+    .lead-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #3F444D;
+    }
+    .lead-input {
+      height: 46px;
+      border: 1.5px solid #E1E6EF;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: 'Geist', sans-serif;
+      color: #021431;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .lead-input:focus {
+      border-color: #0255CA;
+      box-shadow: 0 0 0 3px rgba(2, 85, 202, 0.1);
+    }
+    .lead-input.error { border-color: #E85C3D; }
+    .lead-input-error { font-size: 11px; color: #E85C3D; }
+    .lead-cta {
+      margin: 18px 20px 0;
+      width: calc(100% - 40px);
+      height: 50px;
+      background: #0255CA;
+      border-radius: 12px;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Geist', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .lead-cta:hover { opacity: 0.93; }
+    .lead-cta:active { transform: scale(0.98); }
+    .lead-cta.disabled {
+      background: #F1F3F9;
+      color: #94A0B8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .lead-privacy {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 10px 20px 0;
+      font-size: 11px;
+      color: #94A0B8;
+    }
+    .lead-privacy svg { flex-shrink: 0; }
+
+    /* ── SUCCESS SCREEN ── */
+    #stepSuccess {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      gap: 14px;
+      text-align: center;
+    }
+    #stepSuccess img { width: 130px; }
+    .success-title { font-size: 18px; font-weight: 700; color: #001533; }
+    .success-desc { font-size: 14px; color: #5F6C85; line-height: 1.6; }
+    .booking-code-box {
+      background: #EBF5FF;
+      border-radius: 8px;
+      padding: 12px 20px;
+      width: 100%;
+    }
+    .booking-code-label { font-size: 12px; color: #5F6C85; }
+    .booking-code-value { font-size: 20px; font-weight: 700; color: #0255CA; letter-spacing: 2px; margin-top: 4px; }
+    .btn-back-home {
+      width: 100%;
+      height: 48px;
+      background: #0255CA;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div style="max-width:480px;margin:12px auto 0;padding:0 16px">
+    <div style="background:rgba(15,23,41,0.85);backdrop-filter:blur(8px);color:#fff;font-size:13px;font-weight:500;text-align:center;padding:10px 16px;border-radius:16px;line-height:1.5;font-family:'Geist',sans-serif">
+      Kamu sedang melihat prototipe Pandai Gadai. Setelah selesai eksplorasi, tutup tab ini untuk kembali ke sesi sebelumnya.
+    </div>
+  </div>
+  <div id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <button class="back-btn" id="backBtn" onclick="goBack()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="#021431" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="header-title">Taksiran Gadai</span>
+      </div>
+      <button class="help-btn" onclick="window.open('https://pandaigadai.com/outlet','_blank')">Panduan</button>
+    </header>
+
+    <!-- STEP INDICATOR -->
+    <div class="step-bar" id="stepBar">
+      <div class="step-item" onclick="goToStep(1)" id="stepItem1">
+        <div class="step-circle active" id="stepCircle1">1</div>
+        <span class="step-label active" id="stepLabel1">Pilih Barang</span>
+      </div>
+      <div class="step-connector" id="stepConn1"></div>
+      <div class="step-item" id="stepItem2">
+        <div class="step-circle" id="stepCircle2">2</div>
+        <span class="step-label" id="stepLabel2">Perkiraan Harga</span>
+      </div>
+      <div class="step-connector" id="stepConn2"></div>
+      <div class="step-item" id="stepItem3">
+        <div class="step-circle" id="stepCircle3">3</div>
+        <span class="step-label" id="stepLabel3">Booking Gadai</span>
+      </div>
+    </div>
+
+    <!-- SCROLLABLE CONTENT -->
+    <div class="content" id="mainContent">
+
+      <!-- TOP BANNER -->
+      <div class="top-banner">
+        <div class="top-banner-cards">
+          <a href="https://s.id/webpg_emas" target="_blank" class="banner-card banner-card-emas">
+            <img src="images/gadai-emas-icon.webp" alt="Gadai Emas"/>
+            <div class="banner-card-text">
+              <div class="banner-card-label">Gadai Emas</div>
+              <div class="banner-card-sub">Mulai Gadai ›</div>
+            </div>
+          </a>
+          <a href="https://s.id/webpg_bpkb" target="_blank" class="banner-card banner-card-bpkb">
+            <img src="images/gadai-bpkb-icon.webp" alt="Gadai BPKB"/>
+            <div class="banner-card-text">
+              <div class="banner-card-label">Gadai BPKB</div>
+              <div class="banner-card-sub">Mulai Gadai ›</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- STEP 1: CARI BARANG -->
+      <div id="step1">
+        <p class="search-title">Cek Harga Gadai HP, Laptop, Smartwatch, Kamera, PS, &amp; TV</p>
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <circle cx="9" cy="9" r="6" stroke="#94A0B8" stroke-width="2"/>
+            <path d="M14 14L18 18" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Ketik nama merek hp/laptop" oninput="onSearchInput(this.value)"/>
+        </div>
+
+        <div id="productSpinner" class="spinner-wrap">
+          <div class="spinner"></div>
+        </div>
+
+        <div id="productGrid" class="product-grid" style="display:none"></div>
+        <div id="notFound" class="not-found" style="display:none">
+          <img src="images/phone-not-found.webp" alt="not found"/>
+          <div class="not-found-title">Barang Kamu Belum Ada, nih</div>
+          <div class="not-found-desc">Saat ini barangmu belum ada di sistem kami. Jangan khawatir, kamu bisa kontak Admin cabang terdekat untuk tanyakan harga barang. Mereka siap bantu!</div>
+          <a href="https://pandaigadai.com/outlet" target="_blank" class="not-found-btn">Tanya Perkiraan Harga</a>
+        </div>
+
+        <div class="missing-footer" id="missingFooter">
+          <img src="images/phone-not-found.webp" alt="not found"/>
+          <div class="missing-footer-text">
+            <div class="missing-footer-title">Barangmu Tidak Ada di Daftar?</div>
+            <div class="missing-footer-sub">Kami bisa bantu! Chat kami di WhatsApp kapan saja!</div>
+          </div>
+          <a href="https://pandaigadai.com/outlet" target="_blank" class="chat-wa-btn">Chat WA</a>
+        </div>
+      </div>
+
+      <!-- STEP 2: PERKIRAAN HARGA -->
+      <div id="step2">
+        <div class="product-detail-card">
+          <div class="product-detail-top">
+            <p class="product-detail-hurry">Buruan gadai sebelum harganya turun! </p>
+            <div class="product-detail-row">
+              <img id="detailImg" class="product-detail-img" src="" alt=""/>
+              <div class="product-detail-info">
+                <p class="product-detail-name" id="detailName"></p>
+                <p class="product-detail-cond">Ada Box, charger dan kondisi Baik</p>
+              </div>
+            </div>
+          </div>
+          <div class="product-detail-bottom">
+            <p class="loan-label">Jika digadai kamu akan dapat</p>
+            <p class="loan-range" id="detailLoan">— <span>*</span></p>
+            <div class="shiny-bar"></div>
+          </div>
+        </div>
+        <div class="product-info-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#94A0B8" stroke-width="2"/>
+            <path d="M12 8v4M12 16h.01" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <p class="product-info-note-text">Nilai akhir tergantung pada hasil pengecekan kondisi barang oleh petugas kami.</p>
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- PROMO SELECTION -->
+        <div class="promo-section">
+          <p class="promo-title">Tawaran Spesial Khusus Gadai Pertama</p>
+          <div class="promo-list" id="promoList">
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN100', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp100 RB (Min. Gadai Rp2 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN50', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp50 RB (Min. Gadai Rp1 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('GADAIINSTAN25', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Extra Pinjaman Rp25 RB (Min. Gadai Rp500 RB)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('ELE-GRATIS-INSTAN', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Bunga 0% (Tebus dalam 7 Hari, Maks. Gadai Rp2.5 JT)</span>
+            </div>
+            <div class="promo-item" onclick="selectPromo('ELE-DISKON-20-BUNGA', this)">
+              <div class="promo-radio"><div class="promo-radio-inner"></div></div>
+              <span class="promo-label">Bunga 8% (Tebus dalam 30 Hari)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="separator" style="margin-top:18px"></div>
+
+        <div class="no-bi-box">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="8" fill="#EBF5FF"/>
+            <path d="M20 12v8M20 24h.01" stroke="#0255CA" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="10" stroke="#0255CA" stroke-width="2"/>
+          </svg>
+          <p class="no-bi-text">Gak perlu BI Checking. Datang ke cabang, uang langsung cair.</p>
+        </div>
+      </div>
+
+      <!-- STEP 3: BOOKING GADAI -->
+      <div id="step3">
+        <!-- Branch selection -->
+        <div class="booking-section" style="margin-top:20px">
+          <p class="booking-section-title">Lokasi Cabang</p>
+          <div id="branchEmpty" onclick="openBranchSheet()">
+            <button class="branch-select-btn" id="branchSelectBtn">
+              <span class="branch-placeholder">Pilih cabang terdekat</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18L15 12L9 6" stroke="#5F6C85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <p class="error-text">Harap pilih lokasi cabang</p>
+          </div>
+          <div id="branchSelected" style="display:none">
+            <div class="branch-box">
+              <div class="branch-info">
+                <p class="branch-name" id="selectedBranchName"></p>
+                <p class="branch-hours">Senin-Minggu, 09:00-21:00</p>
+                <p class="branch-addr" id="selectedBranchAddr"></p>
+              </div>
+              <button class="branch-change-btn" onclick="openBranchSheet()">Ubah</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrival time -->
+        <div class="booking-section">
+          <p class="booking-section-title">Waktu Kedatangan</p>
+          <div class="time-group" id="timeGroup">
+            <div class="time-option" id="timeToday" onclick="selectTime('TODAY')">
+              <div class="radio-dot" id="radioDotTODAY"></div>
+              <span class="time-label" id="timeLabelTODAY">Hari Ini</span>
+            </div>
+            <div class="time-option" id="timeTomorrow" onclick="selectTime('TOMORROW')">
+              <div class="radio-dot" id="radioDotTOMORROW"></div>
+              <span class="time-label" id="timeLabelTOMORROW">Besok</span>
+            </div>
+            <div class="time-option" id="timeLusa" onclick="selectTime('DAY_AFTER_TOMORROW')">
+              <div class="radio-dot" id="radioDotDAY_AFTER_TOMORROW"></div>
+              <span class="time-label" id="timeLabelDAY_AFTER_TOMORROW">Lusa</span>
+            </div>
+          </div>
+          <p class="error-text" id="timeError" style="display:none">Pilih waktu kedatangan terlebih dahulu</p>
+        </div>
+
+        <!-- Personal info -->
+        <div class="booking-section">
+          <p class="booking-section-title">Data Diri</p>
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-input" id="inputName" placeholder="Masukkan nama lengkap" maxlength="50" oninput="validateForm()"/>
+            <span class="form-hint">Isi sesuai KTP/SIM (tanpa tanda baca dan gelar)</span>
+            <span class="form-error" id="errName" style="display:none"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor HP Aktif</label>
+            <input type="tel" class="form-input" id="inputPhone" placeholder="Masukkan nomor handphone" maxlength="13" oninput="validateForm()"/>
+            <span class="form-error" id="errPhone" style="display:none"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email <span style="color:#94A0B8">(Opsional)</span></label>
+            <input type="email" class="form-input" id="inputEmail" placeholder="Masukkan email" oninput="validateForm()"/>
+            <span class="form-error" id="errEmail" style="display:none"></span>
+          </div>
+        </div>
+
+        <p class="tnc-note">Dengan melanjutkan, saya menyetujui <a href="#">Syarat &amp; Ketentuan</a> yang berlaku.</p>
+
+        <div class="no-bi-box" style="margin-bottom:20px">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="8" fill="#EBF5FF"/>
+            <path d="M20 12v8M20 24h.01" stroke="#0255CA" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="10" stroke="#0255CA" stroke-width="2"/>
+          </svg>
+          <p class="no-bi-text">Gak perlu BI Checking. Datang ke cabang, uang langsung cair.</p>
+        </div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="stepSuccess">
+        <img src="images/panda.png" alt="Pandai Gadai"/>
+        <p class="success-title">Booking Berhasil!</p>
+        <p class="success-desc">Booking kamu sudah tercatat. Datang ke cabang sesuai jadwal yang kamu pilih dan bawa KTP + barang gadai kamu.</p>
+        <div class="booking-code-box">
+          <p class="booking-code-label">Kode Booking</p>
+          <p class="booking-code-value" id="bookingCodeDisplay">PG-XXXXXX</p>
+        </div>
+        <a href="/guest/home" class="btn-back-home">Kembali ke Beranda</a>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- FOOTER ACTION BAR -->
+    <div class="footer-bar" id="footerBar">
+      <div id="priceEstRow" class="price-estimate-row" style="display:none">
+        <span class="price-est-label">Perkiraan Nilai Pinjaman</span>
+        <span class="price-est-value" id="footerLoanRange"></span>
+      </div>
+      <button class="btn-lanjut" id="btnLanjut" onclick="handleLanjut()">Lanjut</button>
+      <button class="btn-secondary" id="btnCekLain" style="display:none" onclick="resetToStep1()">Cek Nilai Barang Lain</button>
+    </div>
+
+    <!-- BRANCH SELECTOR OVERLAY -->
+    <div id="branchOverlay" onclick="closeBranchSheet(event)">
+      <div class="branch-sheet" onclick="event.stopPropagation()">
+        <p class="branch-sheet-title">Pilih Cabang</p>
+        <div id="branchList"></div>
+      </div>
+    </div>
+
+    <!-- LEAD CAPTURE BOTTOMSHEET -->
+    <div id="leadOverlay" onclick="closeLeadOverlay()">
+      <div class="lead-sheet" onclick="event.stopPropagation()">
+        <div class="lead-sheet-handle"></div>
+
+        <!-- Hero section -->
+        <div class="lead-sheet-hero">
+          <h2 class="lead-sheet-title">Cek Estimasi Gadai, <span>Ada Bonus Buat Kamu</span></h2>
+          <p class="lead-sheet-sub">Isi nama dan nomor HP kamu untuk mulai. Dapatkan extra pinjaman hingga Rp100.000 — proses cepat tanpa BI Checking, duit langsung cair!</p>
+          <div class="lead-trust-row">
+            <div class="lead-trust-pill">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1L10 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H6L8 1Z" fill="rgba(255,255,255,0.7)"/>
+              </svg>
+              10.000+ pelanggan
+            </div>
+            <div class="lead-trust-pill">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="7" width="10" height="8" rx="2" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+                <path d="M5 7V5a3 3 0 016 0v2" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Data aman &amp; terlindungi
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="lead-form">
+          <div class="lead-field">
+            <label class="lead-label">Nama Lengkap</label>
+            <input type="text" class="lead-input" id="leadName" placeholder="Masukkan nama kamu" maxlength="50"
+                   oninput="validateLeadForm()"/>
+            <span class="lead-input-error" id="leadNameErr" style="display:none"></span>
+          </div>
+          <div class="lead-field">
+            <label class="lead-label">Nomor HP Aktif</label>
+            <input type="tel" class="lead-input" id="leadPhone" placeholder="Contoh: 0812XXXXXXXX" maxlength="13"
+                   oninput="validateLeadForm()"/>
+            <span class="lead-input-error" id="leadPhoneErr" style="display:none"></span>
+          </div>
+        </div>
+
+        <button class="lead-cta disabled" id="leadCtaBtn" onclick="submitLead()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M13 5l7 7-7 7M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Mulai Cek Estimasi
+        </button>
+
+        <div class="lead-privacy">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="2" stroke="#94A0B8" stroke-width="1.5"/>
+            <path d="M5 7V5a3 3 0 016 0v2" stroke="#94A0B8" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Data kamu aman. Kami tidak akan membagikan info pribadimu kepada pihak ketiga.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app -->
+
+  <script>
+    // ── STATE ──────────────────────────────────────────────────────────────────
+    let currentStep = 1;
+    let selectedProduct = null;
+    let selectedTime = null;
+    let selectedBranch = null;
+    let searchDebounce = null;
+    let branches = [];
+
+    const BRANCHES_STATIC = [
+      {id:1, name:"Otista", address:"Jl. Otista Raya No. 161, Bidara Cina, Kec. Jatinegara, Kota. Jakarta Timur, 13330"},
+      {id:4, name:"Koja", address:"Jl. Plumpang Semper No.34, Tugu Sel., Kec. Koja, Jakarta Utara 14230"},
+      {id:5, name:"Tambora", address:"Jalan Duri Utara No.5, Duri Utara, Kec. Tambora, Jakarta Barat 11270"},
+      {id:6, name:"Rawa Badak", address:"Jl Cibanteng Raya Gg VI No. 25, Rawa Badak Utara, Kec. Koja, Jakarta Utara 14220"},
+      {id:7, name:"Condet", address:"Jl. Raya Condet No.4, Kel. Balekambang, Kec. Kramat Jati, Jakarta Timur 13530"},
+      {id:8, name:"Kramat Jaya", address:"Jl. Simpang III Tugu Semper No 5, Kel Tugu Utara, Kec Koja, Jakarta Utara 14260"},
+      {id:9, name:"Dewi Sartika", address:"Jl. Raya Dewi Sartika No.19, Kel. Cililitan, Kec. Kramat Jati, Jakarta Timur 13640"},
+      {id:10, name:"Warakas", address:"Jl. Warakas I No.23B, Kel. Warakas, Kec. Tanjung Priok, Jakarta Utara 14370"},
+    ];
+
+    // ── HELPERS ────────────────────────────────────────────────────────────────
+    function toRupiah(n) {
+      if (!n) return 'Rp0';
+      return 'Rp' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function formatJuta(n) {
+      if (!n) return 'Rp0';
+      if (n >= 1000000) return 'Rp' + (n / 1000000).toFixed(1) + 'jt';
+      return toRupiah(n);
+    }
+
+    // ── STEP MANAGEMENT ───────────────────────────────────────────────────────
+    function setStep(n) {
+      currentStep = n;
+      const steps = ['step1','step2','step3','stepSuccess'];
+      steps.forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.style.display = (i === (n - 1)) ? (id === 'stepSuccess' ? 'flex' : 'block') : 'none';
+      });
+      // Step bar
+      for (let i = 1; i <= 3; i++) {
+        const circle = document.getElementById('stepCircle' + i);
+        const label = document.getElementById('stepLabel' + i);
+        circle.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+        label.className = 'step-label' + (i < n ? ' done' : i === n ? ' active' : '');
+        if (i < n) circle.innerHTML = '✓';
+        else circle.innerHTML = i;
+        if (i < 3) {
+          document.getElementById('stepConn' + i).className = 'step-connector' + (i < n ? ' done' : '');
+        }
+      }
+      // Footer bar
+      const footer = document.getElementById('footerBar');
+      if (n === 2) {
+        footer.classList.add('visible');
+        document.getElementById('priceEstRow').style.display = 'flex';
+        document.getElementById('btnLanjut').textContent = 'Lanjut';
+        document.getElementById('btnCekLain').style.display = 'block';
+        if (selectedProduct) {
+          document.getElementById('footerLoanRange').textContent =
+            formatJuta(selectedProduct.min_loan) + ' - ' + formatJuta(selectedProduct.max_loan);
+        }
+      } else if (n === 3) {
+        footer.classList.add('visible');
+        document.getElementById('priceEstRow').style.display = 'none';
+        document.getElementById('btnLanjut').textContent = 'Booking Gadai Instan';
+        document.getElementById('btnCekLain').style.display = 'none';
+      } else {
+        footer.classList.remove('visible');
+      }
+      document.getElementById('stepBar').style.display = n === 4 ? 'none' : '';
+      window.scrollTo(0, 0);
+    }
+
+    function goBack() {
+      if (currentStep > 1 && currentStep <= 3) setStep(currentStep - 1);
+      else window.location.href = '/guest/home';
+    }
+
+    function goToStep(n) {
+      if (n < currentStep && n >= 1) {
+        if (n === 1) resetToStep1();
+        else setStep(n);
+      }
+    }
+
+    function handleLanjut() {
+      if (currentStep === 2) {
+        setStep(3);
+      } else if (currentStep === 3) {
+        submitBooking();
+      }
+    }
+
+    function resetToStep1() {
+      selectedProduct = null;
+      setStep(1);
+    }
+
+    // ── PRODUCT SEARCH ────────────────────────────────────────────────────────
+    function onSearchInput(val) {
+      clearTimeout(searchDebounce);
+      const delay = val.length === 0 || val.length > 1 ? 500 : 0;
+      searchDebounce = setTimeout(() => fetchProducts(val), delay);
+    }
+
+    async function fetchProducts(query) {
+      showSpinner();
+      try {
+        const qs = new URLSearchParams({ page: '1', page_size: query ? '25' : '10' });
+        if (query) qs.append('device', query);
+        const res = await fetch(`https://api.pandaigadai.com/landing/v1/price-references?${qs}`);
+        const data = await res.json();
+        renderProducts(data?.data?.rows || []);
+      } catch(e) {
+        renderProducts([]);
+      }
+    }
+
+    function showSpinner() {
+      document.getElementById('productSpinner').style.display = 'flex';
+      document.getElementById('productGrid').style.display = 'none';
+      document.getElementById('notFound').style.display = 'none';
+      document.getElementById('missingFooter').style.display = 'none';
+    }
+
+    function renderProducts(items) {
+      document.getElementById('productSpinner').style.display = 'none';
+      const grid = document.getElementById('productGrid');
+      const notFound = document.getElementById('notFound');
+      const missing = document.getElementById('missingFooter');
+
+      if (items === null || items.length === 0) {
+        grid.style.display = 'none';
+        notFound.style.display = items === null ? 'flex' : 'none';
+        missing.style.display = 'none';
+        return;
+      }
+
+      notFound.style.display = 'none';
+      missing.style.display = 'flex';
+      grid.style.display = 'grid';
+
+      grid.innerHTML = items.map((item, idx) => {
+        const isLaptop = item.device_category === 'ELEKTRONIK_LAPTOP';
+        const imgSrc = item.images && item.images.length > 0
+          ? item.images[0]
+          : (isLaptop ? 'images/laptop-placeholder.webp' : 'images/phone-placeholder.webp');
+        const align = idx % 2 === 0 ? 'flex-start' : 'flex-end';
+        return `
+          <div class="product-col" style="justify-content:${align}">
+            <div class="product-card" onclick="selectProduct(${idx})">
+              <img class="product-img" src="${imgSrc}" alt="${item.device}" loading="lazy"
+                   onerror="this.src='${isLaptop ? 'images/laptop-placeholder.webp' : 'images/phone-placeholder.webp'}'"/>
+              <p class="product-name">${item.device}</p>
+            </div>
+          </div>`;
+      }).join('');
+
+      // Store items for selection
+      grid._items = items;
+    }
+
+    function selectProduct(idx) {
+      const grid = document.getElementById('productGrid');
+      const item = grid._items[idx];
+      if (!item) return;
+      selectedProduct = item;
+
+      const isLaptop = item.device_category === 'ELEKTRONIK_LAPTOP';
+      const imgSrc = item.images && item.images.length > 0
+        ? item.images[0]
+        : (isLaptop ? 'images/laptop-placeholder.webp' : 'images/phone-placeholder.webp');
+
+      document.getElementById('detailName').textContent = item.device;
+      document.getElementById('detailImg').src = imgSrc;
+      document.getElementById('detailImg').onerror = function() {
+        this.src = isLaptop ? 'images/laptop-placeholder.webp' : 'images/phone-placeholder.webp';
+      };
+      document.getElementById('detailLoan').innerHTML =
+        `${toRupiah(item.min_loan)} -  ${toRupiah(item.max_loan)}<span>*</span>`;
+      document.getElementById('footerLoanRange').textContent =
+        formatJuta(item.min_loan) + ' - ' + formatJuta(item.max_loan);
+
+      setStep(2);
+    }
+
+    // ── TIME SELECTION ─────────────────────────────────────────────────────────
+    function selectTime(id) {
+      selectedTime = id;
+      ['TODAY','TOMORROW','DAY_AFTER_TOMORROW'].forEach(t => {
+        const opt = document.querySelector(`[onclick="selectTime('${t}')"]`);
+        const dot = document.getElementById('radioDot' + t);
+        const lbl = document.getElementById('timeLabel' + t);
+        const isSelected = t === id;
+        if (dot) dot.className = 'radio-dot' + (isSelected ? ' selected' : '');
+        if (lbl) lbl.className = 'time-label' + (isSelected ? ' selected' : '');
+        if (opt) opt.className = 'time-option' + (isSelected ? ' selected' : '');
+      });
+      document.getElementById('timeGroup').classList.remove('error');
+      document.getElementById('timeError').style.display = 'none';
+      validateForm();
+    }
+
+    // ── BRANCH SELECTION ──────────────────────────────────────────────────────
+    function openBranchSheet() {
+      const overlay = document.getElementById('branchOverlay');
+      overlay.classList.add('open');
+      const list = document.getElementById('branchList');
+      list.innerHTML = BRANCHES_STATIC.map(b => `
+        <div class="branch-list-item" onclick="selectBranch(${b.id})">
+          <p class="branch-list-name">${b.name}</p>
+          <p class="branch-list-addr">${b.address}</p>
+        </div>`).join('');
+    }
+
+    function closeBranchSheet(e) {
+      document.getElementById('branchOverlay').classList.remove('open');
+    }
+
+    function selectBranch(id) {
+      selectedBranch = BRANCHES_STATIC.find(b => b.id === id);
+      closeBranchSheet();
+      document.getElementById('branchEmpty').style.display = 'none';
+      document.getElementById('branchSelected').style.display = 'block';
+      document.getElementById('selectedBranchName').textContent = selectedBranch.name;
+      document.getElementById('selectedBranchAddr').textContent = selectedBranch.address;
+      validateForm();
+    }
+
+    // ── FORM VALIDATION ───────────────────────────────────────────────────────
+    function validateForm() {
+      if (currentStep !== 3) return;
+      const name = document.getElementById('inputName').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const email = document.getElementById('inputEmail').value.trim();
+      let valid = true;
+
+      const nameErr = document.getElementById('errName');
+      const phoneErr = document.getElementById('errPhone');
+      const emailErr = document.getElementById('errEmail');
+
+      // Name
+      if (!name) { nameErr.textContent = 'Nama tidak boleh kosong'; nameErr.style.display = 'block'; valid = false; }
+      else { nameErr.style.display = 'none'; }
+
+      // Phone (starts with 08, min 9 digits)
+      if (!phone) { phoneErr.textContent = 'Nomor HP tidak boleh kosong'; phoneErr.style.display = 'block'; valid = false; }
+      else if (!/^08\d{7,}$/.test(phone)) { phoneErr.textContent = 'Nomor HP harus diawali 08 dengan minimal 9 angka'; phoneErr.style.display = 'block'; valid = false; }
+      else { phoneErr.style.display = 'none'; }
+
+      // Email (optional)
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailErr.textContent = 'Format email salah'; emailErr.style.display = 'block'; valid = false;
+      } else { emailErr.style.display = 'none'; }
+
+      const canSubmit = valid && !!selectedBranch && !!selectedTime;
+      const btn = document.getElementById('btnLanjut');
+      btn.className = 'btn-lanjut' + (canSubmit ? '' : ' disabled');
+      return canSubmit;
+    }
+
+    // ── BOOKING SUBMIT ────────────────────────────────────────────────────────
+    async function submitBooking() {
+      if (!validateForm()) {
+        if (!selectedTime) {
+        document.getElementById('timeError').style.display = 'block';
+        document.getElementById('timeGroup').classList.add('error');
+      }
+        return;
+      }
+      const btn = document.getElementById('btnLanjut');
+      btn.textContent = 'Memproses...';
+      btn.className = 'btn-lanjut disabled';
+      await new Promise(r => setTimeout(r, 1200));
+      // Show success
+      setStep(4);
+      document.getElementById('stepSuccess').style.display = 'flex';
+      document.getElementById('bookingCodeDisplay').textContent = 'PG-' + Math.random().toString(36).substring(2,8).toUpperCase();
+    }
+
+    // ── PROMO SELECTION ──────────────────────────────────────────────────────
+    let selectedPromo = null;
+
+    function selectPromo(code, el) {
+      selectedPromo = code;
+      document.querySelectorAll('.promo-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    // ── LEAD CAPTURE ─────────────────────────────────────────────────────────
+    let leadSubmitted = false;
+
+    function openLeadSheet() {
+      document.getElementById('leadOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('leadName').focus(), 350);
+    }
+
+    function validateLeadForm() {
+      const name  = document.getElementById('leadName').value.trim();
+      const phone = document.getElementById('leadPhone').value.trim();
+      const nameErr  = document.getElementById('leadNameErr');
+      const phoneErr = document.getElementById('leadPhoneErr');
+      let valid = true;
+
+      if (!name) {
+        nameErr.textContent = 'Nama tidak boleh kosong';
+        nameErr.style.display = 'block';
+        valid = false;
+      } else { nameErr.style.display = 'none'; }
+
+      if (!phone) {
+        phoneErr.textContent = 'Nomor HP tidak boleh kosong';
+        phoneErr.style.display = 'block';
+        valid = false;
+      } else if (!/^08\d{7,}$/.test(phone)) {
+        phoneErr.textContent = 'Harus diawali 08 dengan minimal 9 angka';
+        phoneErr.style.display = 'block';
+        valid = false;
+      } else { phoneErr.style.display = 'none'; }
+
+      const btn = document.getElementById('leadCtaBtn');
+      btn.className = 'lead-cta' + (valid ? '' : ' disabled');
+      return valid;
+    }
+
+    function submitLead() {
+      if (!validateLeadForm()) return;
+      const name  = document.getElementById('leadName').value.trim();
+      const phone = document.getElementById('leadPhone').value.trim();
+
+      // Store lead data — pre-fill Step 3 fields
+      leadSubmitted = true;
+      document.getElementById('inputName').value  = name;
+      document.getElementById('inputPhone').value = phone;
+
+      // Animate out
+      const sheet = document.querySelector('.lead-sheet');
+      sheet.style.transition = 'transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)';
+      sheet.style.transform  = 'translateY(100%)';
+      setTimeout(() => {
+        document.getElementById('leadOverlay').classList.remove('open');
+        sheet.style.transform = '';
+      }, 300);
+    }
+
+    // ── LEAD OVERLAY CLOSE ────────────────────────────────────────────────────
+    function closeLeadOverlay() {
+      const sheet = document.querySelector('.lead-sheet');
+      sheet.style.transition = 'transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)';
+      sheet.style.transform  = 'translateY(100%)';
+      setTimeout(() => {
+        document.getElementById('leadOverlay').classList.remove('open');
+        sheet.style.transform = '';
+      }, 300);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    setStep(1);
+    fetchProducts('');
+  </script>
+</body>
+</html>

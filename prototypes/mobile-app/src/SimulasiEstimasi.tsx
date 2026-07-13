@@ -218,7 +218,7 @@ export default function SimulasiEstimasi() {
 
               {/* Syarat - not eligible */}
               <div className="bg-[#fef2f2] flex flex-col gap-[12px] items-start p-[16px] shrink-0 w-full">
-                <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px]">Syarat Gadai BPKB Instan (Tanpa Survei)</p>
+                <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px]">Kenapa tidak lolos BPKB Instan (Tanpa Survei)?</p>
                 <div className="flex flex-col gap-[8px] w-full">
                   {SYARAT_BPKB_CHECKS.map(({ text, ok }) => (
                     <div key={text} className="flex flex-wrap gap-[4px] items-center w-full">
@@ -234,7 +234,7 @@ export default function SimulasiEstimasi() {
                 </div>
               </div>
 
-              {cabangCard}
+              {bpkbKota !== 'Lainnya' && cabangCard}
             </>
 
           ) : (
@@ -249,7 +249,7 @@ export default function SimulasiEstimasi() {
                     <p className="font-normal leading-[24px] text-[#0f1729] text-[16px] text-center w-full">{item}</p>
                     <InspectLabel label="Loan estimate" tokens={['label: Caption · #65758b', 'value: Title 1 Bold · #001cdb (text/info)']} className="w-full">
                     <div className="flex flex-col items-center w-full">
-                      <p className="font-normal leading-[16px] text-[#65758b] text-[12px] text-center w-full">Nilai pinjaman</p>
+                      <p className="font-normal leading-[16px] text-[#65758b] text-[12px] text-center w-full">Nilai pinjaman maks.</p>
                       <div className="flex gap-[4px] items-center justify-center">
                         <p className="font-bold leading-[32px] text-[#001cdb] text-[20px] text-center whitespace-nowrap">Rp2.950.000</p>
                         <button onClick={() => setShowTooltip(true)} className="shrink-0 size-[18px] flex items-center justify-center">
@@ -273,7 +273,7 @@ export default function SimulasiEstimasi() {
 
               {/* Syarat - eligible */}
               <div className="bg-[#f0fdf4] flex flex-col gap-[12px] items-start p-[16px] shrink-0 w-full">
-                <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px]">Syarat Gadai BPKB Instan</p>
+                <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px]">Syarat Gadai BPKB Instan (Tanpa Survei)</p>
                 <div className="flex flex-col gap-[8px] w-full">
                   {SYARAT_BPKB.map(text => (
                     <div key={text} className="flex gap-[4px] items-center shrink-0 w-full">
@@ -359,6 +359,9 @@ export default function SimulasiEstimasi() {
                     <div className="flex gap-[4px] items-center">
                       <img src="/assets/discount.png" alt="" className="shrink-0 size-[14px] object-contain brightness-0 invert" />
                       <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">{PROMOS[selectedPromo].title}</p>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                        <path d="M9 18l6-6-6-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
                     <p className="font-normal leading-[18px] text-[12px] text-white">Khusus gadai pertama, min. pinjaman Rp2jt</p>
                   </div>

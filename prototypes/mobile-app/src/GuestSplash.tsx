@@ -23,9 +23,11 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
       className="w-[375px] overflow-hidden rounded-3xl shadow-2xl relative"
       style={{
         height: 812,
-        backgroundImage: "url('/assets/splash-bg.png')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundColor: 'rgba(70,150,248,0.3)',
+        backgroundImage: "url('/assets/glass-bg-login.svg')",
+        backgroundSize: '774px 857px',
+        backgroundPosition: '-212px -135px',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       {/* Status bar — always visible */}
@@ -72,7 +74,7 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
       >
         {/* Butuh Bantuan */}
         <div className="flex items-center justify-end h-[56px] shrink-0">
-          <button className="flex items-center gap-1 h-7 px-[10px] rounded-full bg-white/70">
+          <button data-component="Help Button" className="flex items-center gap-1 h-7 px-[10px] rounded-full bg-white/70">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#023dff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3.5 10.5v-1a6.5 6.5 0 0 1 13 0v1"/>
               <rect x="2" y="10.5" width="2.5" height="4" rx="1.25"/>
@@ -89,26 +91,28 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
         </div>
 
         {/* Headline */}
-        <h1 className="text-[22px] font-bold text-[#0f1729] leading-[28px] text-center mb-8 px-2">
+        <h1 data-component="Splash Headline" className="text-[22px] font-bold text-[#0f1729] leading-[28px] text-center mb-8 px-2">
           Gadai Aman, Nyaman, Full Senyuman di Pandai Gadai
         </h1>
 
         {/* Form card */}
-        <div className="bg-white rounded-xl shadow-lg px-3 py-4 flex flex-col gap-3">
+        <div data-component="Login Card" className="bg-white/70 rounded-[12px] px-3 py-4 flex flex-col gap-3" style={{ boxShadow: '0px 0px 4px 0px rgba(0,0,0,0.15)' }}>
           <div className="flex flex-col gap-1">
             <input
+              data-component="Nomor HP Input"
               type="text"
-              placeholder="Pandai ID/NIK"
+              placeholder="Nomor HP"
               value={nik}
               onChange={e => setNik(e.target.value)}
               className="w-full border border-[#cbd5e1] rounded-[6px] px-3 py-3 text-[14px] outline-none bg-white text-[#64748b]"
             />
           </div>
           <button
+            data-component="Primary CTA — Masuk"
             onClick={() => {}}
             className="w-full bg-[#023dff] rounded-[8px] py-3 text-[14px] font-semibold text-white"
           >
-            Masuk dengan Pandai ID/NIK
+            Masuk dengan Nomor HP
           </button>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
@@ -134,12 +138,17 @@ export default function GuestSplash({ startAtLogin = false }: { startAtLogin?: b
           </label>
         </div>
 
-        <button
-          onClick={() => navigate('/guest/home')}
-          className="mt-6 text-center text-[14px] font-semibold text-[#0020e3] w-full"
-        >
-          Masuk tanpa akun
-        </button>
+        {/* Guest entry — outside card, per Figma */}
+        <div className="flex flex-col gap-2 mt-2">
+          <p className="text-[13px] text-[#64748b]">Belum pernah gadai?</p>
+          <button
+            data-component="Secondary CTA — Masuk Tanpa Akun"
+            onClick={() => navigate('/guest/home')}
+            className="w-full bg-white border border-[#cbd5e1] rounded-[8px] py-3 flex items-center justify-center"
+          >
+            <span className="text-[14px] font-semibold text-[#021431]">Masuk tanpa akun</span>
+          </button>
+        </div>
       </div>
 
       {/* Home indicator — always visible */}

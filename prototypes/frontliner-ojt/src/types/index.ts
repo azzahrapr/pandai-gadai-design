@@ -129,6 +129,7 @@ export interface FLProfile {
   activeMilestoneIds: string[]
   completedMilestoneIds?: string[]
   quizScores?: Record<string, number>
+  quizAnswers?: Record<string, Record<string, number>>
 }
 
 export interface KanitProfile {

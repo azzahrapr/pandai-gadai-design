@@ -219,17 +219,17 @@ export default function SimulasiPromoSukses() {
           </button>
           {promoApplied ? (
             <button className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full">
-              <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Simpan Kode Promo</p>
+              <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Simpan Ringkasan</p>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
           ) : (
-            <button
-              onClick={() => navigate('/home')}
-              className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
-            >
-              <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Keluar</p>
+            <button className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full">
+              <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Simpan Ringkasan</p>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           )}
         </div>

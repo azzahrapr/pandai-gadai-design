@@ -5,15 +5,6 @@ const imgRight   = "/assets/status-right.svg"
 const imgMascot  = "/assets/panda-pose8.png"
 const imgBg      = "/assets/simulasi-bg.png"
 
-// Copy icon vectors (Cortes DS: copy icon)
-const imgCopyVec1 = "https://www.figma.com/api/mcp/asset/49bfa8f1-a311-4399-b036-61e7f1dbb806"
-const imgCopyVec2 = "https://www.figma.com/api/mcp/asset/e3e41669-8ad2-47b2-b7ac-9c00f23a2c7c"
-
-// Check circle inner vector (check_circle DS component)
-const imgCheckCircle = "https://www.figma.com/api/mcp/asset/3d73b097-d3b2-4803-8756-d84aa6f725d0"
-
-// Download icon vector (icon-filled/download)
-const imgDownload = "https://www.figma.com/api/mcp/asset/7906c7a2-ed97-4808-9796-99d69d8ea628"
 
 export default function SimulasiPromo() {
   const navigate = useNavigate()
@@ -68,14 +59,10 @@ export default function SimulasiPromo() {
                 <p className="font-bold leading-[36px] text-white text-[28px] text-center whitespace-nowrap" style={{ letterSpacing: '-0.168px' }}>
                   EXTRA100
                 </p>
-                <div className="overflow-clip relative shrink-0 size-[20px]">
-                  <div className="absolute" style={{ bottom: '8.33%', left: '25%', right: '8.33%', top: '25%' }}>
-                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCopyVec1} />
-                  </div>
-                  <div className="absolute" style={{ inset: '8.33% 27.08% 26.1% 8.33%' }}>
-                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCopyVec2} />
-                  </div>
-                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-80">
+                  <rect x="9" y="9" width="13" height="13" rx="2" stroke="white" strokeWidth="1.5"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
               </div>
             </div>
           </div>
@@ -98,11 +85,10 @@ export default function SimulasiPromo() {
             'Tunjukkan saat transaksi di cabang',
           ].map((text, i) => (
             <div key={i} className="flex gap-[4px] items-center shrink-0 w-full">
-              <div className="overflow-clip relative shrink-0 size-[18px]">
-                <div className="absolute" style={{ inset: '8.33%' }}>
-                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCheckCircle} />
-                </div>
-              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <circle cx="12" cy="12" r="10" fill="#16a34a"/>
+                <path d="M7 12l3.5 3.5L17 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <p className="font-normal leading-[20px] text-[14px] text-black whitespace-nowrap">{text}</p>
             </div>
           ))}
@@ -123,11 +109,10 @@ export default function SimulasiPromo() {
             className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
           >
             <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Simpan Kode Promo</p>
-            <div className="overflow-clip relative shrink-0 size-[18px]">
-              <div className="absolute" style={{ inset: '12.5% 12.5% 8.33% 12.5%' }}>
-                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgDownload} />
-              </div>
-            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+              <path d="M12 3v13M7 11l5 5 5-5" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 21h14" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </button>
         </div>
       </div>

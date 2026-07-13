@@ -1,15 +1,29 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
-const imgDate    = "/assets/status-date.svg"
-const imgRight   = "/assets/status-right.svg"
-const imgContactCs = "https://www.figma.com/api/mcp/asset/fc927073-a217-45ab-a84e-c879d70af702"
-const imgBg        = "https://www.figma.com/api/mcp/asset/ca668d77-3b54-4219-a033-58db55df9269"
+const imgDate  = "/assets/status-date.svg"
+const imgRight = "/assets/status-right.svg"
 
 export default function SimulasiSukses() {
   const navigate = useNavigate()
   const location = useLocation()
   const state = location.state as { item?: string; category?: string } | null
+  const item = state?.item ?? ''
   const category = state?.category ?? ''
+  const isMobil = category === 'BPKB Mobil'
+
+  const vehicleIcon = (
+    <div className="relative shrink-0 size-[24px]">
+      <div className="absolute inset-0 bg-[#e5f2ff] rounded-full" />
+      <div className="absolute inset-[3px] flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#023dff">
+          {isMobil
+            ? <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+            : <path d="M19 10.5c-.83-2.34-3.05-4-5.62-4H9l-2 4H5c-1.1 0-2 .9-2 2v3h2c0 1.66 1.34 3 3 3s3-1.34 3-3h4c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-3c0-1.1-.9-2-2-2h-2l-3-4H9l-2 4z"/>
+          }
+        </svg>
+      </div>
+    </div>
+  )
 
   return (
     <div className="bg-[#f8fafc] flex flex-col items-start relative rounded-3xl shadow-2xl overflow-hidden" style={{ width: 375, height: 812 }}>
@@ -41,42 +55,58 @@ export default function SimulasiSukses() {
       </div>
 
       {/* Content */}
-      <div className="bg-[#e5f2ff] flex flex-1 flex-col gap-[24px] items-center min-h-0 px-[16px] py-[32px] relative w-full overflow-y-auto hide-scrollbar pb-[136px]">
+      <div className="bg-[#e5f2ff] flex flex-col gap-[16px] items-center overflow-y-auto hide-scrollbar flex-1 min-h-0 w-full px-[16px] py-[32px] relative pb-[136px]">
+
         {/* Decorative background */}
         <div className="absolute left-0 size-[375px] top-[16px] pointer-events-none">
-          <img alt="" className="absolute block inset-0 max-w-none size-full object-cover" src={imgBg} />
+          <img alt="" className="absolute block inset-0 max-w-none size-full object-cover" src="/assets/simulasi-bg.png" />
         </div>
 
-        {/* Illustration */}
-        <img src={imgContactCs} alt="" className="relative shrink-0 size-[148px] object-contain" />
+        {/* Banner-promo container: h-[308px] */}
+        <div className="h-[308px] relative shrink-0 w-[343px]">
 
-        {/* Title */}
-        <div className="flex flex-col gap-[4px] items-center relative shrink-0 text-[#0f1729] text-center w-full">
-          <div className="font-semibold leading-[0] text-[18px] w-full">
-            <p className="leading-[28px]">Terima kasih sudah memilih</p>
-            <p className="leading-[28px]">Pandai Gadai!</p>
+          {/* Panda mascot */}
+          <div className="absolute -translate-x-1/2 left-1/2 size-[143px] top-0 pointer-events-none z-10">
+            <img alt="" className="absolute inset-0 max-w-none object-cover size-full" src="/assets/panda-pose8.png" />
           </div>
-          <p className="font-normal leading-[20px] text-[14px] w-full">
-            Tim kami akan segera menghubungi kamu.
-          </p>
+
+          {/* Card + banner group */}
+          <div className="absolute -translate-x-1/2 flex flex-col items-start left-1/2 top-[132px]">
+
+            {/* Price card — rounded top only */}
+            <div className="bg-white border border-[#e1e7ef] flex flex-col gap-[8px] items-center justify-center px-[8px] py-[12px] rounded-tl-[12px] rounded-tr-[12px] shrink-0 w-[343px]">
+              {vehicleIcon}
+              <p className="font-normal leading-[24px] min-w-full text-[#0f1729] text-[16px] text-center w-min">{item}</p>
+              <div className="flex flex-col items-start shrink-0 w-full">
+                <p className="font-normal leading-[16px] text-[#65758b] text-[12px] text-center w-full">Nilai pinjaman maks.</p>
+                <div className="flex items-center justify-center shrink-0 w-full">
+                  <p className="font-bold leading-[32px] text-[#001cdb] text-[20px] text-center whitespace-nowrap">Rp2.950.000</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Grey info banner — rounded bottom only */}
+            <div className="bg-[#f8fafc] border-b border-l border-r border-[#e1e7ef] flex items-center justify-center gap-[6px] px-[12px] py-[8px] rounded-bl-[8px] rounded-br-[8px] shrink-0 w-full">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <p className="font-bold leading-[15px] text-[#0f1729] text-[12px] whitespace-nowrap">Tim kami akan segera menghubungi kamu!</p>
+            </div>
+
+          </div>
         </div>
 
-        {/* Card */}
+        {/* Bottom card — full width */}
         <div className="bg-[rgba(255,255,255,0.7)] border border-[#e1e7ef] flex flex-col gap-[12px] items-center p-[16px] relative rounded-[12px] shrink-0 w-full">
           <div className="flex flex-col gap-[4px] items-start w-full">
-            <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] w-full">
-              Mau cair hari ini? Langsung ke cabang aja!
-            </p>
+            <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] w-full">Mau cair hari ini? Langsung ke cabang aja!</p>
             <p className="font-normal leading-[16px] text-[#65758b] text-[12px] w-full">
-              {category.startsWith('BPKB')
+              {isMobil
                 ? 'Tinggal bawa BPKB & KTP, petugas kami akan melayani kamu 😊'
-                : 'Tinggal bawa barang & KTP, petugas kami akan melayani kamu 😊'}
+                : 'Tinggal bawa BPKB & KTP, petugas kami akan melayani kamu 😊'}
             </p>
           </div>
-          <div
-            onClick={() => navigate('/cabang')}
-            className="bg-white border border-[#e1e7ef] flex gap-[4px] items-center px-[12px] py-[8px] rounded-[8px] shrink-0 w-full cursor-pointer"
-          >
+          <div onClick={() => navigate('/cabang')} className="bg-white border border-[#e1e7ef] flex gap-[4px] items-center px-[12px] py-[8px] rounded-[8px] shrink-0 w-full cursor-pointer">
             <div className="flex h-[58px] items-start shrink-0">
               <div className="flex items-center py-[4px] shrink-0">
                 <img src="/assets/chips/icon/fi/outline/marker.png" alt="" className="size-[16px]" />
@@ -104,22 +134,23 @@ export default function SimulasiSukses() {
             </svg>
           </div>
         </div>
+
       </div>
 
       {/* Sticky footer */}
       <div className="absolute bottom-0 flex flex-col items-start left-0 w-[375px]">
-        <div className="bg-white border-t border-[#e1e7ef] flex flex-col gap-[12px] items-center justify-center overflow-clip pb-[24px] pt-[16px] px-[16px] shrink-0 w-full">
+        <div className="bg-white flex flex-col gap-[12px] items-center justify-center overflow-clip pb-[24px] pt-[8px] px-[16px] shrink-0 w-full">
           <button
             onClick={() => window.open('https://maps.app.goo.gl/aXvs1R3j2mcr5iPb7', '_blank')}
             className="bg-[#023dff] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
           >
             <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Lihat Cabang</p>
           </button>
-          <button
-            onClick={() => navigate('/guest/home')}
-            className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
-          >
-            <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Keluar</p>
+          <button className="bg-white border border-[#cbd5e1] flex gap-[4px] h-[44px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full">
+            <p className="font-semibold leading-[22px] text-[#0f1729] text-[14px] whitespace-nowrap">Simpan Ringkasan</p>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#0f1729" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
         </div>
       </div>

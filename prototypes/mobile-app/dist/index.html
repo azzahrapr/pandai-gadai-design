@@ -3,11 +3,500 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Detail Pinjaman</title>
-    <script type="module" crossorigin src="/assets/index-Cy6gd5sg.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BYSKaa4p.css">
+    <title>Pandai Gadai</title>
+    <style>
+      /* ── INSPECT OVERLAY ── */
+      body.inspect-mode { cursor: default; }
+      #inspect-badge {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 99999;
+        color: #fff;
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        border: none;
+        background: #475569;
+        transition: background 0.15s;
+      }
+      #inspect-badge:hover { background: #344256; }
+      body.inspect-mode #inspect-badge { background: #0255CA; box-shadow: 0 2px 8px rgba(2,84,202,0.4); }
+      body.inspect-mode #inspect-badge:hover { background: #001cdb; }
+      #inspect-panel {
+        position: fixed;
+        top: 44px;
+        right: 12px;
+        z-index: 99998;
+        width: 280px;
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+        background: #021431;
+        border-radius: 10px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+        font-family: monospace;
+        font-size: 11px;
+        line-height: 1.6;
+        color: #e2e8f0;
+        display: none;
+      }
+      body.inspect-mode #inspect-panel { display: block; }
+      #inspect-panel .ip-hint {
+        padding: 16px 14px;
+        color: #475569;
+        font-size: 11px;
+        text-align: center;
+        line-height: 1.6;
+      }
+      #inspect-panel .ip-close {
+        position: absolute;
+        top: 8px; right: 10px;
+        background: none; border: none;
+        color: #475569; font-size: 16px;
+        cursor: pointer; line-height: 1;
+        display: none;
+      }
+      #inspect-panel .ip-close:hover { color: #e2e8f0; }
+      #inspect-panel .ip-body { padding: 10px 12px 12px; }
+      .it-component { font-size: 12px; font-weight: 700; color: #60a5fa; margin-bottom: 4px; }
+      .it-class { color: #94a3b8; font-size: 10px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .it-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+      .it-label { color: #64748b; min-width: 72px; font-size: 10px; flex-shrink: 0; }
+      .it-value { color: #f1f5f9; font-size: 11px; }
+      .it-swatch {
+        display: inline-block; width: 10px; height: 10px;
+        border-radius: 2px; border: 1px solid rgba(255,255,255,0.2);
+        vertical-align: middle; margin-right: 4px;
+      }
+      .it-token { color: #34d399; font-size: 10px; }
+      .it-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+      .it-section { color: #f59e0b; font-weight: 700; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .it-copy-btn {
+        margin-top: 6px; width: 100%; padding: 5px 0;
+        background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 5px; color: #94a3b8; font-family: monospace;
+        font-size: 10px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
+      }
+      .it-copy-btn:hover { background: rgba(255,255,255,0.13); color: #f1f5f9; }
+      .it-copy-btn.copied { color: #34d399; border-color: #34d399; }
+      .inspect-highlight-ring { outline: 2px solid #0255CA !important; outline-offset: 2px !important; }
+      .inspect-hover-ring { outline: 2px dashed rgba(2,85,202,0.5) !important; outline-offset: 2px !important; }
+    </style>
+    <script type="module" crossorigin src="/assets/index-DPQqO7Mv.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-B5Fe3j-3.css">
   </head>
   <body>
+    <div id="inspect-badge" onclick="ipToggleInspect()">&#128269; Inspect</div>
+    <div id="inspect-panel">
+      <p class="ip-hint">Click any element on the page to inspect it.</p>
+      <button class="ip-close" id="ip-close-btn" onclick="ipUnlock()">&#215;</button>
+    </div>
     <div id="root"></div>
+    <script>
+    // ── INSPECT OVERLAY ──────────────────────────────────────────────────────
+    (function initInspect() {
+      if (new URLSearchParams(location.search).get('inspect') === 'true') {
+        document.body.classList.add('inspect-mode');
+      }
+
+      // Cortes Design System semantic tokens
+      const TOKEN_MAP = {
+        '#023dff': 'background/primary',
+        '#001cdb': 'background/primary-darker',
+        '#ffcd05': 'background/secondary',
+        '#ffffff': 'background/neutral',
+        '#f8fafc': 'background/subtle',
+        '#e1e7ef': 'background/disabled',
+        '#0f1729': 'background/dark',
+        '#16a34a': 'background/success',
+        '#f0fdf4': 'background/success-subtle',
+        '#dc2626': 'background/error',
+        '#fef2f2': 'background/error-subtle',
+        '#e5f2ff': 'background/info-subtle',
+        '#15803d': 'text/success',
+        '#b91c1c': 'text/error',
+        '#cbd5e1': 'border/default',
+        '#94a3b8': 'border/hover',
+        // prototype approximations
+        '#021431': 'text/default ~',
+        '#001533': 'text/default ~',
+        '#0f1729': 'text/default ~',
+        '#5f6c85': 'text/subtle ~',
+        '#65758b': 'text/subtle ~',
+        '#64748b': 'text/subtle ~',
+        '#94a0b8': 'text/disabled ~',
+        '#0255ca': 'background/primary ~',
+        '#0020e3': 'background/primary ~',
+        '#142a5b': 'text/default ~',
+        '#e1e6ef': 'border/subtle ~',
+        '#f1f3f9': 'background/subtle ~',
+        '#f8f9fc': 'background/subtle ~',
+        '#f3f4f6': 'background/subtle ~',
+        '#020617': 'text/default ~',
+        '#020c1b': 'text/default ~',
+      };
+
+      const RADIUS_MAP = {
+        '0px': 'rounded-none', '4px': 'rounded-sm', '6px': 'rounded',
+        '8px': 'rounded-lg', '10px': 'rounded-xl', '12px': 'rounded-2xl',
+        '16px': 'rounded-3xl', '20px': 'rounded-[20px]',
+        '9999px': 'rounded-full', '50%': 'rounded-full',
+      };
+
+      function radiusToken(val) {
+        if (!val || val === '0px') return null;
+        return RADIUS_MAP[val.split(' ')[0]] || null;
+      }
+
+      function typographyToken(sizePx, weight) {
+        const s = Math.round(parseFloat(sizePx)), w = parseInt(weight);
+        if (s === 20 && w >= 700) return 'font-styles/title-1';
+        if (s === 18 && w >= 600) return 'font-styles/title-2';
+        if (s === 16 && w >= 600) return 'font-styles/subtitle-1';
+        if (s === 14 && w >= 600) return 'font-styles/subtitle-2';
+        if (s === 16) return 'font-styles/body-1';
+        if (s === 14) return 'font-styles/body-2';
+        if (s === 13) return 'font-styles/body-2 ~';
+        if (s === 12 && w >= 700) return 'font-styles/label-1';
+        if (s === 10 && w >= 700) return 'font-styles/label-2';
+        if (s === 12) return 'font-styles/caption-1';
+        if (s === 10) return 'font-styles/caption-2';
+        return null;
+      }
+
+      function rgbToHex(rgb) {
+        const m = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!m) return null;
+        return '#' + [m[1],m[2],m[3]].map(function(n) { return (+n).toString(16).padStart(2,'0'); }).join('');
+      }
+
+      function tokenLabel(hex) {
+        if (!hex) return null;
+        return TOKEN_MAP[hex.toLowerCase()] || null;
+      }
+
+      function colorRow(label, hex) {
+        if (!hex || hex === '#000000') return '';
+        const tok = tokenLabel(hex);
+        return '<div class="it-row"><span class="it-label">'+label+'</span><span class="it-value"><span class="it-swatch" style="background:'+hex+'"></span>'+hex+(tok ? ' <span class="it-token">('+tok+')</span>' : '')+'</span></div>';
+      }
+
+      let hoveredEl = null, lockedEl = null;
+      window.snippetStore = {};
+      const snippetStore = window.snippetStore;
+      let snippetId = 0;
+
+      const panel = document.getElementById('inspect-panel');
+      const closeBtn = document.getElementById('ip-close-btn');
+
+      // React uses data-component attribute instead of class names
+      function getInspectTarget(el) {
+        if (!el || el === document.body) return null;
+        // SVG
+        const svgEl = el.tagName === 'svg' ? el : el.closest('svg');
+        if (svgEl) return { type: 'svg', el: svgEl };
+        // Image
+        if (el.tagName === 'IMG') return { type: 'image', el: el };
+        // Walk up DOM for data-component
+        let cur = el;
+        while (cur && cur !== document.body) {
+          if (cur.dataset && cur.dataset.component) {
+            return { type: 'component', el: cur, name: cur.dataset.component };
+          }
+          cur = cur.parentElement;
+        }
+        return null;
+      }
+
+      window.ipExport = function(btn, imgEl, scale) {
+        const original = btn.textContent;
+        btn.textContent = '...';
+        const src = imgEl.getAttribute('src') || '';
+        const base = src.split('/').pop().replace(/\.[^.]+$/, '');
+        const dw = Math.round(imgEl.offsetWidth), dh = Math.round(imgEl.offsetHeight);
+
+        function finish(canvas) {
+          canvas.toBlob(function(blob) {
+            if (!blob) { btn.textContent = 'Error'; return; }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = base + '@' + scale + 'x.png'; a.click();
+            URL.revokeObjectURL(url);
+            btn.textContent = '✓';
+            setTimeout(function() { btn.textContent = original; }, 1500);
+          }, 'image/png');
+        }
+
+        if (src.toLowerCase().endsWith('.svg')) {
+          // SVG path: fetch raw markup and re-render at target resolution — always crisp
+          const tw = dw * scale, th = dh * scale;
+          fetch(src)
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+              const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+              const root = doc.documentElement;
+              if (!root.getAttribute('viewBox')) {
+                root.setAttribute('viewBox', '0 0 ' + (root.getAttribute('width') || dw) + ' ' + (root.getAttribute('height') || dh));
+              }
+              root.setAttribute('width', tw);
+              root.setAttribute('height', th);
+              const svgStr = new XMLSerializer().serializeToString(root);
+              const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+              const img = new Image();
+              img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = tw; canvas.height = th;
+                canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
+                try { finish(canvas); } catch(e) { btn.textContent = 'Error'; }
+              };
+              img.onerror = function() { btn.textContent = 'Error'; };
+              img.src = dataUrl;
+            })
+            .catch(function() { btn.textContent = 'Error'; });
+        } else {
+          // Raster path: never export below natural resolution
+          const nw = imgEl.naturalWidth, nh = imgEl.naturalHeight;
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(dw * scale, nw);
+          canvas.height = Math.max(dh * scale, nh);
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+          finish(canvas);
+        }
+      };
+
+      window.ipExportInlineSvg = function(btn, eid, scale) {
+        const svgEl = snippetStore[eid];
+        const original = btn.textContent;
+        btn.textContent = '...';
+        const rect = svgEl.getBoundingClientRect();
+        const dw = Math.round(rect.width), dh = Math.round(rect.height);
+        const tw = dw * scale, th = dh * scale;
+        // Clone the live element so namespace declarations are preserved
+        const clone = svgEl.cloneNode(true);
+        if (!clone.getAttribute('viewBox')) {
+          clone.setAttribute('viewBox', '0 0 ' + (clone.getAttribute('width') || dw) + ' ' + (clone.getAttribute('height') || dh));
+        }
+        clone.setAttribute('width', tw); clone.setAttribute('height', th);
+        // Data URL is more reliable than Blob URL for SVG→canvas across browsers
+        const svgStr = new XMLSerializer().serializeToString(clone);
+        const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = tw; canvas.height = th;
+          canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
+          try {
+            canvas.toBlob(function(pngBlob) {
+              if (!pngBlob) { btn.textContent = 'Error'; return; }
+              const url = URL.createObjectURL(pngBlob);
+              const a = document.createElement('a');
+              a.href = url; a.download = 'icon@' + scale + 'x.png'; a.click();
+              URL.revokeObjectURL(url);
+              btn.textContent = '✓';
+              setTimeout(function() { btn.textContent = original; }, 1500);
+            }, 'image/png');
+          } catch(e) { btn.textContent = 'Error'; }
+        };
+        img.onerror = function() { btn.textContent = 'Error'; };
+        img.src = dataUrl;
+      };
+
+      window.ipCopy = function(btn, id) {
+        const text = snippetStore[id]; if (!text) return;
+        const original = btn.textContent;
+        const done = function() {
+          btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+          setTimeout(function() { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(function() { fallbackCopy(text); done(); });
+        } else { fallbackCopy(text); done(); }
+      };
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+
+      function renderComponentPanel(el, name) {
+        const cs = getComputedStyle(el);
+        const colorHex = rgbToHex(cs.color), bgHex = rgbToHex(cs.backgroundColor);
+        const borderHex = rgbToHex(cs.borderTopColor), radius = cs.borderRadius;
+        const radTok = radiusToken(radius), typoTok = typographyToken(cs.fontSize, cs.fontWeight);
+        const w = Math.round(el.offsetWidth) + 'px', h = Math.round(el.offsetHeight) + 'px';
+
+        const cssLines = [
+          colorHex ? '  color: '+colorHex+';'+(tokenLabel(colorHex) ? ' /* '+tokenLabel(colorHex)+' */' : '') : '',
+          bgHex && bgHex !== '#ffffff' ? '  background: '+bgHex+';'+(tokenLabel(bgHex) ? ' /* '+tokenLabel(bgHex)+' */' : '') : '',
+          borderHex && borderHex !== colorHex && borderHex !== '#000000' ? '  border-color: '+borderHex+';'+(tokenLabel(borderHex) ? ' /* '+tokenLabel(borderHex)+' */' : '') : '',
+          '  font-size: '+cs.fontSize+';',
+          '  font-weight: '+cs.fontWeight+';',
+          cs.padding !== '0px' ? '  padding: '+cs.padding+';' : '',
+          radius !== '0px' ? '  border-radius: '+radius+';' : '',
+          '  width: '+w+';',
+          '  height: '+h+';',
+        ].filter(Boolean).join('\n');
+
+        const sid = ++snippetId;
+        snippetStore[sid] = '/* '+name+' */\n{\n'+cssLines+'\n}';
+
+        return '<div class="ip-body">'
+          + '<div class="it-component">'+name+'</div>'
+          + '<div class="it-class">data-component</div>'
+          + '<hr class="it-divider">'
+          + colorRow('color', colorHex)
+          + (bgHex && bgHex !== '#ffffff' ? colorRow('background', bgHex) : '')
+          + (borderHex && borderHex !== colorHex && borderHex !== '#000000' ? colorRow('border', borderHex) : '')
+          + '<hr class="it-divider">'
+          + '<div class="it-row"><span class="it-label">font-size</span><span class="it-value">'+cs.fontSize+'</span></div>'
+          + '<div class="it-row"><span class="it-label">font-weight</span><span class="it-value">'+cs.fontWeight+'</span></div>'
+          + (typoTok ? '<div class="it-row"><span class="it-label">type token</span><span class="it-value it-token">'+typoTok+'</span></div>' : '')
+          + (cs.padding !== '0px' ? '<div class="it-row"><span class="it-label">padding</span><span class="it-value">'+cs.padding+'</span></div>' : '')
+          + (radius !== '0px' ? '<div class="it-row"><span class="it-label">radius</span><span class="it-value">'+radius+(radTok ? ' <span class="it-token">('+radTok+')</span>' : '')+'</span></div>' : '')
+          + '<div class="it-row"><span class="it-label">width</span><span class="it-value">'+w+'</span></div>'
+          + '<div class="it-row"><span class="it-label">height</span><span class="it-value">'+h+'</span></div>'
+          + '<button class="it-copy-btn" onclick="ipCopy(this,'+sid+')">Copy CSS</button>'
+          + '</div>';
+      }
+
+      function renderImagePanel(imgEl) {
+        const src = imgEl.getAttribute('src') || '', filename = src.split('/').pop() || src;
+        const dw = Math.round(imgEl.offsetWidth), dh = Math.round(imgEl.offsetHeight);
+        const nw = imgEl.naturalWidth, nh = imgEl.naturalHeight;
+        const isSvg = src.toLowerCase().endsWith('.svg');
+        const sid = ++snippetId; snippetStore[sid] = src;
+        const eid = ++snippetId; snippetStore[eid] = imgEl;
+
+        function scaleBtn(scale) {
+          if (isSvg) {
+            const ow = dw * scale;
+            return '<button class="it-copy-btn" style="margin-top:0" title="'+ow+'\xd7'+(dh*scale)+'px — vector, lossless" onclick="ipExport(this,snippetStore['+eid+'],'+scale+')">'+scale+'x &middot; '+ow+'px</button>';
+          }
+          const ow = Math.max(dw * scale, nw), oh = Math.max(dh * scale, nh);
+          const blurry = ow > nw || oh > nh;
+          const st = blurry ? 'margin-top:0;color:#f59e0b;border-color:rgba(245,158,11,0.35)' : 'margin-top:0';
+          const tip = blurry ? 'Source '+nw+'\xd7'+nh+'px — will upscale (blurry)' : ow+'\xd7'+oh+'px — lossless';
+          return '<button class="it-copy-btn" style="'+st+'" title="'+tip+'" onclick="ipExport(this,snippetStore['+eid+'],'+scale+')">'+scale+'x &middot; '+ow+'px</button>';
+        }
+
+        const sourceRow = isSvg
+          ? '<div class="it-row"><span class="it-label">source</span><span class="it-value">SVG &middot; <span style="color:#22c55e">vector</span></span></div>'
+          : '<div class="it-row"><span class="it-label">source</span><span class="it-value">'+nw+'&times;'+nh+'px'+(nw < dw*2 ? ' <span style="color:#f59e0b">&middot; low-res</span>' : '')+'</span></div>';
+        const lowResWarning = !isSvg && nw < dw * 2
+          ? '<p style="font-size:9px;color:#f59e0b;line-height:1.5;margin-bottom:6px">⚠ Source is low-res. Re-export from Figma at 2x+ for crisp downloads.</p>'
+          : '';
+        return '<div class="ip-body">'
+          + '<div class="it-component">Image Asset</div>'
+          + '<div class="it-class">&lt;img&gt;</div>'
+          + '<hr class="it-divider">'
+          + '<div class="it-row"><span class="it-label">file</span><span class="it-value" style="word-break:break-all;font-size:10px">'+filename+'</span></div>'
+          + '<div class="it-row"><span class="it-label">display</span><span class="it-value">'+dw+'&times;'+dh+'px</span></div>'
+          + sourceRow
+          + '<hr class="it-divider">'
+          + '<div class="it-section">Export</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px">'+scaleBtn(1)+scaleBtn(2)+scaleBtn(3)+scaleBtn(4)+'</div>'
+          + lowResWarning
+          + '<button class="it-copy-btn" onclick="ipCopy(this,'+sid+')">Copy src path</button>'
+          + '</div>';
+      }
+
+      function renderSvgPanel(svgEl) {
+        const rect = svgEl.getBoundingClientRect();
+        const dw = Math.round(rect.width), dh = Math.round(rect.height);
+        const sid = ++snippetId; snippetStore[sid] = svgEl.outerHTML;
+        const eid = ++snippetId; snippetStore[eid] = svgEl;
+        function scaleBtn(scale) {
+          const ow = dw * scale;
+          return '<button class="it-copy-btn" style="margin-top:0" title="'+ow+'\xd7'+(dh*scale)+'px — vector, lossless" onclick="ipExportInlineSvg(this,'+eid+','+scale+')">'+scale+'x &middot; '+ow+'px</button>';
+        }
+        return '<div class="ip-body">'
+          + '<div class="it-component">SVG Icon</div>'
+          + '<div class="it-class">&lt;svg&gt; — inline</div>'
+          + '<hr class="it-divider">'
+          + '<div class="it-row"><span class="it-label">display</span><span class="it-value">'+dw+'&times;'+dh+'px</span></div>'
+          + '<div class="it-row"><span class="it-label">source</span><span class="it-value">SVG &middot; <span style="color:#22c55e">vector</span></span></div>'
+          + '<hr class="it-divider">'
+          + '<div class="it-section">Export</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:6px">'+scaleBtn(1)+scaleBtn(2)+scaleBtn(3)+scaleBtn(4)+'</div>'
+          + '<button class="it-copy-btn" onclick="ipCopy(this,'+sid+')">Copy SVG markup</button>'
+          + '</div>';
+      }
+
+      function lockElement(target) {
+        if (lockedEl) lockedEl.classList.remove('inspect-highlight-ring');
+        if (hoveredEl) hoveredEl.classList.remove('inspect-hover-ring');
+        lockedEl = target.el;
+        lockedEl.classList.add('inspect-highlight-ring');
+        let html = '';
+        if (target.type === 'image') html = renderImagePanel(target.el);
+        else if (target.type === 'svg') html = renderSvgPanel(target.el);
+        else html = renderComponentPanel(target.el, target.name);
+        panel.innerHTML = html;
+        closeBtn.style.display = 'block';
+        panel.prepend(closeBtn);
+      }
+
+      window.ipToggleInspect = function() {
+        const isOn = document.body.classList.toggle('inspect-mode');
+        if (!isOn) {
+          ipUnlock();
+          if (hoveredEl) { hoveredEl.classList.remove('inspect-hover-ring'); hoveredEl = null; }
+        }
+      };
+
+      window.ipUnlock = function() {
+        if (lockedEl) { lockedEl.classList.remove('inspect-highlight-ring'); lockedEl = null; }
+        panel.innerHTML = '<p class="ip-hint">Click any element on the page to inspect it.</p>';
+        closeBtn.style.display = 'none';
+        panel.prepend(closeBtn);
+      };
+
+      document.addEventListener('mouseover', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (panel.contains(el) || el.id === 'inspect-badge' || el.id === 'ip-close-btn') return;
+        if (hoveredEl && hoveredEl !== lockedEl) hoveredEl.classList.remove('inspect-hover-ring');
+        const target = getInspectTarget(el);
+        if (!target) { hoveredEl = null; return; }
+        if (target.el === lockedEl) { hoveredEl = null; return; }
+        target.el.classList.add('inspect-hover-ring');
+        hoveredEl = target.el;
+      });
+
+      document.addEventListener('mouseout', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (el !== lockedEl) el.classList.remove('inspect-hover-ring');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        const el = e.target;
+        if (panel.contains(el) || el.id === 'inspect-badge') return;
+        const target = getInspectTarget(el);
+        if (!target) { ipUnlock(); return; }
+        e.preventDefault();
+        e.stopPropagation();
+        lockElement(target);
+      }, true);
+
+      document.addEventListener('keydown', function(e) {
+        if (!document.body.classList.contains('inspect-mode')) return;
+        if (e.key === 'Escape') ipUnlock();
+      });
+    })();
+    </script>
   </body>
 </html>

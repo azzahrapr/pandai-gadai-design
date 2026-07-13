@@ -95,17 +95,30 @@ export default function FLDashboard() {
             </div>
             {todayChecklist ? (
               <div className="space-y-2">
-                {todayChecklist.items.slice(0, 4).map(it => (
-                  <div key={it.itemId} className="flex items-center gap-2.5 py-1">
-                    <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${it.completed ? 'bg-[#023DFF]' : 'border border-[#CBD5E1]'}`}>
-                      {it.completed && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                {todayChecklist.tasks ? (
+                  todayChecklist.tasks.slice(0, 4).map(task => (
+                    <div key={task.taskId} className="flex items-center gap-2.5 py-1">
+                      <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0 bg-[#023DFF]">
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                      <span className="text-sm text-[#65758B]">{task.taskName} <span className="text-[#94A3B8]">({task.completedItemIds.length} item)</span></span>
                     </div>
-                    <span className={`text-sm ${it.completed ? 'text-[#65758B] line-through' : 'text-[#0F1729]'}`}>{it.itemId}</span>
-                  </div>
-                ))}
-                {todayChecklist.items.length > 4 && (
-                  <p className="text-xs text-[#65758B] mt-1">+{todayChecklist.items.length - 4} item lainnya</p>
-                )}
+                  ))
+                ) : todayChecklist.items ? (
+                  <>
+                    {todayChecklist.items.slice(0, 4).map(it => (
+                      <div key={it.itemId} className="flex items-center gap-2.5 py-1">
+                        <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${it.completed ? 'bg-[#023DFF]' : 'border border-[#CBD5E1]'}`}>
+                          {it.completed && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                        </div>
+                        <span className={`text-sm ${it.completed ? 'text-[#65758B] line-through' : 'text-[#0F1729]'}`}>{it.itemId}</span>
+                      </div>
+                    ))}
+                    {todayChecklist.items.length > 4 && (
+                      <p className="text-xs text-[#65758B] mt-1">+{todayChecklist.items.length - 4} item lainnya</p>
+                    )}
+                  </>
+                ) : null}
                 {todayChecklist.kanitNote && (
                   <div className="mt-3 pt-3 border-t border-[#E1E7EF] bg-[#F8FAFC] rounded-lg p-3">
                     <p className="text-xs font-semibold text-[#65758B] mb-1">Catatan Kanit</p>
@@ -143,7 +156,7 @@ export default function FLDashboard() {
                 {allChecklists.slice(-6).reverse().map(cl => (
                   <tr key={cl.id} className="border-b border-[#E1E7EF] last:border-0">
                     <Td><span className="w-6 h-6 bg-[#F1F5F9] rounded-md flex items-center justify-center text-xs font-bold text-[#65758B]">{cl.day}</span></Td>
-                    <Td>{cl.milestoneName}</Td>
+                    <Td>{cl.tasks ? `${cl.tasks.length} task` : cl.milestoneName}</Td>
                     <Td subtle>{cl.date}</Td>
                     <Td>
                       <StatusBadge

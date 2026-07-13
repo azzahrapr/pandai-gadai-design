@@ -193,8 +193,32 @@ function AssetCard({ item, onAction }: { item: PinjamanItem; onAction: () => voi
   )
 }
 
+const IC = '#023dff'
+const ISW = { stroke: IC, strokeWidth: '1.5', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' }
+
+const GADAI_CATEGORIES = {
+  Elektronik: [
+    { label: 'Handphone',    icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18" r="0.8" fill={IC} stroke="none"/></svg> },
+    { label: 'Laptop',       icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M1 21h22"/></svg> },
+    { label: 'TV',           icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 21h8M12 19v2"/></svg> },
+    { label: 'Smartwatch',   icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M9 7V5h6v2M9 17v2h6v-2"/></svg> },
+    { label: 'Game Console', icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><path d="M10.5 5h3a5.5 5.5 0 0 1 5.5 5.5v3A5.5 5.5 0 0 1 13.5 19h-3A5.5 5.5 0 0 1 5 13.5v-3A5.5 5.5 0 0 1 10.5 5z"/><path d="M6 12h4m-2-2v4"/><circle cx="16" cy="11" r="0.8" fill={IC} stroke="none"/><circle cx="18" cy="13" r="0.8" fill={IC} stroke="none"/></svg> },
+    { label: 'Kamera',       icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> },
+  ],
+  Emas: [
+    { label: 'Logam Mulia', icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><path d="M12 3 2 9l10 12 10-12-10-6z"/><path d="M2 9h20M7 9 12 3M17 9 12 3"/></svg> },
+    { label: 'Perhiasan',   icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><circle cx="12" cy="14" r="6"/><path d="M9 5h6l2 3H7l2-3z"/></svg> },
+  ],
+  BPKB: [
+    { label: 'BPKB Motor', icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><circle cx="5.5" cy="16.5" r="2.5"/><circle cx="18.5" cy="16.5" r="2.5"/><path d="M8 16.5h4l3-6h3l2 3"/><path d="M7 8h3l1.5 2.5"/></svg> },
+    { label: 'BPKB Mobil', icon: <svg width="16" height="16" viewBox="0 0 24 24" {...ISW}><path d="M5 12 6.7 7.6A2 2 0 0 1 8.6 6h6.8a2 2 0 0 1 1.9 1.6L19 12"/><path d="M3 12h18v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg> },
+  ],
+}
+
 export default function Homepage() {
   const navigate = useNavigate()
+  const [showCategorySheet, setShowCategorySheet] = useState(false)
+  const [pendingCategory, setPendingCategory] = useState('')
   const [poinBalance] = useState(() =>
     parseInt(localStorage.getItem('pandai_poin') ?? '20000', 10)
   )
@@ -353,6 +377,7 @@ export default function Homepage() {
           <div className="flex gap-2">
             <button
               className="bg-white border border-slate-200 flex-1 flex items-center gap-2 px-3 py-3 rounded-2xl"
+              onClick={() => { setPendingCategory(''); setShowCategorySheet(true) }}
             >
               <img src={imgCalcIcon} alt="" className="size-5 shrink-0 object-contain" />
               <div className="flex flex-col items-start">
@@ -447,6 +472,75 @@ export default function Homepage() {
           <span className="text-[12px] font-bold text-slate-500">Akun</span>
         </button>
       </div>
+
+      {/* Category picker sheet */}
+      {showCategorySheet && (
+        <div className="absolute inset-0 bg-[rgba(15,17,41,0.7)] z-50" onClick={() => setShowCategorySheet(false)}>
+          <div
+            className="absolute bottom-0 bg-white drop-shadow-[0px_10px_7.5px_rgba(0,0,0,0.1),0px_4px_3px_rgba(0,0,0,0.1)] flex flex-col pb-[16px] pt-[12px] rounded-tl-[8px] rounded-tr-[8px] w-[375px]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex flex-col gap-[16px] items-center shrink-0 w-full">
+              <div className="flex flex-col gap-[16px] items-center px-[16px] shrink-0 w-full">
+                <div className="bg-[#e1e7ef] h-[8px] rounded-[9999px] w-[100px]" />
+                <div className="flex gap-[8px] items-center w-full">
+                  <p className="flex-1 font-semibold leading-[28px] text-[#0f1729] text-[18px]">Pilih barang</p>
+                  <button onClick={() => setShowCategorySheet(false)} className="overflow-clip relative shrink-0 size-[16px]">
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 24 24" fill="none">
+                      <path d="M18 6L6 18M6 6l12 12" stroke="#0f1729" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col items-start w-full max-h-[400px] overflow-y-auto">
+                <div className="bg-white flex flex-col items-center px-[16px] w-full">
+                  <div className="flex flex-col gap-[16px] items-start w-full">
+                    {Object.entries(GADAI_CATEGORIES).map(([group, items]) => (
+                      <div key={group} className="flex flex-col gap-[16px] items-start w-full">
+                        <p className="font-semibold leading-[22px] text-[#65758b] text-[14px]">{group}</p>
+                        <div className="flex flex-wrap gap-[8px] items-start w-full">
+                          {items.map(item => (
+                            <button
+                              key={item.label}
+                              onClick={() => setPendingCategory(item.label)}
+                              className={`flex gap-[8px] h-[40px] items-center justify-start px-[12px] py-[6px] rounded-[8px] shrink-0 border ${
+                                pendingCategory === item.label
+                                  ? 'bg-[#e5f2ff] border-[#023dff]'
+                                  : 'bg-white border-[#cbd5e1]'
+                              }`}
+                              style={{ width: '167.5px' }}
+                            >
+                              <div className="shrink-0 size-[16px] flex items-center justify-center">
+                                {item.icon}
+                              </div>
+                              <p className={`font-semibold leading-[22px] text-[14px] whitespace-nowrap ${
+                                pendingCategory === item.label ? 'text-[#023dff]' : 'text-[#0f1729]'
+                              }`}>{item.label}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-end justify-center px-[16px] w-full">
+                <button
+                  disabled={!pendingCategory}
+                  onClick={() => { setShowCategorySheet(false); navigate('/simulasi', { state: { category: pendingCategory } }) }}
+                  className={`flex gap-[4px] h-[38px] items-center justify-center px-[16px] py-[8px] rounded-[8px] w-full ${
+                    pendingCategory ? 'bg-[#023dff]' : 'bg-[#e1e7ef]'
+                  }`}
+                >
+                  <p className={`font-semibold leading-[22px] text-[14px] whitespace-nowrap ${
+                    pendingCategory ? 'text-white' : 'text-[#94a3b8]'
+                  }`}>Lanjutkan</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

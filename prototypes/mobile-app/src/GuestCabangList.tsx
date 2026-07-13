@@ -65,7 +65,7 @@ export default function GuestCabangList() {
     <div className="w-[375px] flex flex-col overflow-hidden rounded-3xl shadow-2xl bg-white" style={{ height: 812 }}>
 
       {/* Header */}
-      <div className="shrink-0 border-b border-[#e1e6ef]">
+      <div data-component="Header / NavBar" className="shrink-0 border-b border-[#e1e6ef]">
         {/* Status bar */}
         <div className="flex items-end justify-between h-[52px] px-[15px] pb-[9px]">
           <img src={imgDate} alt="" className="h-[11px] w-[28px] shrink-0" />
@@ -89,7 +89,7 @@ export default function GuestCabangList() {
 
       {/* Search bar */}
       <div className="px-4 pt-3 pb-2 shrink-0">
-        <div className="flex items-center gap-2 h-10 bg-[#f8f9fc] border border-[#f1f3f9] rounded-full px-3">
+        <div data-component="Search Bar" className="flex items-center gap-2 h-10 bg-[#f8f9fc] border border-[#f1f3f9] rounded-full px-3">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" className="shrink-0">
             <circle cx="9" cy="9" r="6" stroke="#94a0b8" strokeWidth="2"/>
             <path d="M14 14L18 18" stroke="#94a0b8" strokeWidth="2" strokeLinecap="round"/>
@@ -113,6 +113,7 @@ export default function GuestCabangList() {
         <div className="flex flex-col gap-4">
           {filtered.map(branch => (
             <div
+              data-component="Branch Card"
               key={branch.id}
               className="bg-white border border-[#e1e6ef] rounded-xl px-4 py-3 flex flex-col gap-3"
               style={{ boxShadow: '0px 2px 3px rgba(0,0,0,0.1)' }}
@@ -163,10 +164,10 @@ export default function GuestCabangList() {
 
               {/* Action buttons */}
               <div className="flex gap-4">
-                <button className="flex-1 h-8 flex items-center justify-center border border-[#0255ca] bg-[#e6ecff] rounded-[6px]">
+                <button data-component="Secondary Button — Lihat Lokasi" className="flex-1 h-8 flex items-center justify-center border border-[#0255ca] bg-[#e6ecff] rounded-[6px]">
                   <span className="text-[12px] font-bold text-[#0255ca]">Lihat Lokasi</span>
                 </button>
-                <button className="flex-1 h-8 flex items-center justify-center bg-[#0255ca] rounded-[6px]">
+                <button data-component="Primary Button — Kontak Admin" className="flex-1 h-8 flex items-center justify-center bg-[#0255ca] rounded-[6px]">
                   <span className="text-[12px] font-bold text-white">Kontak Admin</span>
                 </button>
               </div>

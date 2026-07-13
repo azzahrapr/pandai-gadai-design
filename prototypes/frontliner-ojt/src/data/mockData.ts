@@ -321,6 +321,9 @@ export const MOCK_USERS: AppUser[] = [
       activeMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar', 'pelayanan-transaksi', 'penaksiran'],
       completedMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar'],
       quizScores: { 'packing-sealing': 85 },
+      quizAnswers: {
+        'packing-sealing': { 'ps-q1': 1, 'ps-q2': 0, 'ps-q3': 1, 'ps-q4': 3 },
+      },
     },
   },
   {

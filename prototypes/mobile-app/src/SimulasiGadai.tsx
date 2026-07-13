@@ -5,20 +5,10 @@ import { InspectLabel } from './InspectLabel'
 const imgDate  = "/assets/status-date.svg"
 const imgRight = "/assets/status-right.svg"
 
-// Safety shield icon parts (Cortes DS: IconFilled/safety)
-const imgShield0 = "https://www.figma.com/api/mcp/asset/68617ea3-3ef5-4be9-b990-51fb3bd19774"
-const imgShield1 = "https://www.figma.com/api/mcp/asset/05aeb3be-0237-46e9-9574-e020680b17a9"
-const imgShield2 = "https://www.figma.com/api/mcp/asset/81b4f28c-c5d1-436a-afd2-78bec06437cf"
-const imgShield3 = "https://www.figma.com/api/mcp/asset/9bfa73f6-512d-4fcf-9546-d58d7544d341"
-const imgShield4 = "https://www.figma.com/api/mcp/asset/768d716a-2a0d-4c27-8ed2-246be07a326a"
-const imgShield5 = "https://www.figma.com/api/mcp/asset/7ae43fb0-41de-4b15-8127-0ab608014176"
-const imgShield6 = "https://www.figma.com/api/mcp/asset/9f29c296-b1ee-41e9-8198-2c4ac3ee3cd5"
-const imgShield7 = "https://www.figma.com/api/mcp/asset/e949c865-f20d-4d96-a514-b11bfe1f77d8"
 
 const C = '#023dff'
 const SW = { stroke: C, strokeWidth: '1.5', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' }
 
-const imgPromoIcon = "https://www.figma.com/api/mcp/asset/a37ccae0-abe3-4f17-8f55-d0c09ff0aa90"
 
 const CATEGORIES = {
   Elektronik: [
@@ -160,32 +150,11 @@ const ITEMS: Record<string, string[]> = {
 
 function IconSafety() {
   return (
-    <div className="overflow-clip relative shrink-0 size-[40px]">
-      <div className="absolute" style={{ inset: '10% 19.68% 15.5% 11.72%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield0} />
-      </div>
-      <div className="absolute" style={{ inset: '24.2% 19.68% 15.5% 27.87%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield1} />
-      </div>
-      <div className="absolute" style={{ inset: '18.28% 53.98% 52.58% 19.35%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield2} />
-      </div>
-      <div className="absolute" style={{ inset: '18.28% 27.3% 52.58% 46.02%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield3} />
-      </div>
-      <div className="absolute" style={{ inset: '47.42% 29.31% 23.78% 46.02%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield4} />
-      </div>
-      <div className="absolute" style={{ inset: '47.42% 53.98% 23.78% 21.36%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield5} />
-      </div>
-      <div className="absolute" style={{ inset: '35.37% 38.91% 41.67% 32.15%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield6} />
-      </div>
-      <div className="absolute" style={{ bottom: '15.74%', left: '50%', right: '3.75%', top: '47.5%' }}>
-        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgShield7} />
-      </div>
-    </div>
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="shrink-0">
+      <path d="M20 4L6 9v10c0 8.284 5.928 16.032 14 18 8.072-1.968 14-9.716 14-18V9L20 4z" fill="#023dff" fillOpacity="0.12"/>
+      <path d="M20 4L6 9v10c0 8.284 5.928 16.032 14 18 8.072-1.968 14-9.716 14-18V9L20 4z" stroke="#023dff" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M14 20l4 4 8-8" stroke="#023dff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
   )
 }
 
@@ -485,11 +454,13 @@ export default function SimulasiGadai() {
       {/* Sticky footer */}
       <div className="absolute bottom-0 flex flex-col items-start left-0 w-[375px]">
         {!['BPKB Motor', 'BPKB Mobil'].includes(selectedCategory) && <div className="bg-[#d3f1d4] flex gap-[8px] h-[45px] items-center px-[16px] py-[8px] rounded-tl-[8px] rounded-tr-[8px] shrink-0 w-full">
-          <div className="overflow-clip relative shrink-0 size-[16px]">
-            <div className="absolute" style={{ inset: '2.87% 2.71% 2.71% 2.87%' }}>
-              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgPromoIcon} />
-            </div>
-          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
+            <path d="M20 12v10H4V12" stroke="#28832d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 7H2v5h20V7z" stroke="#28832d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 22V7" stroke="#28832d" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" stroke="#28832d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" stroke="#28832d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <p className="font-normal leading-[16px] text-[#28832d] text-[12px] w-[313px]">Ada bonus Rp100rb untuk gadai pertama!</p>
         </div>}
         <div className="bg-white flex flex-col items-center justify-center overflow-clip pb-[24px] pt-[8px] px-[16px] shrink-0 w-full">
@@ -695,17 +666,6 @@ export default function SimulasiGadai() {
               ))}
               {sheetItems.length === 0 && (
                 <div className="flex flex-col gap-[16px] items-center px-[16px] py-[12px] w-full">
-                  {isBPKB && (
-                    <div className="bg-[#e5f2ff] border border-[#e8ebed] flex gap-[8px] items-start overflow-clip p-[12px] rounded-[8px] w-full">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#023dff" className="shrink-0 mt-[2px]">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
-                      </svg>
-                      <p className="flex-1 font-normal leading-[18px] text-[12px] text-[#65758b]">
-                        Brand {selectedCategory === 'BPKB Mobil' ? 'mobil' : 'motor'} ini hanya dapat diproses melalui{' '}
-                        <button onClick={() => window.open('https://tally.so/r/OD4rLk', '_blank')} className="font-bold text-[#023dff]">Cek BPKB Survei →</button>
-                      </p>
-                    </div>
-                  )}
                   <img src="/assets/spot.empty-transaction.png" alt="" className="size-[128px] object-contain" />
                   <div className="flex flex-col gap-[4px] items-center w-full">
                     <p className="font-semibold leading-[23px] text-[16px] text-black text-center">Barang tidak ditemukan</p>
@@ -715,14 +675,16 @@ export default function SimulasiGadai() {
               )}
             </div>
 
-            {/* Hubungi CS button — only when empty state is showing */}
+            {/* Footer button — only when empty state is showing */}
             {sheetItems.length === 0 && (
               <div className="flex flex-col items-start px-[16px] pb-[24px] pt-[8px] shrink-0">
                 <button
-                  onClick={() => window.open('https://wa.me/6281234567890', '_blank')}
+                  onClick={() => window.open(isBPKB ? 'https://tally.so/r/OD4rLk' : 'https://wa.me/6281234567890', '_blank')}
                   className="bg-[#023dff] flex gap-[4px] h-[38px] items-center justify-center px-[16px] py-[8px] rounded-[8px] w-full"
                 >
-                  <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Hubungi CS</p>
+                  <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">
+                    {isBPKB ? 'Cek BPKB Survei' : 'Hubungi CS'}
+                  </p>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
                     <path d="M7 17L17 7M17 7H7M17 7v10" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -765,7 +727,7 @@ export default function SimulasiGadai() {
                             {items.map(item => (
                               <button
                                 key={item.label}
-                                onClick={() => setPendingCategory(item.label)}
+                                onClick={() => { setSelectedCategory(item.label); setSearchValue(''); setShowSheet(false) }}
                                 className={`flex gap-[8px] h-[40px] items-center justify-start px-[12px] py-[6px] rounded-[8px] shrink-0 border ${
                                   pendingCategory === item.label
                                     ? 'bg-[#e5f2ff] border-[#023dff]'
@@ -789,14 +751,6 @@ export default function SimulasiGadai() {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-[8px] items-end justify-center px-[16px] shrink-0 w-full">
-                <button
-                  onClick={() => { setSelectedCategory(pendingCategory); setSearchValue(''); setShowSheet(false) }}
-                  className="bg-[#023dff] flex gap-[4px] h-[38px] items-center justify-center px-[16px] py-[8px] rounded-[8px] shrink-0 w-full"
-                >
-                  <p className="font-semibold leading-[22px] text-white text-[14px] whitespace-nowrap">Lanjutkan</p>
-                </button>
               </div>
             </div>
           </div>

@@ -15,11 +15,13 @@ export default function FLMilestoneDetail() {
     ? profile.quizScores![milestone.id]
     : null
 
-  const [expandedMaterial, setExpandedMaterial] = useState<string | null>(milestone?.materials[0]?.id ?? null)
+  const [expandedMaterial, setExpandedMaterial] = useState<string | null>(null)
   const [completedMaterials, setCompletedMaterials] = useState<Set<string>>(() =>
     isCompleted ? new Set(milestone?.materials.map(m => m.id) ?? []) : new Set()
   )
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({})
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>(
+    () => (milestone?.id && profile.quizAnswers?.[milestone.id]) ? profile.quizAnswers[milestone.id] : {}
+  )
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(() => isCompleted && !!(milestone?.quiz?.length))
   const [view, setView] = useState<'materi' | 'quiz'>('materi')
 
@@ -166,6 +168,12 @@ export default function FLMilestoneDetail() {
                     <span className={`text-sm font-bold px-3 py-1 rounded-full flex-shrink-0 ${quizPassing ? 'bg-[#F0FDF4] text-[#15803D]' : 'bg-[#FEF2F2] text-[#DC2626]'}`}>
                       {quizScore}/100
                     </span>
+                    <button
+                      onClick={() => setView('quiz')}
+                      className="flex-shrink-0 h-8 px-3 bg-white border border-[#CBD5E1] text-[#0F1729] text-xs font-semibold rounded-lg hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF] transition-all"
+                    >
+                      Lihat Jawaban
+                    </button>
                   </div>
                 ) : allMaterialsDone ? (
                   <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 flex flex-col gap-4">

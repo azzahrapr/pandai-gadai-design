@@ -1,10 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
-// Figma CDN assets — expire ~7 days from design fetch (save locally to replace)
-const imgSpotSuccess    = "https://www.figma.com/api/mcp/asset/f11e1e6a-cbda-4fe3-8056-8a419e638d1f"
-const imgConfettiCircle = "https://www.figma.com/api/mcp/asset/4078bea5-248b-4e91-82b2-d13766f7db74"
-const imgConfettiUpper  = "https://www.figma.com/api/mcp/asset/47f4aea3-3f14-40aa-b23f-75f125ecc45d"
-const imgConfettiLower  = "https://www.figma.com/api/mcp/asset/0b93e6f5-0ff1-44ca-a296-1e0631be3227"
+const imgSpotSuccess = "/assets/spot-success.png"
 
 // Local permanent assets
 const imgWeave    = "/assets/weave-success.svg"  // 375×175 — scaleX(-1) mirrors wave direction
@@ -49,30 +45,6 @@ export default function TYPSuccess() {
       style={{ height: 812, background: 'linear-gradient(180deg, #3d7aff 0%, #051dae 100%)' }}
     >
 
-      {/* ── Decorative background layers ── */}
-
-      {/* Confetti circle halo centered on the panda area */}
-      <div className="absolute pointer-events-none"
-        style={{ left: 5, top: 57.22, width: 365.06, height: 365.06 }}>
-        <img src={imgConfettiCircle} alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-      </div>
-
-      {/* Upper confetti scatter */}
-      <div className="absolute pointer-events-none"
-        style={{ left: 12.96, top: 116.08, width: 349.071, height: 196.92 }}>
-        <img src={imgConfettiUpper} alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-      </div>
-
-      {/* Lower confetti scatter (rotate-180 + scaleY(-1) = horizontal flip) */}
-      <div className="absolute pointer-events-none"
-        style={{ left: 12.04, top: 190.96, width: 350.929, height: 324.115, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ transform: 'rotate(180deg) scaleY(-1)', flexShrink: 0, width: 350.929, height: 324.115, position: 'relative' }}>
-          <img src={imgConfettiLower} alt=""
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-        </div>
-      </div>
 
       {/* ── UI layers ── */}
 
