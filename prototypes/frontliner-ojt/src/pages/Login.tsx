@@ -7,8 +7,16 @@ import type { UserRole, FLProfile } from '../types'
 export default function Login() {
   const [role, setRole] = useState<UserRole | null>(null)
   const [selectedId, setSelectedId] = useState('')
-  const { login } = useApp()
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const { login, resetData } = useApp()
   const navigate = useNavigate()
+
+  function handleReset() {
+    resetData()
+    setRole(null)
+    setSelectedId('')
+    setShowResetConfirm(false)
+  }
 
   const users = role ? MOCK_USERS.filter(u => u.role === role) : []
 
@@ -48,7 +56,18 @@ export default function Login() {
             <Stat value="3" label="Komponen Nilai" />
           </div>
         </div>
-        <p className="relative text-blue-300 text-xs">Internal Use Only · v0.1 Prototype</p>
+        <div className="relative flex items-center justify-between">
+          <p className="text-blue-300 text-xs">Internal Use Only · v0.1 Prototype</p>
+          {!showResetConfirm ? (
+            <button onClick={() => setShowResetConfirm(true)} className="text-blue-300/60 hover:text-blue-200 text-xs transition-colors">Reset data</button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-blue-200 text-xs">Yakin reset?</span>
+              <button onClick={handleReset} className="text-red-300 hover:text-red-200 text-xs font-semibold transition-colors">Ya</button>
+              <button onClick={() => setShowResetConfirm(false)} className="text-blue-300/60 hover:text-blue-200 text-xs transition-colors">Batal</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right — login form */}

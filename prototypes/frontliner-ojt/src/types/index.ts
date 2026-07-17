@@ -8,12 +8,13 @@ export interface QuizQuestion {
   correctIndex: number
 }
 export type SubmissionStatus = 'not_started' | 'submitted' | 'scored'
-export type AssessmentStatus = 'not_started' | 'submitted' | 'scored'
+export type AssessmentStatus = 'not_started' | 'submitted' | 'selesai'
 
 export interface LearningMaterial {
   id: string
   title: string
   content: string
+  slideUrl?: string
 }
 
 export interface ChecklistItem {
@@ -48,6 +49,8 @@ export interface DailyTaskRecord {
   completedItemIds: string[]
   reflection: string
   submittedAt: string
+  kanitScore?: number
+  kanitNote?: string
 }
 
 export interface DailyChecklist {
@@ -104,8 +107,23 @@ export interface Assessment {
   answers: AssessmentAnswer[]
   status: AssessmentStatus
   submittedAt?: string
-  kanitScore?: number
-  kanitNote?: string
+  mcqScore?: number
+}
+
+export interface SoftSkillRating {
+  skill: string
+  score: number
+}
+
+export interface FinalEvaluation {
+  id: string
+  flId: string
+  kanitId: string
+  submittedAt: string
+  softSkills: SoftSkillRating[]
+  attitudeScore: number
+  feedback: string
+  recommendation: 'lulus' | 'tidak_lulus'
 }
 
 export interface ScoreBreakdown {

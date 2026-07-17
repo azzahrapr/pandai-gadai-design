@@ -72,19 +72,10 @@ export function FLSidebar() {
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/fl/dashboard" label="Beranda" icon={<IconHome />} />
         <NavItem to="/fl/milestones" label="Materi Belajar" icon={<IconBook />} />
-        <NavItem to="/fl/checklist" label="Daily Checklist" icon={<IconChecklist />} />
+        <NavItem to="/fl/checklist" label="Checklist" icon={<IconChecklist />} />
         <NavItem to="/fl/scores" label="Nilai Saya" icon={<IconChart />} />
 
-        {day >= 8 && (
-          <>
-            <div className="my-2 border-t border-white/10" />
-            <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Lanjutan</p>
-            <NavItem to="/fl/penaksiran" label="Penaksiran" icon={<IconScale />} />
-          </>
-        )}
-        {day >= 14 && (
-          <NavItem to="/fl/assessment" label="Assessment" icon={<IconGrad />} />
-        )}
+        <NavItem to="/fl/assessment" label="Assessment" icon={<IconGrad />} />
       </nav>
 
       {/* User */}
@@ -132,8 +123,7 @@ export function KanitSidebar() {
       <nav className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto">
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/kanit/dashboard" label="Dashboard" icon={<IconHome />} />
-        <NavItem to="/kanit/review" label="Review Checklist" icon={<IconChecklist />} />
-        <NavItem to="/kanit/penaksiran" label="Penaksiran" icon={<IconScale />} />
+        <NavItem to="/kanit/review-progress" label="Review Progress OJT" icon={<IconChecklist />} />
         <NavItem to="/kanit/results" label="Hasil Akhir OJT" icon={<IconChart />} />
       </nav>
 

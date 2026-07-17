@@ -4,27 +4,59 @@ import { MILESTONES } from '../../data/mockData'
 import { useApp } from '../../context/AppContext'
 import type { FLProfile, QuizQuestion } from '../../types'
 
+const MILESTONE_TASK_MAP: Record<string, string[]> = {
+  'opening-closing': ['opening', 'closing'],
+  'canvassing': ['canvassing'],
+  'pelayanan-dasar': ['pelayanan-dasar'],
+  'pelayanan-transaksi': ['pelayanan-transaksi'],
+  'penaksiran': ['penaksiran-elektronik'],
+  'packing-sealing': ['packing-sealing'],
+}
+
+const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
+  'opening-closing': 13,
+  'packing-sealing': 4,
+  'canvassing': 2,
+  'pelayanan-dasar': 6,
+  'pelayanan-transaksi': 6,
+  'penaksiran': 6,
+}
+
 export default function FLMilestoneDetail() {
   const { id } = useParams<{ id: string }>()
-  const { currentUser } = useApp()
+  const { currentUser, getFlChecklists } = useApp()
   const profile = currentUser!.profile as FLProfile
   const milestone = MILESTONES.find(m => m.id === id)
 
-  const isCompleted = !!(milestone && profile.completedMilestoneIds?.includes(milestone.id))
+  const allChecklists = getFlChecklists(currentUser!.id).filter(c =>
+    c.status === 'submitted' || c.status === 'scored'
+  )
+
+  const relatedTaskIds = milestone ? (MILESTONE_TASK_MAP[milestone.id] ?? []) : []
+  const expectedCount = milestone ? (MILESTONE_EXPECTED_COUNT[milestone.id] ?? 14) : 14
+  const milestoneSubmissions = relatedTaskIds.length > 0
+    ? allChecklists.filter(cl => cl.tasks?.some(t => relatedTaskIds.includes(t.taskId))).length
+    : 0
+
+  const hasRelatedChecklist = relatedTaskIds.length > 0
+    ? milestoneSubmissions > 0
+    : (milestone ? (profile.completedMilestoneIds?.includes(milestone.id) ?? false) : false)
+  const isCompleted = milestoneSubmissions >= expectedCount
+  const quizUnlocked = relatedTaskIds.length > 0
+    ? isCompleted
+    : hasRelatedChecklist
+
   const storedQuizScore: number | null = (milestone?.quiz?.length && profile.quizScores?.[milestone.id] !== undefined)
     ? profile.quizScores![milestone.id]
     : null
 
-  const [expandedMaterial, setExpandedMaterial] = useState<string | null>(
-    () => isCompleted ? null : (milestone?.materials[0]?.id ?? null)
-  )
-  const [completedMaterials, setCompletedMaterials] = useState<Set<string>>(() =>
-    isCompleted ? new Set(milestone?.materials.map(m => m.id) ?? []) : new Set()
-  )
+  const [currentMaterialIdx, setCurrentMaterialIdx] = useState<number>(0)
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>(
     () => (milestone?.id && profile.quizAnswers?.[milestone.id]) ? profile.quizAnswers[milestone.id] : {}
   )
-  const [quizSubmitted, setQuizSubmitted] = useState<boolean>(() => isCompleted && !!(milestone?.quiz?.length))
+  const [quizSubmitted, setQuizSubmitted] = useState<boolean>(
+    () => !!(milestone?.quiz?.length) && profile.quizScores?.[milestone.id] !== undefined
+  )
   const [view, setView] = useState<'materi' | 'quiz'>('materi')
 
   if (!milestone) {
@@ -39,24 +71,8 @@ export default function FLMilestoneDetail() {
     )
   }
 
-  const isMinggu2 = milestone.type === 'minggu2'
+  const isLevel2 = milestone.type === 'minggu2'
   const hasQuiz = !!(milestone.quiz && milestone.quiz.length > 0)
-  const allMaterialsDone = completedMaterials.size >= milestone.materials.length
-
-  const markDone = (materialId: string) => {
-    setCompletedMaterials(prev => new Set([...prev, materialId]))
-    const idx = milestone.materials.findIndex(m => m.id === materialId)
-    const next = milestone.materials[idx + 1]
-    setExpandedMaterial(next ? next.id : null)
-  }
-
-  const unmarkDone = (materialId: string) => {
-    setCompletedMaterials(prev => {
-      const next = new Set(prev)
-      next.delete(materialId)
-      return next
-    })
-  }
 
   const quizScore: number | null = hasQuiz && quizSubmitted
     ? (storedQuizScore !== null
@@ -77,8 +93,8 @@ export default function FLMilestoneDetail() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <span className={`text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full ${isMinggu2 ? 'bg-[#E5F2FF] text-[#023DFF]' : 'bg-[#F1F5F9] text-[#65758B]'}`}>
-            {isMinggu2 ? 'Minggu 2' : 'Minggu 1'}
+          <span className={`text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full ${isLevel2 ? 'bg-[#E5F2FF] text-[#023DFF]' : 'bg-[#F1F5F9] text-[#65758B]'}`}>
+            {isLevel2 ? 'Level 2' : 'Level 1'}
           </span>
           <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2.5 py-1 rounded-full">~{milestone.estimatedMinutes} menit</span>
         </div>
@@ -92,16 +108,14 @@ export default function FLMilestoneDetail() {
           <span className="text-2xl font-bold text-[#0F1729]">{milestone.materials.length}</span>
           <span className="text-sm text-[#65758B]">Materi belajar</span>
         </div>
-        <div className={`flex items-center gap-3 px-4 ${hasQuiz ? 'border-r border-[#E1E7EF]' : ''}`}>
+        <div className="flex items-center gap-3 px-4 border-r border-[#E1E7EF]">
           <span className="text-2xl font-bold text-[#0F1729]">~{milestone.estimatedMinutes}</span>
           <span className="text-sm text-[#65758B]">Menit belajar</span>
         </div>
-        {hasQuiz && (
-          <div className="flex items-center gap-3 px-4">
-            <span className="text-2xl font-bold text-[#0F1729]">{milestone.quiz!.length}</span>
-            <span className="text-sm text-[#65758B]">Soal quiz</span>
-          </div>
-        )}
+        <div className="flex items-center gap-3 px-4">
+          <span className="text-2xl font-bold text-[#0F1729]">{expectedCount}</span>
+          <span className="text-sm text-[#65758B]">Target checklist</span>
+        </div>
       </div>
 
       {/* Content grid */}
@@ -110,51 +124,11 @@ export default function FLMilestoneDetail() {
         <div className="col-span-2 space-y-3">
           {view === 'materi' ? (
             <>
-              {milestone.materials.map((m, idx) => {
-                const isDone = completedMaterials.has(m.id)
-                const isExpanded = expandedMaterial === m.id
-                return (
-                  <div key={m.id} className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
-                    <button
-                      onClick={() => setExpandedMaterial(isExpanded ? null : m.id)}
-                      className="w-full flex items-center gap-4 p-5 text-left hover:bg-[#F8FAFC] transition-colors"
-                    >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold ${
-                        isDone ? 'bg-[#16A34A] text-white' : isExpanded ? 'bg-[#023DFF] text-white' : 'bg-[#F1F5F9] text-[#65758B]'
-                      }`}>
-                        {isDone ? '✓' : idx + 1}
-                      </div>
-                      <p className="flex-1 font-semibold text-[#0F1729] text-sm">{m.title}</p>
-                      {isDone && (
-                        <span className="text-xs text-[#15803D] font-semibold bg-[#F0FDF4] px-2 py-0.5 rounded-full flex-shrink-0">Selesai</span>
-                      )}
-                      <svg
-                        className={`text-[#94A3B8] transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-                        width="18" height="18" viewBox="0 0 18 18" fill="none"
-                      >
-                        <path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    {isExpanded && (
-                      <div className="px-5 pb-5 border-t border-[#E1E7EF]">
-                        <div className="pt-4 text-sm text-[#65758B] leading-relaxed whitespace-pre-wrap">
-                          {m.content.replace(/##\s*/g, '\n').replace(/###\s*/g, '\n').replace(/\*\*/g, '')}
-                        </div>
-                        <button
-                          onClick={() => isDone ? unmarkDone(m.id) : markDone(m.id)}
-                          className={`mt-5 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                            isDone
-                              ? 'bg-[#F0FDF4] text-[#15803D] border border-[#16A34A]/20 hover:bg-[#DCFCE7]'
-                              : 'bg-[#023DFF] text-white hover:bg-[#001CDB]'
-                          }`}
-                        >
-                          {isDone ? '✓ Sudah Dibaca' : 'Tandai Sudah Dibaca'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+              <SlideViewer
+                materials={milestone.materials}
+                currentIdx={currentMaterialIdx}
+                onNavigate={setCurrentMaterialIdx}
+              />
 
               {/* Quiz entry point */}
               {hasQuiz && (
@@ -177,13 +151,13 @@ export default function FLMilestoneDetail() {
                       Lihat Jawaban
                     </button>
                   </div>
-                ) : allMaterialsDone ? (
+                ) : quizUnlocked ? (
                   <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 flex flex-col gap-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] flex items-center justify-center text-base flex-shrink-0">🔓</div>
                       <div>
                         <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-                        <p className="text-xs text-[#65758B] mt-0.5">Semua materi sudah dibaca. Kamu siap mengerjakan quiz!</p>
+                        <p className="text-xs text-[#65758B] mt-0.5">Checklist terkait sudah selesai. Kamu siap mengerjakan quiz!</p>
                       </div>
                     </div>
                     <div className="bg-[#FEF2F2] border border-[#DC2626]/20 rounded-lg px-4 py-3 flex items-start gap-2.5">
@@ -204,7 +178,7 @@ export default function FLMilestoneDetail() {
                     <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-base flex-shrink-0">🔒</div>
                     <div>
                       <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-                      <p className="text-xs text-[#65758B] mt-0.5">Selesaikan semua materi dulu untuk membuka quiz ini.</p>
+                      <p className="text-xs text-[#65758B] mt-0.5">Selesaikan semua target sesi checklist untuk membuka quiz.</p>
                     </div>
                   </div>
                 )
@@ -232,57 +206,241 @@ export default function FLMilestoneDetail() {
 
         {/* Right panel */}
         <div className="space-y-4">
-          {/* Progress */}
+          {/* Progress Checklist */}
           <div className="bg-white rounded-xl border border-[#E1E7EF] p-4">
-            <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Progress</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#65758B]">Materi dibaca</span>
-                <span className={`font-semibold ${allMaterialsDone ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
-                  {completedMaterials.size}/{milestone.materials.length}
+            <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Progress Checklist</p>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-[#65758B]">Task dilakukan</span>
+                <span className={`font-semibold ${milestoneSubmissions >= expectedCount ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
+                  {Math.min(milestoneSubmissions, expectedCount)}/{expectedCount}
                 </span>
               </div>
-              {hasQuiz && (
-                <div className="flex justify-between">
-                  <span className="text-[#65758B]">Mini quiz</span>
-                  <span className={`font-semibold ${quizPassing ? 'text-[#15803D]' : quizSubmitted ? 'text-[#DC2626]' : 'text-[#94A3B8]'}`}>
-                    {quizSubmitted ? `${quizScore}/100` : 'Belum dikerjakan'}
-                  </span>
+              <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${milestoneSubmissions >= expectedCount ? 'bg-[#16A34A]' : 'bg-[#023DFF]'}`}
+                  style={{ width: `${Math.min(100, (milestoneSubmissions / expectedCount) * 100)}%` }}
+                />
+              </div>
+              {milestoneSubmissions >= expectedCount ? (
+                <p className="text-xs text-[#15803D] font-medium">✓ Semua sesi checklist sudah selesai</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {hasRelatedChecklist ? (
+                    <div className="flex items-start gap-2 bg-[#E5F2FF] border border-[#023DFF]/20 rounded-lg px-3 py-2.5">
+                      <span className="text-sm flex-shrink-0">🔄</span>
+                      <p className="text-xs text-[#023DFF] font-medium leading-relaxed">{Math.max(0, expectedCount - milestoneSubmissions)} sesi lagi untuk selesaikan modul ini</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#65758B] leading-relaxed">Belum ada sesi checklist untuk modul ini. Klik tombol di bawah untuk mulai.</p>
+                  )}
+                  <Link
+                    to="/fl/checklist"
+                    className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
+                  >
+                    Mulai Sesi →
+                  </Link>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Quick nav — hidden during quiz */}
-          {view === 'materi' && <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
+          {/* Nav — always visible so quiz entry is reachable */}
+          <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
             <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Daftar Materi</p>
             <div className="space-y-1">
               {milestone.materials.map((m, idx) => (
                 <button
                   key={m.id}
-                  onClick={() => setExpandedMaterial(m.id)}
+                  onClick={() => { setCurrentMaterialIdx(idx); setView('materi') }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${
-                    expandedMaterial === m.id ? 'bg-[#E5F2FF] text-[#023DFF] font-medium' : 'text-[#65758B] hover:bg-[#F8FAFC]'
+                    view === 'materi' && currentMaterialIdx === idx ? 'bg-[#E5F2FF] text-[#023DFF] font-medium' : 'text-[#65758B] hover:bg-[#F8FAFC]'
                   }`}
                 >
-                  <span className={`text-xs font-bold w-4 text-center flex-shrink-0 ${completedMaterials.has(m.id) ? 'text-[#15803D]' : ''}`}>
-                    {completedMaterials.has(m.id) ? '✓' : idx + 1}
+                  <span className="text-xs font-bold w-4 text-center flex-shrink-0 text-[#94A3B8]">
+                    {idx + 1}
                   </span>
                   <span className="truncate">{m.title}</span>
                 </button>
               ))}
+              {hasQuiz && (
+                <>
+                  <div className="border-t border-[#E1E7EF] my-1" />
+                  <button
+                    onClick={() => quizUnlocked && setView('quiz')}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${
+                      view === 'quiz' ? 'bg-[#E5F2FF] text-[#023DFF] font-medium'
+                      : !quizUnlocked ? 'text-[#CBD5E1] cursor-not-allowed'
+                      : 'text-[#65758B] hover:bg-[#F8FAFC]'
+                    }`}
+                  >
+                    <span className={`text-xs font-bold w-4 text-center flex-shrink-0 ${quizPassing ? 'text-[#15803D]' : ''}`}>
+                      {quizPassing ? '✓' : '📝'}
+                    </span>
+                    <span className="truncate flex-1">Mini Quiz</span>
+                    {quizSubmitted ? (
+                      <span className={`ml-auto text-[10px] font-bold flex-shrink-0 ${quizPassing ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{quizScore}/100</span>
+                    ) : !quizUnlocked ? (
+                      <span className="ml-auto text-[10px] text-[#CBD5E1] flex-shrink-0">🔒</span>
+                    ) : null}
+                  </button>
+                </>
+              )}
             </div>
-          </div>}
+          </div>
 
           <div className="bg-[#E5F2FF] rounded-xl border border-[#023DFF]/20 p-4">
             <p className="text-xs font-semibold text-[#023DFF] mb-2">💡 Tips belajar</p>
             <p className="text-xs text-[#001CDB] leading-relaxed">
               {hasQuiz
-                ? 'Baca semua materi sebelum mengerjakan quiz. Tandai tiap materi yang sudah dipahami.'
-                : 'Baca semua materi dan tandai setelah memahaminya. Ini jadi bukti progress belajarmu.'}
+                ? 'Pelajari materi, lalu mulai sesi checklist dari halaman ini. Quiz terbuka setelah semua target sesi terpenuhi.'
+                : 'Pelajari materi, lalu klik "Mulai Sesi Checklist" setiap kali kamu mau praktikkan di lapangan. Progress diukur dari jumlah sesi yang sudah disubmit.'}
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+type SlideBlock =
+  | { type: 'h2'; text: string }
+  | { type: 'h3'; text: string }
+  | { type: 'li'; text: string; num: number }
+  | { type: 'bullet'; text: string }
+  | { type: 'p'; text: string }
+
+function parseSlideBlocks(content: string): SlideBlock[] {
+  const blocks: SlideBlock[] = []
+  let listNum = 0
+  for (const raw of content.split('\n')) {
+    const line = raw.trim()
+    if (!line) { listNum = 0; continue }
+    if (line.startsWith('## ')) { blocks.push({ type: 'h2', text: line.slice(3) }); continue }
+    if (line.startsWith('### ')) { blocks.push({ type: 'h3', text: line.slice(4) }); continue }
+    if (/^\d+\.\s/.test(line)) { listNum++; blocks.push({ type: 'li', text: line.replace(/^\d+\.\s/, ''), num: listNum }); continue }
+    if (line.startsWith('- ')) { blocks.push({ type: 'bullet', text: line.slice(2) }); continue }
+    blocks.push({ type: 'p', text: line })
+  }
+  return blocks
+}
+
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={i} className="text-[#0F1729]">{part.slice(2, -2)}</strong>
+      : <span key={i}>{part}</span>
+  )
+}
+
+function SlideContent({ content }: { content: string }) {
+  const blocks = parseSlideBlocks(content)
+  return (
+    <div className="space-y-2.5">
+      {blocks.map((block, i) => {
+        if (block.type === 'h2') return (
+          <h2 key={i} className="text-xl font-bold text-[#0F1729] leading-snug mb-4">{renderInline(block.text)}</h2>
+        )
+        if (block.type === 'h3') return (
+          <h3 key={i} className="text-sm font-bold text-[#0F1729] mt-5 mb-1">{renderInline(block.text)}</h3>
+        )
+        if (block.type === 'li') return (
+          <div key={i} className="flex items-start gap-3">
+            <span className="w-5 h-5 rounded-full bg-[#023DFF] text-white text-[10px] font-bold flex-shrink-0 flex items-center justify-center mt-0.5">{block.num}</span>
+            <p className="text-sm text-[#334155] leading-relaxed">{renderInline(block.text)}</p>
+          </div>
+        )
+        if (block.type === 'bullet') return (
+          <div key={i} className="flex items-start gap-3">
+            <span className="text-[#023DFF] font-bold flex-shrink-0 mt-0.5 text-xs">–</span>
+            <p className="text-sm text-[#334155] leading-relaxed">{renderInline(block.text)}</p>
+          </div>
+        )
+        return <p key={i} className="text-sm text-[#65758B] leading-relaxed">{renderInline(block.text)}</p>
+      })}
+    </div>
+  )
+}
+
+const DUMMY_SLIDE_URL =
+  'https://docs.google.com/presentation/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms/embed?start=false&loop=false&delayms=3000'
+
+function SlideViewer({
+  materials,
+  currentIdx,
+  onNavigate,
+}: {
+  materials: { id: string; title: string; content: string; slideUrl?: string }[]
+  currentIdx: number
+  onNavigate: (idx: number) => void
+}) {
+  const material = materials[currentIdx]
+  const total = materials.length
+  const embedUrl = material.slideUrl ?? DUMMY_SLIDE_URL
+
+  return (
+    <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden shadow-sm">
+      {/* Toolbar chrome */}
+      <div className="bg-[#F1F5F9] border-b border-[#E1E7EF] px-4 py-2.5 flex items-center gap-3">
+        <div className="flex gap-1.5 flex-shrink-0">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E1E7EF]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E1E7EF]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E1E7EF]" />
+        </div>
+        <div className="flex-1 text-center">
+          <span className="text-xs text-[#65758B] font-medium truncate">{material.title}</span>
+        </div>
+        <span className="text-[11px] text-[#94A3B8] flex-shrink-0 tabular-nums">{currentIdx + 1} / {total}</span>
+      </div>
+
+      {/* Google Slides iframe — 16:9 */}
+      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+        <iframe
+          key={embedUrl}
+          src={embedUrl}
+          className="absolute inset-0 w-full h-full border-0"
+          allowFullScreen
+          allow="autoplay"
+        />
+      </div>
+
+      {/* Navigation bar */}
+      <div className="bg-[#F8FAFC] border-t border-[#E1E7EF] px-5 py-3 flex items-center justify-between">
+        <button
+          onClick={() => onNavigate(currentIdx - 1)}
+          disabled={currentIdx === 0}
+          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+            currentIdx === 0
+              ? 'text-[#CBD5E1] cursor-not-allowed'
+              : 'text-[#65758B] hover:bg-[#E1E7EF] hover:text-[#0F1729]'
+          }`}
+        >
+          ← Materi Sebelumnya
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          {materials.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => onNavigate(i)}
+              className={`rounded-full transition-all duration-200 ${
+                i === currentIdx ? 'w-4 h-1.5 bg-[#023DFF]' : 'w-1.5 h-1.5 bg-[#CBD5E1] hover:bg-[#94A3B8]'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={() => onNavigate(currentIdx + 1)}
+          disabled={currentIdx === total - 1}
+          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+            currentIdx === total - 1
+              ? 'text-[#CBD5E1] cursor-not-allowed'
+              : 'text-[#65758B] hover:bg-[#E1E7EF] hover:text-[#0F1729]'
+          }`}
+        >
+          Materi Berikutnya →
+        </button>
       </div>
     </div>
   )

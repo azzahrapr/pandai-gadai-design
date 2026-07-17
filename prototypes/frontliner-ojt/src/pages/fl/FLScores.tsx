@@ -1,225 +1,241 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
-import type { FLProfile } from '../../types'
+import { ASSESSMENT_QUESTIONS } from '../../data/mockData'
+import type { FLProfile, DailyChecklist } from '../../types'
 
 export default function FLScores() {
-  const { currentUser, getFlScoreBreakdown, getFlChecklists, getFlPenaksiran, getFlAssessment } = useApp()
+  const { currentUser, getFlScoreBreakdown, getFlChecklists, getFlAssessment, getFlFinalEvaluation } = useApp()
   const profile = currentUser!.profile as FLProfile
   const scores = getFlScoreBreakdown(currentUser!.id)
   const checklists = getFlChecklists(currentUser!.id).filter(c => c.status === 'scored')
-  const penaksiran = getFlPenaksiran(currentUser!.id).filter(r => r.kanitScore !== undefined)
   const assessment = getFlAssessment(currentUser!.id)
+  const finalEval = getFlFinalEvaluation(currentUser!.id)
+  const [selectedCard, setSelectedCard] = useState<'daily' | 'assessment'>('daily')
 
-  const PASSING_SCORE = 75
+  const mcqCorrect = assessment ? ASSESSMENT_QUESTIONS.reduce((count, q) => {
+    const ans = assessment.answers.find(a => a.questionId === q.id)
+    return count + (ans?.answer === q.options[q.correctIndex] ? 1 : 0)
+  }, 0) : 0
 
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#0F1729]">Nilai OJT Saya</h1>
-        <p className="text-[#65758B] text-sm mt-1">Rekap lengkap semua komponen penilaian kamu.</p>
+        <p className="text-[#65758B] text-sm mt-1">{profile.branch} · {profile.position}</p>
       </div>
 
-      {/* Total score hero */}
-      <div className={`rounded-xl p-8 flex items-center gap-8 mb-6 ${
-        scores.totalScore !== null
-          ? scores.passed ? 'bg-[#F0FDF4] border border-[#16A34A]/20' : 'bg-[#FEF2F2] border border-[#DC2626]/20'
-          : 'bg-white border border-[#E1E7EF]'
-      }`}>
-        <div className="text-center">
-          <p className={`text-7xl font-black ${
-            scores.totalScore !== null
-              ? scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'
-              : 'text-[#CBD5E1]'
-          }`}>
-            {scores.totalScore ?? '—'}
-          </p>
-          <p className="text-[#65758B] text-sm mt-1">Total Score</p>
-        </div>
-        <div className="flex-1">
+      <div className="space-y-4">
+        {/* 3-card score grid */}
+        <div className="grid grid-cols-3 gap-3">
+          <ScoreCard label="Checklist" weight="60%" score={scores.dailyProgressScore} note={`rata-rata dari ${scores.daysScored}/14 hari`} isActive={selectedCard === 'daily'} onClick={() => setSelectedCard('daily')} />
+          <ScoreCard label="Assessment" weight="40%" score={scores.assessmentScore} note={assessment ? `${mcqCorrect}/${ASSESSMENT_QUESTIONS.length} jawaban benar` : 'Belum tersedia'} isActive={selectedCard === 'assessment'} onClick={() => setSelectedCard('assessment')} />
           {scores.totalScore !== null ? (
-            <>
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm mb-3 ${
-                scores.passed ? 'bg-[#16A34A] text-white' : 'bg-[#DC2626] text-white'
+            <div className={`rounded-xl border px-4 py-4 ${
+              !finalEval ? 'bg-[#F8FAFC] border-[#E1E7EF]'
+              : scores.passed ? 'bg-[#F0FDF4] border-[#16A34A]/30' : 'bg-[#FEF2F2] border-[#DC2626]/20'
+            }`}>
+              <p className={`text-xs font-semibold mb-3 ${!finalEval ? 'text-[#65758B]' : scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>Nilai Akhir</p>
+              <p className={`text-3xl font-black mb-2 ${!finalEval ? 'text-[#94A3B8]' : scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{scores.totalScore}</p>
+              <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-xs ${
+                !finalEval ? 'bg-[#F1F5F9] text-[#65758B]'
+                : scores.passed ? 'bg-[#16A34A] text-white' : 'bg-[#DC2626] text-white'
               }`}>
-                {scores.passed ? '🎉 LULUS OJT' : '❌ Belum Memenuhi Standar'}
+                {!finalEval ? 'Menunggu evaluasi akhir' : scores.passed ? '🎉 Rekomendasi: Final' : '❌ Rekomendasi: Tidak Final'}
               </div>
-              <div className="h-3 bg-[#F1F5F9] rounded-full overflow-hidden mb-2">
-                <div
-                  className={`h-full rounded-full transition-all ${scores.passed ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}`}
-                  style={{ width: `${scores.totalScore}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-[#94A3B8]">
-                <span>0</span>
-                <span className="text-[#65758B] font-medium">Standar: {PASSING_SCORE}</span>
-                <span>100</span>
-              </div>
-            </>
+            </div>
           ) : (
-            <div>
-              <p className="font-semibold text-[#0F1729] mb-1">Nilai akhir belum tersedia</p>
-              <p className="text-sm text-[#65758B]">Nilai final dihitung setelah semua 3 komponen (harian, penaksiran, assessment) mendapat penilaian dari Kanit.</p>
+            <div className="rounded-xl border border-dashed border-[#E1E7EF] bg-[#F8FAFC] px-4 py-4">
+              <p className="text-xs font-semibold text-[#94A3B8] mb-3">Nilai Akhir</p>
+              <p className="text-3xl font-black text-[#CBD5E1] mb-2">—</p>
+              <p className="text-[11px] text-[#94A3B8] leading-snug">Menunggu semua komponen dinilai</p>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Score breakdown */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <ScoreCard
-          label="Progress Harian"
-          weight="50%"
-          score={scores.dailyProgressScore}
-          note={`${scores.daysScored} hari dinilai`}
-          colorClass="text-[#023DFF]"
-          barColor="bg-[#023DFF]"
-        />
-        <ScoreCard
-          label="Assessment"
-          weight="30%"
-          score={scores.assessmentScore}
-          note={assessment ? (assessment.status === 'scored' ? 'Sudah dinilai' : 'Menunggu penilaian') : 'Belum dikerjakan'}
-          colorClass="text-[#B27202]"
-          barColor="bg-[#E0A200]"
-        />
-        <ScoreCard
-          label="Penaksiran"
-          weight="20%"
-          score={scores.penaksiranScore}
-          note={`${scores.penaksiranCount} sesi`}
-          colorClass="text-[#65758B]"
-          barColor="bg-[#64748B]"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        {/* Daily history table */}
-        <div className="bg-white rounded-xl border border-[#E1E7EF]">
-          <div className="p-5 border-b border-[#E1E7EF] flex items-center justify-between">
-            <h3 className="font-semibold text-[#0F1729]">Riwayat Penilaian Harian</h3>
-            <span className="text-xs text-[#65758B]">{checklists.length} hari</span>
-          </div>
-          {checklists.length === 0 ? (
-            <div className="p-8 text-center text-[#94A3B8] text-sm">Belum ada penilaian harian</div>
-          ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#E1E7EF]">
-                  <th className="text-xs font-semibold text-[#65758B] uppercase tracking-wide py-3 px-5 text-left">Hari</th>
-                  <th className="text-xs font-semibold text-[#65758B] uppercase tracking-wide py-3 px-3 text-left">Milestone</th>
-                  <th className="text-xs font-semibold text-[#65758B] uppercase tracking-wide py-3 px-5 text-right">Nilai</th>
-                </tr>
-              </thead>
-              <tbody>
-                {checklists.map(cl => (
-                  <tr key={cl.id} className="border-b border-[#E1E7EF] last:border-0">
-                    <td className="py-3 px-5">
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
-                        (cl.kanitScore ?? 0) >= 85 ? 'bg-[#F0FDF4] text-[#15803D]' :
-                        (cl.kanitScore ?? 0) >= 75 ? 'bg-[#FEFDEA] text-[#B27202]' : 'bg-[#FEF2F2] text-[#DC2626]'
-                      }`}>{cl.day}</span>
-                    </td>
-                    <td className="py-3 px-3 text-sm text-[#0F1729]">{cl.milestoneName}</td>
-                    <td className="py-3 px-5 text-right">
-                      <span className={`text-base font-bold ${
-                        (cl.kanitScore ?? 0) >= 85 ? 'text-[#15803D]' :
-                        (cl.kanitScore ?? 0) >= 75 ? 'text-[#B27202]' : 'text-[#DC2626]'
-                      }`}>{cl.kanitScore}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              {checklists.length > 0 && (
-                <tfoot>
-                  <tr className="border-t border-[#E1E7EF]">
-                    <td colSpan={2} className="py-3 px-5 text-sm font-semibold text-[#65758B]">Rata-rata</td>
-                    <td className="py-3 px-5 text-right font-bold text-[#023DFF] text-base">{scores.dailyProgressScore ?? '—'}</td>
-                  </tr>
-                </tfoot>
+        {/* Detail panel */}
+        <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
+          {selectedCard === 'daily' && (
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-[#0F1729] text-sm">Progress Per Task</h3>
+                <Link to="/fl/checklist" className="text-xs font-semibold text-[#023DFF] hover:underline">Lihat checklist →</Link>
+              </div>
+              {checklists.length === 0 ? (
+                <p className="text-sm text-[#94A3B8] text-center py-6">Belum ada checklist yang dinilai</p>
+              ) : (
+                <TaskDayMatrix checklists={checklists} linkPrefix="/fl/checklist/task/" />
               )}
-            </table>
-          )}
-        </div>
-
-        {/* Penaksiran + Assessment */}
-        <div className="space-y-4">
-          {/* Penaksiran */}
-          <div className="bg-white rounded-xl border border-[#E1E7EF]">
-            <div className="p-5 border-b border-[#E1E7EF] flex items-center justify-between">
-              <h3 className="font-semibold text-[#0F1729]">Penaksiran</h3>
-              <span className="text-xs text-[#65758B]">{penaksiran.length} sesi dinilai</span>
             </div>
-            {penaksiran.length === 0 ? (
-              <div className="p-6 text-center text-[#94A3B8] text-sm">Belum ada sesi penaksiran dinilai</div>
-            ) : (
-              <table className="w-full">
-                <tbody>
-                  {penaksiran.map(r => (
-                    <tr key={r.id} className="border-b border-[#E1E7EF] last:border-0">
-                      <td className="py-3 px-5 text-sm text-[#0F1729] max-w-0">
-                        <div className="truncate">
-                          <p className="font-medium truncate">{r.barangDescription}</p>
-                          <p className="text-xs text-[#65758B]">{r.accuracy ? `${r.accuracy.toFixed(1)}% akurasi` : '—'}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-5 text-right">
-                        <span className={`font-bold text-base ${(r.kanitScore ?? 0) >= 85 ? 'text-[#15803D]' : 'text-[#B27202]'}`}>{r.kanitScore}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t border-[#E1E7EF]">
-                    <td className="py-3 px-5 text-sm font-semibold text-[#65758B]">Rata-rata</td>
-                    <td className="py-3 px-5 text-right font-bold text-[#023DFF] text-base">{scores.penaksiranScore ?? '—'}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            )}
-          </div>
+          )}
 
-          {/* Assessment */}
-          <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
-            <h3 className="font-semibold text-[#0F1729] mb-4">Assessment Hari ke-14</h3>
-            {assessment ? (
-              <div className={`flex items-center justify-between p-4 rounded-xl ${assessment.status === 'scored' ? 'bg-[#FEFDEA]' : 'bg-[#F8FAFC]'}`}>
-                <div>
-                  <p className="text-sm font-semibold text-[#0F1729]">
-                    {assessment.status === 'scored' ? '✅ Sudah dinilai' : '⏳ Menunggu penilaian'}
-                  </p>
-                  <p className="text-xs text-[#65758B] mt-0.5">
-                    {assessment.masteryChecks.filter(m => m.mastered).length}/{assessment.masteryChecks.length} materi dikuasai
-                  </p>
+          {selectedCard === 'assessment' && (
+            <div className="p-5">
+              <h3 className="font-semibold text-[#0F1729] text-sm mb-4">Assessment Akhir OJT</h3>
+              {!assessment ? (
+                <p className="text-sm text-[#94A3B8] text-center py-6">Belum dikerjakan</p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl p-4 flex items-center gap-4">
+                    <div className="text-center flex-shrink-0">
+                      <p className={`text-4xl font-black ${(assessment.mcqScore ?? 0) >= 75 ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{assessment.mcqScore ?? Math.round((mcqCorrect / ASSESSMENT_QUESTIONS.length) * 100)}</p>
+                      <p className="text-xs text-[#65758B]">/100</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-[#15803D] text-sm">✅ Selesai — dinilai otomatis</p>
+                      <p className="text-xs text-[#65758B] mt-0.5">{mcqCorrect}/{ASSESSMENT_QUESTIONS.length} jawaban benar · {assessment.masteryChecks.filter(m => m.mastered).length}/{assessment.masteryChecks.length} materi dikuasai</p>
+                    </div>
+                    <Link to="/fl/assessment" className="flex-shrink-0 text-xs font-semibold text-[#023DFF] hover:underline">Lihat Jawaban →</Link>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-2">Penguasaan Materi</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {assessment.masteryChecks.map(m => (
+                        <div key={m.materialId} className={`flex items-center gap-2 p-2 rounded-lg ${m.mastered ? 'bg-[#F0FDF4]' : 'bg-[#F8FAFC]'}`}>
+                          <div className={`w-3.5 h-3.5 rounded-full flex-shrink-0 flex items-center justify-center ${m.mastered ? 'bg-[#16A34A]' : 'bg-[#CBD5E1]'}`}>
+                            {m.mastered && <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                          </div>
+                          <p className="text-xs text-[#0F1729]">{m.material}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                {assessment.kanitScore !== undefined && (
-                  <p className={`text-3xl font-black ${assessment.kanitScore >= 75 ? 'text-[#B27202]' : 'text-[#DC2626]'}`}>{assessment.kanitScore}</p>
-                )}
-              </div>
-            ) : (
-              <div className="p-4 text-center text-[#94A3B8] text-sm">Belum dikerjakan</div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
   )
 }
 
-function ScoreCard({ label, weight, score, note, colorClass, barColor }: {
-  label: string; weight: string; score: number | null; note: string; colorClass: string; barColor: string
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide">{label}</p>
-        <span className="text-xs bg-[#F1F5F9] text-[#65758B] px-2 py-0.5 rounded-full font-semibold">{weight}</span>
+function taskScoreColor(s: number | null) {
+  if (s === null) return { text: 'text-[#CBD5E1]', bg: 'bg-[#F8FAFC] border border-[#E1E7EF]' }
+  if (s >= 85) return { text: 'text-[#15803D]', bg: 'bg-[#F0FDF4] border border-[#16A34A]/20' }
+  if (s >= 75) return { text: 'text-[#B27202]', bg: 'bg-[#FEFDEA] border border-[#E0A200]/20' }
+  return { text: 'text-[#B91C1C]', bg: 'bg-[#FEF2F2] border border-[#DC2626]/20' }
+}
+
+function TaskDayMatrix({ checklists, linkPrefix }: { checklists: DailyChecklist[]; linkPrefix?: string }) {
+  // Build task → {day → score} map from per-task scores
+  const taskOrder: string[] = []
+  const taskNames: Record<string, string> = {}
+  const taskDayScores: Record<string, Record<number, number | null>> = {}
+
+  for (const cl of checklists) {
+    if (!cl.tasks) continue
+    for (const t of cl.tasks) {
+      if (!taskOrder.includes(t.taskId)) { taskOrder.push(t.taskId); taskNames[t.taskId] = t.taskName }
+      if (!taskDayScores[t.taskId]) taskDayScores[t.taskId] = {}
+      taskDayScores[t.taskId][cl.day] = t.kanitScore ?? null
+    }
+  }
+
+  // Fallback to day-level if no per-task scores exist
+  const hasPerTaskScores = taskOrder.some(id => Object.values(taskDayScores[id] ?? {}).some(s => s !== null))
+  if (!hasPerTaskScores) {
+    return (
+      <div className="grid grid-cols-7 gap-1.5">
+        {Array.from({ length: 14 }, (_, i) => {
+          const day = i + 1
+          const cl = checklists.find(c => c.day === day)
+          const s = cl?.kanitScore ?? null
+          const c = taskScoreColor(s)
+          return (
+            <div key={day} className={`rounded-lg h-10 flex items-center justify-between px-2 ${c.bg}`}>
+              <span className="text-[10px] text-[#94A3B8]">H{day}</span>
+              <span className={`text-xs font-bold ${c.text}`}>{s ?? '—'}</span>
+            </div>
+          )
+        })}
       </div>
-      <p className={`text-3xl font-bold mt-2 ${score !== null ? colorClass : 'text-[#CBD5E1]'}`}>
-        {score ?? '—'}
-      </p>
-      <p className="text-xs text-[#65758B] mt-1">{note}</p>
-      <div className="mt-3 h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-        <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: score !== null ? `${score}%` : '0%' }} />
+    )
+  }
+
+  const allDays = Array.from({ length: 14 }, (_, i) => i + 1)
+
+  return (
+    <div>
+      <table className="w-full border-collapse table-fixed">
+        <thead>
+          <tr>
+            <th className="text-left text-[10px] font-semibold text-[#65758B] pb-2 pr-3 whitespace-nowrap" style={{ width: '8rem' }}>Task</th>
+            {allDays.map(d => (
+              <th key={d} className="text-center text-[9px] text-[#94A3B8] pb-2 px-0.5">H{d}</th>
+            ))}
+            <th className="text-right text-[10px] font-semibold text-[#65758B] pb-2 pl-3 whitespace-nowrap">Rata-rata</th>
+          </tr>
+        </thead>
+        <tbody>
+          {taskOrder.map(taskId => {
+            const dayMap = taskDayScores[taskId] ?? {}
+            const scored = Object.values(dayMap).filter((s): s is number => s !== null)
+            const avg = scored.length > 0 ? Math.round(scored.reduce((a, b) => a + b, 0) / scored.length) : null
+            const avgC = taskScoreColor(avg)
+            const TaskWrapper = linkPrefix
+              ? ({ children }: { children: React.ReactNode }) => <Link to={`${linkPrefix}${taskId}`}>{children}</Link>
+              : ({ children }: { children: React.ReactNode }) => <>{children}</>
+            return (
+              <tr key={taskId} className="group">
+                <td className="pr-3 py-1">
+                  <TaskWrapper>
+                    <span className={`text-xs font-medium text-[#0F1729] whitespace-nowrap ${linkPrefix ? 'group-hover:text-[#023DFF] cursor-pointer' : ''}`}>
+                      {taskNames[taskId]}
+                    </span>
+                  </TaskWrapper>
+                </td>
+                {allDays.map(d => {
+                  const s = dayMap[d] ?? null
+                  const c = taskScoreColor(s)
+                  return (
+                    <td key={d} className="px-0.5 py-1">
+                      <div className={`w-full h-7 rounded flex items-center justify-center text-[10px] font-bold ${c.bg} ${c.text}`}>
+                        {s ?? '—'}
+                      </div>
+                    </td>
+                  )
+                })}
+                <td className="pl-3 py-1 text-right">
+                  <span className={`text-sm font-black ${avgC.text}`}>{avg ?? '—'}</span>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <div className="flex items-center gap-4 mt-3 text-[10px] text-[#65758B]">
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#F0FDF4] border border-[#16A34A]/20 inline-block" />≥85</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#FEFDEA] border border-[#E0A200]/20 inline-block" />75–84</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#FEF2F2] border border-[#DC2626]/20 inline-block" />&lt;75</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-[#F8FAFC] border border-[#E1E7EF] inline-block" />Belum dinilai</span>
       </div>
     </div>
+  )
+}
+
+function ScoreCard({ label, weight, score, note, isActive, onClick }: {
+  label: string; weight: string; score: number | null; note: string; isActive: boolean; onClick: () => void
+}) {
+  const scoreColor = score === null ? 'text-[#CBD5E1]' : score >= 85 ? 'text-[#15803D]' : score >= 75 ? 'text-[#B27202]' : 'text-[#B91C1C]'
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left rounded-xl px-4 py-4 transition-all ${
+        isActive ? 'bg-white border-2 border-[#023DFF]' : 'bg-white border border-[#E1E7EF] hover:border-[#94A3B8]'
+      }`}
+    >
+      <div className="flex items-center gap-1.5 mb-3">
+        <p className={`text-xs font-semibold ${isActive ? 'text-[#023DFF]' : 'text-[#65758B]'}`}>{label}</p>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${isActive ? 'bg-[#E5F2FF] text-[#023DFF]' : 'bg-[#F1F5F9] text-[#65758B]'}`}>{weight}</span>
+      </div>
+      <p className={`text-3xl font-black mb-1 ${scoreColor}`}>{score ?? '—'}</p>
+      <p className="text-[11px] text-[#94A3B8]">{note}</p>
+      <div className="flex items-center gap-0.5 mt-2 text-[11px] font-semibold text-[#023DFF]">
+        Lihat detail
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+    </button>
   )
 }

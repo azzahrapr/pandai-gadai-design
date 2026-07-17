@@ -66,16 +66,10 @@ export function KanitBottomNav() {
       activeIcon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" fill="currentColor" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     {
-      to: '/kanit/review',
+      to: '/kanit/review-progress',
       label: 'Review',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
       activeIcon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" opacity=".15"/><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-    },
-    {
-      to: '/kanit/penaksiran',
-      label: 'Penaksiran',
-      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2a5 5 0 015 5c0 2-2 4-2 4H9s-2-2-2-4a5 5 0 015-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M9 11v8h6v-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M7 19h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
-      activeIcon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2a5 5 0 015 5c0 2-2 4-2 4H9s-2-2-2-4a5 5 0 015-5z" fill="currentColor" opacity=".2" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M9 11v8h6v-8M7 19h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
     },
     {
       to: '/kanit/results',

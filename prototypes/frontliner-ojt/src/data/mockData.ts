@@ -289,6 +289,7 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 7,
       kanitId: 'kanit-001',
       activeMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar'],
+      completedMilestoneIds: ['opening-closing', 'canvassing'],
     },
   },
   {
@@ -301,9 +302,10 @@ export const MOCK_USERS: AppUser[] = [
       branch: 'Cabang Sudirman',
       position: 'OJT Frontliner',
       startDate: '2026-07-01',
-      currentDay: 7,
+      currentDay: 8,
       kanitId: 'kanit-001',
       activeMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar'],
+      completedMilestoneIds: ['canvassing', 'pelayanan-dasar'],
     },
   },
   {
@@ -319,11 +321,28 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 14,
       kanitId: 'kanit-001',
       activeMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar', 'pelayanan-transaksi', 'penaksiran'],
-      completedMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar'],
+      completedMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar', 'pelayanan-transaksi', 'penaksiran'],
       quizScores: { 'packing-sealing': 85 },
       quizAnswers: {
         'packing-sealing': { 'ps-q1': 1, 'ps-q2': 0, 'ps-q3': 1, 'ps-q4': 3 },
       },
+    },
+  },
+  {
+    id: 'fl-004',
+    name: 'Dewi Rahmawati',
+    role: 'fl',
+    profile: {
+      id: 'fl-004',
+      name: 'Dewi Rahmawati',
+      branch: 'Cabang Sudirman',
+      position: 'OJT Frontliner',
+      startDate: '2026-06-24',
+      currentDay: 14,
+      kanitId: 'kanit-001',
+      activeMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar', 'pelayanan-transaksi', 'penaksiran'],
+      completedMilestoneIds: ['opening-closing', 'packing-sealing', 'canvassing', 'pelayanan-dasar', 'pelayanan-transaksi', 'penaksiran'],
+      quizScores: { 'packing-sealing': 100, 'canvassing': 75 },
     },
   },
   {
@@ -334,7 +353,7 @@ export const MOCK_USERS: AppUser[] = [
       id: 'kanit-001',
       name: 'Hendra Wijaya',
       branch: 'Cabang Sudirman',
-      flIds: ['fl-001', 'fl-002', 'fl-003'],
+      flIds: ['fl-001', 'fl-002', 'fl-003', 'fl-004'],
     },
   },
 ]
@@ -343,11 +362,9 @@ const fl001Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl001-1', day: 1, date: '2026-07-01', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Hari pertama, agak grogi tapi opening berjalan. Saldo awal sudah diverifikasi sesuai catatan.', submittedAt: '2026-07-01T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3'], reflection: 'Pertama kali canvassing, lumayan nervous. Baru bisa 3 prospek, belum berani masuk ke follow up.', submittedAt: '2026-07-01T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Greeting sudah dilakukan dengan baik. Belum ada situasi komplain hari ini.', submittedAt: '2026-07-01T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c2', 'pn-c4'], reflection: 'Belum berani taksir sendiri, baru observasi dan bantu input data ke Intools.', submittedAt: '2026-07-01T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c6', 'oc-c7'], reflection: 'Laporan belum selesai tepat waktu, ada nasabah mendadak sebelum closing. Perlu manajemen waktu lebih baik.', submittedAt: '2026-07-01T17:30:00' },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3'], reflection: 'Pertama kali canvassing, lumayan nervous. Baru bisa 3 prospek, belum berani masuk ke follow up.', submittedAt: '2026-07-01T13:00:00', kanitScore: 78 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Greeting sudah dilakukan dengan baik. Belum ada situasi komplain hari ini.', submittedAt: '2026-07-01T16:00:00', kanitScore: 85 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c2', 'pn-c4'], reflection: 'Belum berani taksir sendiri, baru observasi dan bantu input data ke Intools.', submittedAt: '2026-07-01T16:30:00', kanitScore: 80 },
     ],
     status: 'scored', submittedAt: '2026-07-01T17:30:00',
     kanitScore: 82, kanitNote: 'Hari pertama sudah bagus. Laporan harian perlu lebih dipersiapkan dari awal.', kanitScoredAt: '2026-07-01T18:00:00',
@@ -355,11 +372,9 @@ const fl001Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl001-2', day: 2, date: '2026-07-02', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening lebih lancar dari kemarin. Saldo sudah langsung dicek saat sistem menyala.', submittedAt: '2026-07-02T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c5'], reflection: 'Berhasil 5 prospek hari ini. Sudah mulai lebih percaya diri menyapa calon nasabah.', submittedAt: '2026-07-02T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Pelayanan sudah lebih tenang. Masih perlu latihan untuk skenario komplain.', submittedAt: '2026-07-02T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c4', 'pn-c5'], reflection: 'Sudah coba taksir 2 item dengan didampingi. Akurasi masih perlu ditingkatkan.', submittedAt: '2026-07-02T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai tepat waktu. Lebih baik dari kemarin.', submittedAt: '2026-07-02T17:15:00' },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c5'], reflection: 'Berhasil 5 prospek hari ini. Sudah mulai lebih percaya diri menyapa calon nasabah.', submittedAt: '2026-07-02T13:00:00', kanitScore: 92 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Pelayanan sudah lebih tenang. Masih perlu latihan untuk skenario komplain.', submittedAt: '2026-07-02T16:00:00', kanitScore: 88 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c4', 'pn-c5'], reflection: 'Sudah coba taksir 2 item dengan didampingi. Akurasi masih perlu ditingkatkan.', submittedAt: '2026-07-02T16:30:00', kanitScore: 88 },
     ],
     status: 'scored', submittedAt: '2026-07-02T17:15:00',
     kanitScore: 90, kanitNote: 'Progress bagus di hari kedua! Packing rapi dan tepat waktu. Pertahankan.', kanitScoredAt: '2026-07-02T17:45:00',
@@ -367,11 +382,9 @@ const fl001Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl001-3', day: 3, date: '2026-07-03', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Semua item opening selesai tanpa kendala.', submittedAt: '2026-07-03T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c5'], reflection: 'Berhasil menghubungi 7 prospek hari ini, melebihi target. Belum ada prospek kemarin untuk di-follow up.', submittedAt: '2026-07-03T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada 1 situasi komplain hari ini, berhasil diselesaikan meski masih perlu bimbingan Kanit.', submittedAt: '2026-07-03T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item sendiri hari ini. Akurasi 88%, hampir mencapai target. Perlu lebih teliti.', submittedAt: '2026-07-03T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai tepat waktu. Tidak ada selisih kas.', submittedAt: '2026-07-03T17:20:00' },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c5'], reflection: 'Berhasil menghubungi 7 prospek hari ini, melebihi target.', submittedAt: '2026-07-03T13:00:00', kanitScore: 92 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada 1 situasi komplain hari ini, berhasil diselesaikan meski masih perlu bimbingan Kanit.', submittedAt: '2026-07-03T16:00:00', kanitScore: 88 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item sendiri hari ini. Akurasi 88%, hampir mencapai target.', submittedAt: '2026-07-03T16:30:00', kanitScore: 85 },
     ],
     status: 'scored', submittedAt: '2026-07-03T17:20:00',
     kanitScore: 88, kanitNote: 'Canvassing aktif, 7 prospek melebihi target! Mulai rutinkan follow up.', kanitScoredAt: '2026-07-03T18:10:00',
@@ -379,11 +392,9 @@ const fl001Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl001-4', day: 4, date: '2026-07-04', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening berjalan lancar, sistem menyala tanpa masalah. Saldo awal sesuai catatan kemarin.', submittedAt: '2026-07-04T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek hari ini dan follow up 2 dari kemarin. Salah satu prospek minta brosur untuk dibawa pulang.', submittedAt: '2026-07-04T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Pelayanan sudah baik dan ramah. Belum ada situasi komplain hari ini, tapi sudah siap jika ada.', submittedAt: '2026-07-04T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Akurasi taksiran 91%, sudah melewati target 90%. Mulai lebih percaya diri.', submittedAt: '2026-07-04T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap kas selesai tepat waktu. Semua dokumen sudah diamankan dengan baik.', submittedAt: '2026-07-04T17:00:00' },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek hari ini dan follow up 2 dari kemarin.', submittedAt: '2026-07-04T13:00:00', kanitScore: 87 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4'], reflection: 'Pelayanan sudah baik dan ramah. Belum ada situasi komplain hari ini, tapi sudah siap jika ada.', submittedAt: '2026-07-04T16:00:00', kanitScore: 85 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Akurasi taksiran 91%, sudah melewati target 90%. Mulai lebih percaya diri.', submittedAt: '2026-07-04T16:30:00', kanitScore: 83 },
     ],
     status: 'scored', submittedAt: '2026-07-04T17:00:00',
     kanitScore: 85, kanitNote: 'Pelayanan sudah baik dan ramah. Akan ada latihan skenario komplain besok.', kanitScoredAt: '2026-07-04T17:30:00',
@@ -391,26 +402,79 @@ const fl001Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl001-5', day: 5, date: '2026-07-05', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Semua checklist opening selesai. Saldo awal verified dan sesuai.', submittedAt: '2026-07-05T08:30:00' },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '7 prospek hari ini. Follow up 2 prospek kemarin, 1 konfirmasi mau datang besok.', submittedAt: '2026-07-05T13:00:00' },
       { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Berhasil menangani komplain nasabah soal waktu tunggu dengan prinsip HEAR. Deg-degan tapi berhasil!', submittedAt: '2026-07-05T16:00:00' },
       { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Akurasi taksiran hari ini 93%. Sudah konsisten di atas target.', submittedAt: '2026-07-05T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai tepat waktu. Tidak ada selisih kas hari ini.', submittedAt: '2026-07-05T17:10:00' },
     ],
-    status: 'scored', submittedAt: '2026-07-05T17:10:00',
-    kanitScore: 95, kanitNote: 'Excellent! Semua item terpenuhi. Progress signifikan dari hari pertama!', kanitScoredAt: '2026-07-05T17:30:00',
+    status: 'submitted', submittedAt: '2026-07-05T17:10:00',
   },
   {
     id: 'cl-fl001-6', day: 6, date: '2026-07-06', flId: 'fl-001',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP. Tidak ada kendala berarti.', submittedAt: '2026-07-06T08:30:00' },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '8 prospek hari ini. Prospek yang kemarin konfirmasi jadi datang — langsung ditangani tim.', submittedAt: '2026-07-06T13:00:00' },
       { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada nasabah kurang puas dengan penjelasan bunga gadai. Berhasil dijelaskan ulang dengan sabar dan nasabah mengerti.', submittedAt: '2026-07-06T16:00:00' },
       { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 4 item hari ini, semua akurasi di atas 90%. Sudah lebih konsisten.', submittedAt: '2026-07-06T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai, ada selisih kecil Rp 2.000 tapi sudah ketemu penyebabnya dari transaksi kembalian.', submittedAt: '2026-07-06T17:00:00' },
     ],
-    status: 'scored', submittedAt: '2026-07-06T17:00:00',
-    kanitScore: 92, kanitNote: 'Konsistensi meningkat! Penanganan komplain sudah jauh lebih baik dari hari pertama.', kanitScoredAt: '2026-07-06T17:20:00',
+    status: 'submitted', submittedAt: '2026-07-06T17:00:00',
+  },
+  {
+    id: 'cl-fl001-ps-1', day: 3, date: '2026-07-03', flId: 'fl-001',
+    tasks: [
+      { taskId: 'packing-sealing', taskName: 'Packing & Sealing', completedItemIds: ['ps-c1', 'ps-c2', 'ps-c3', 'ps-c4', 'ps-c5'], reflection: 'Pertama kali praktek packing barang gadai. Masih perlu latihan labeling yang rapi.', submittedAt: '2026-07-03T16:00:00', kanitScore: 80 },
+    ],
+    status: 'scored', submittedAt: '2026-07-03T16:00:00',
+    kanitScore: 80, kanitNote: 'Langkah dasar sudah benar, rapikan labeling dan pastikan sealing kencang.', kanitScoredAt: '2026-07-03T17:00:00',
+  },
+  {
+    id: 'cl-fl001-ps-2', day: 4, date: '2026-07-04', flId: 'fl-001',
+    tasks: [
+      { taskId: 'packing-sealing', taskName: 'Packing & Sealing', completedItemIds: ['ps-c1', 'ps-c2', 'ps-c3', 'ps-c4', 'ps-c5'], reflection: 'Labeling sudah lebih rapi. Sealing lebih rapat. Penyimpanan juga lebih tertata.', submittedAt: '2026-07-04T16:00:00', kanitScore: 85 },
+    ],
+    status: 'scored', submittedAt: '2026-07-04T16:00:00',
+    kanitScore: 85, kanitNote: 'Progress bagus! Konsistensi labeling meningkat.', kanitScoredAt: '2026-07-04T17:00:00',
+  },
+  {
+    id: 'cl-fl001-ps-3', day: 5, date: '2026-07-05', flId: 'fl-001',
+    tasks: [
+      { taskId: 'packing-sealing', taskName: 'Packing & Sealing', completedItemIds: ['ps-c1', 'ps-c2', 'ps-c3', 'ps-c4', 'ps-c5'], reflection: 'Sudah lebih terbiasa. Urutan packing sudah hafal tanpa perlu cek panduan.', submittedAt: '2026-07-05T16:00:00', kanitScore: 87 },
+    ],
+    status: 'scored', submittedAt: '2026-07-05T16:00:00',
+    kanitScore: 87, kanitNote: 'Sudah konsisten. Kecepatan packing juga meningkat.', kanitScoredAt: '2026-07-05T17:00:00',
+  },
+  {
+    id: 'cl-fl001-ps-4', day: 6, date: '2026-07-06', flId: 'fl-001',
+    tasks: [
+      { taskId: 'packing-sealing', taskName: 'Packing & Sealing', completedItemIds: ['ps-c1', 'ps-c2', 'ps-c3', 'ps-c4', 'ps-c5'], reflection: 'Semua item terpenuhi. Labeling rapi dan sealing kencang. Sudah siap untuk mini quiz!', submittedAt: '2026-07-06T16:00:00', kanitScore: 90 },
+    ],
+    status: 'scored', submittedAt: '2026-07-06T16:00:00',
+    kanitScore: 90, kanitNote: 'Penguasaan packing & sealing sudah sangat baik. Lanjutkan ke mini quiz.', kanitScoredAt: '2026-07-06T17:00:00',
+  },
+  {
+    id: 'cl-fl001-oc-1', day: 1, date: '2026-07-01', flId: 'fl-001',
+    tasks: [
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening hari pertama berjalan lancar. Sistem siap dan kas awal sudah terverifikasi.', submittedAt: '2026-07-01T09:00:00', kanitScore: 80 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap kas sudah selesai. Semua dokumen sudah diarsip dengan benar.', submittedAt: '2026-07-01T17:00:00', kanitScore: 78 },
+    ],
+    status: 'scored', submittedAt: '2026-07-01T17:30:00',
+    kanitScore: 79, kanitScoredAt: '2026-07-01T18:00:00',
+  },
+  {
+    id: 'cl-fl001-oc-2', day: 2, date: '2026-07-02', flId: 'fl-001',
+    tasks: [
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening hari ini lebih cepat. Sudah terbiasa dengan urutan prosedurnya.', submittedAt: '2026-07-02T09:00:00', kanitScore: 83 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap kas lebih teliti. Ada 1 selisih kecil tapi berhasil dikoreksi.', submittedAt: '2026-07-02T17:00:00', kanitScore: 82 },
+    ],
+    status: 'scored', submittedAt: '2026-07-02T17:30:00',
+    kanitScore: 82, kanitScoredAt: '2026-07-02T18:00:00',
+  },
+  {
+    id: 'cl-fl001-oc-3', day: 3, date: '2026-07-03', flId: 'fl-001',
+    tasks: [
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Semua checklist opening selesai tanpa kesalahan. Sudah lebih percaya diri.', submittedAt: '2026-07-03T09:00:00', kanitScore: 85 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Penutupan berjalan baik. Laporan sudah lebih lengkap dan terstruktur.', submittedAt: '2026-07-03T17:00:00', kanitScore: 85 },
+    ],
+    status: 'scored', submittedAt: '2026-07-03T17:30:00',
+    kanitScore: 85, kanitScoredAt: '2026-07-03T18:00:00',
   },
 ]
 
@@ -520,11 +584,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-8', day: 8, date: '2026-07-01', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sudah sangat rutin. Tidak ada kendala, saldo awal langsung diverifikasi.', submittedAt: '2026-07-01T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '5 prospek hari ini, 2 follow up dari kemarin. Salah satu prospek minta jadwal kunjungan ke cabang.', submittedAt: '2026-07-01T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada komplain soal antrian, berhasil diselesaikan dengan meminta nasabah menunggu di ruang nyaman.', submittedAt: '2026-07-01T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 2 item emas. Akurasi 92%, sudah konsisten di atas target.', submittedAt: '2026-07-01T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai tepat waktu. Tidak ada selisih kas.', submittedAt: '2026-07-01T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sudah sangat rutin. Tidak ada kendala, saldo awal langsung diverifikasi.', submittedAt: '2026-07-01T08:30:00', kanitScore: 88 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '5 prospek hari ini, 2 follow up dari kemarin. Salah satu prospek minta jadwal kunjungan ke cabang.', submittedAt: '2026-07-01T13:00:00', kanitScore: 83 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ada komplain soal antrian, berhasil diselesaikan dengan meminta nasabah menunggu di ruang nyaman.', submittedAt: '2026-07-01T16:00:00', kanitScore: 85 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 2 item emas. Akurasi 92%, sudah konsisten di atas target.', submittedAt: '2026-07-01T16:30:00', kanitScore: 87 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai tepat waktu. Tidak ada selisih kas.', submittedAt: '2026-07-01T17:00:00', kanitScore: 82 },
     ],
     status: 'scored', submittedAt: '2026-07-01T17:00:00',
     kanitScore: 85, kanitNote: 'Sudah sangat konsisten di hari ke-8. Pertahankan ritme ini.', kanitScoredAt: '2026-07-01T17:30:00',
@@ -532,11 +596,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-9', day: 9, date: '2026-07-02', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP. Ditemukan printer macet, langsung lapor dan ditangani teknisi.', submittedAt: '2026-07-02T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek hari ini. Prospek yang kemarin dikonfirmasi jadi datang ke cabang.', submittedAt: '2026-07-02T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan lancar. Tidak ada komplain besar. Nasabah baru berhasil dilayani dari awal hingga selesai transaksi.', submittedAt: '2026-07-02T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item: 2 emas dan 1 perhiasan. Rata-rata akurasi 94%, yang terbaik sejauh ini.', submittedAt: '2026-07-02T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai. Ada 1 transaksi tebus yang perlu dicek ulang tapi sudah beres.', submittedAt: '2026-07-02T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP. Ditemukan printer macet, langsung lapor dan ditangani teknisi.', submittedAt: '2026-07-02T08:30:00', kanitScore: 88 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek hari ini. Prospek yang kemarin dikonfirmasi jadi datang ke cabang.', submittedAt: '2026-07-02T13:00:00', kanitScore: 90 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan lancar. Tidak ada komplain besar. Nasabah baru berhasil dilayani dari awal hingga selesai transaksi.', submittedAt: '2026-07-02T16:00:00', kanitScore: 87 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item: 2 emas dan 1 perhiasan. Rata-rata akurasi 94%, yang terbaik sejauh ini.', submittedAt: '2026-07-02T16:30:00', kanitScore: 90 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai. Ada 1 transaksi tebus yang perlu dicek ulang tapi sudah beres.', submittedAt: '2026-07-02T17:00:00', kanitScore: 85 },
     ],
     status: 'scored', submittedAt: '2026-07-02T17:00:00',
     kanitScore: 88, kanitNote: 'Penaksiran meningkat signifikan! Akurasi dan kecepatan sudah bagus.', kanitScoredAt: '2026-07-02T17:30:00',
@@ -544,11 +608,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-10', day: 10, date: '2026-07-03', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Semua berjalan normal. Saldo awal sesuai.', submittedAt: '2026-07-03T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '7 prospek hari ini — rekor terbanyak. Follow up 3 dari kemarin, 2 berminat minggu depan.', submittedAt: '2026-07-03T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Nasabah lama kembali gadai, senang bisa melayani dengan cepat karena sudah kenal prosedurnya.', submittedAt: '2026-07-03T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 4 item hari ini. Salah satu item jam tangan, pertama kali — akurasi 89%, perlu latihan lebih.', submittedAt: '2026-07-03T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai tepat waktu. Tidak ada selisih.', submittedAt: '2026-07-03T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Semua berjalan normal. Saldo awal sesuai.', submittedAt: '2026-07-03T08:30:00', kanitScore: 90 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '7 prospek hari ini — rekor terbanyak. Follow up 3 dari kemarin, 2 berminat minggu depan.', submittedAt: '2026-07-03T13:00:00', kanitScore: 93 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Nasabah lama kembali gadai, senang bisa melayani dengan cepat karena sudah kenal prosedurnya.', submittedAt: '2026-07-03T16:00:00', kanitScore: 90 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 4 item hari ini. Salah satu item jam tangan, pertama kali — akurasi 89%, perlu latihan lebih.', submittedAt: '2026-07-03T16:30:00', kanitScore: 88 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai tepat waktu. Tidak ada selisih.', submittedAt: '2026-07-03T17:00:00', kanitScore: 89 },
     ],
     status: 'scored', submittedAt: '2026-07-03T17:00:00',
     kanitScore: 90, kanitNote: 'Canvassing terus meningkat. Penaksiran item non-emas perlu lebih dilatih.', kanitScoredAt: '2026-07-03T17:30:00',
@@ -556,11 +620,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-11', day: 11, date: '2026-07-04', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening lancar, semua sistem normal.', submittedAt: '2026-07-04T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '5 prospek hari ini. Fokus di follow up — 3 dari kemarin sudah dijawab, 1 berencana datang akhir pekan.', submittedAt: '2026-07-04T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan berjalan baik. Berhasil jelaskan produk perpanjangan kepada 2 nasabah yang baru pertama kali.', submittedAt: '2026-07-04T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item emas dan 1 jam tangan. Akurasi jam tangan meningkat ke 91% — sudah di atas target!', submittedAt: '2026-07-04T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai. Semua dokumen diamankan.', submittedAt: '2026-07-04T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening lancar, semua sistem normal.', submittedAt: '2026-07-04T08:30:00', kanitScore: 87 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '5 prospek hari ini. Fokus di follow up — 3 dari kemarin sudah dijawab, 1 berencana datang akhir pekan.', submittedAt: '2026-07-04T13:00:00', kanitScore: 85 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan berjalan baik. Berhasil jelaskan produk perpanjangan kepada 2 nasabah yang baru pertama kali.', submittedAt: '2026-07-04T16:00:00', kanitScore: 85 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 3 item emas dan 1 jam tangan. Akurasi jam tangan meningkat ke 91% — sudah di atas target!', submittedAt: '2026-07-04T16:30:00', kanitScore: 87 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap dan laporan selesai. Semua dokumen diamankan.', submittedAt: '2026-07-04T17:00:00', kanitScore: 81 },
     ],
     status: 'scored', submittedAt: '2026-07-04T17:00:00',
     kanitScore: 85, kanitNote: 'Progress penaksiran non-emas terus membaik. Pertahankan follow up canvassing!', kanitScoredAt: '2026-07-04T17:30:00',
@@ -568,11 +632,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-12', day: 12, date: '2026-07-05', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP, tidak ada kendala.', submittedAt: '2026-07-05T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek baru dan follow up 2. Prospek akhir pekan kemarin jadi datang hari ini dan langsung transaksi!', submittedAt: '2026-07-05T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ramai hari ini, tapi berhasil tangani semua nasabah dengan baik. Tidak ada keluhan.', submittedAt: '2026-07-05T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 5 item hari ini — terbanyak selama OJT. Rata-rata akurasi 93%.', submittedAt: '2026-07-05T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap lebih lama karena transaksi banyak, tapi selesai tepat waktu.', submittedAt: '2026-07-05T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP, tidak ada kendala.', submittedAt: '2026-07-05T08:30:00', kanitScore: 88 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '6 prospek baru dan follow up 2. Prospek akhir pekan kemarin jadi datang hari ini dan langsung transaksi!', submittedAt: '2026-07-05T13:00:00', kanitScore: 90 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Ramai hari ini, tapi berhasil tangani semua nasabah dengan baik. Tidak ada keluhan.', submittedAt: '2026-07-05T16:00:00', kanitScore: 87 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 5 item hari ini — terbanyak selama OJT. Rata-rata akurasi 93%.', submittedAt: '2026-07-05T16:30:00', kanitScore: 88 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap lebih lama karena transaksi banyak, tapi selesai tepat waktu.', submittedAt: '2026-07-05T17:00:00', kanitScore: 82 },
     ],
     status: 'scored', submittedAt: '2026-07-05T17:00:00',
     kanitScore: 87, kanitNote: 'Canvassing menghasilkan konversi nyata! Penaksiran konsisten. Closing perlu sedikit lebih cepat.', kanitScoredAt: '2026-07-05T17:30:00',
@@ -580,11 +644,11 @@ const fl003Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl003-13', day: 13, date: '2026-07-06', flId: 'fl-003',
     tasks: [
-      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sempurna, semua item selesai sebelum jam buka.', submittedAt: '2026-07-06T08:30:00' },
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '8 prospek hari ini — terbanyak selama OJT. Semangat tinggi karena besok hari terakhir.', submittedAt: '2026-07-06T13:00:00' },
-      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Melayani dengan percaya diri. Sudah bisa handle 2 nasabah sekaligus di jam sibuk.', submittedAt: '2026-07-06T16:00:00' },
-      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 4 item (3 emas, 1 elektronik). Akurasi rata-rata 95% — pencapaian terbaik selama OJT!', submittedAt: '2026-07-06T16:30:00' },
-      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai 15 menit lebih cepat dari biasanya. Semua aman dan terdokumentasi.', submittedAt: '2026-07-06T17:00:00' },
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sempurna, semua item selesai sebelum jam buka.', submittedAt: '2026-07-06T08:30:00', kanitScore: 93 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-c1', 'cv-c2', 'cv-c3', 'cv-c4', 'cv-c5'], reflection: '8 prospek hari ini — terbanyak selama OJT. Semangat tinggi karena besok hari terakhir.', submittedAt: '2026-07-06T13:00:00', kanitScore: 95 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Melayani dengan percaya diri. Sudah bisa handle 2 nasabah sekaligus di jam sibuk.', submittedAt: '2026-07-06T16:00:00', kanitScore: 91 },
+      { taskId: 'penaksiran-elektronik', taskName: 'Penaksiran Elektronik', completedItemIds: ['pn-c1', 'pn-c2', 'pn-c3', 'pn-c4', 'pn-c5'], reflection: 'Taksir 4 item (3 emas, 1 elektronik). Akurasi rata-rata 95% — pencapaian terbaik selama OJT!', submittedAt: '2026-07-06T16:30:00', kanitScore: 90 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Rekap selesai 15 menit lebih cepat dari biasanya. Semua aman dan terdokumentasi.', submittedAt: '2026-07-06T17:00:00', kanitScore: 86 },
     ],
     status: 'scored', submittedAt: '2026-07-06T17:00:00',
     kanitScore: 91, kanitNote: 'Milestone lanjutan sudah bagus! Konsistensi meningkat di semua aspek.', kanitScoredAt: '2026-07-06T17:30:00',
@@ -612,10 +676,96 @@ const pendingChecklists: DailyChecklist[] = [
   },
 ]
 
+const fl004EarlyScores = [78, 82, 85, 80, 88, 90, 86]
+const fl004DayScores = [84, 87, 92, 89, 91, 88]
+const fl004DayNotes = ['Baik, terus tingkatkan!', 'Penaksiran sangat akurat!', 'Excellent, konsisten!', 'Pertahankan ritme ini!', 'Sangat konsisten!', 'Performa terbaik hari ini!']
+// Per-task scores for fl004 days 8–13: [opening, pelayanan-dasar, closing]
+const fl004TaskScores: Record<number, [number, number, number]> = {
+  8: [83, 85, 84], 9: [87, 88, 86], 10: [92, 93, 91],
+  11: [89, 90, 88], 12: [91, 93, 89], 13: [88, 89, 87],
+}
+
+const fl004Checklists: DailyChecklist[] = [
+  ...Array.from({ length: 7 }, (_, i) => {
+    const day = i + 1
+    const milestoneIdx = Math.min(Math.floor(i / 2.2), 5)
+    const d = new Date('2026-06-24')
+    d.setDate(d.getDate() + i)
+    const date = d.toISOString().split('T')[0]
+    return {
+      id: `cl-fl004-${day}`, day, date, flId: 'fl-004',
+      milestoneId: milestoneRotation[milestoneIdx],
+      milestoneName: milestoneNames[milestoneIdx],
+      items: [
+        { itemId: 'oc-c1', completed: true },
+        { itemId: 'oc-c2', completed: true },
+        { itemId: 'oc-c3', completed: true },
+      ],
+      status: 'scored' as const,
+      submittedAt: `${date}T17:00:00`,
+      kanitScore: fl004EarlyScores[i],
+      kanitNote: 'Progress baik, terus tingkatkan!',
+      kanitScoredAt: `${date}T17:30:00`,
+    }
+  }),
+  ...Array.from({ length: 6 }, (_, i) => {
+    const day = i + 8
+    const d = new Date('2026-07-01')
+    d.setDate(d.getDate() + i)
+    const date = d.toISOString().split('T')[0]
+    const ts = fl004TaskScores[day]
+    return {
+      id: `cl-fl004-${day}`, day, date, flId: 'fl-004',
+      tasks: [
+        { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening sesuai SOP, tidak ada kendala.', submittedAt: `${date}T08:30:00`, kanitScore: ts[0] },
+        { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan nasabah berjalan lancar dan profesional.', submittedAt: `${date}T16:00:00`, kanitScore: ts[1] },
+        { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Closing selesai tepat waktu, rekap kas sesuai.', submittedAt: `${date}T17:00:00`, kanitScore: ts[2] },
+      ],
+      status: 'scored' as const,
+      submittedAt: `${date}T17:00:00`,
+      kanitScore: fl004DayScores[i],
+      kanitNote: fl004DayNotes[i],
+      kanitScoredAt: `${date}T17:30:00`,
+    }
+  }),
+  {
+    id: 'cl-fl004-14', day: 14, date: '2026-07-13', flId: 'fl-004',
+    tasks: [
+      { taskId: 'opening', taskName: 'Opening', completedItemIds: ['oc-c1', 'oc-c2', 'oc-c3', 'oc-c4'], reflection: 'Opening hari terakhir! Sudah sangat hafal semua prosedur tanpa perlu panduan.', submittedAt: '2026-07-13T08:00:00', kanitScore: 93 },
+      { taskId: 'pelayanan-dasar', taskName: 'Pelayanan Nasabah', completedItemIds: ['pd-c1', 'pd-c2', 'pd-c3', 'pd-c4', 'pd-c5'], reflection: 'Pelayanan terbaik sepanjang OJT. Bangga bisa menutup dengan performa penuh.', submittedAt: '2026-07-13T16:00:00', kanitScore: 95 },
+      { taskId: 'closing', taskName: 'Closing', completedItemIds: ['oc-c5', 'oc-c6', 'oc-c7'], reflection: 'Closing terakhir. Rekap bersih, tidak ada selisih. Terima kasih atas bimbingannya!', submittedAt: '2026-07-13T17:00:00', kanitScore: 91 },
+    ],
+    status: 'scored', submittedAt: '2026-07-13T17:00:00',
+    kanitScore: 93, kanitNote: 'Penutup yang luar biasa! Dewi menunjukkan kemajuan konsisten selama 14 hari. Semangat terus!', kanitScoredAt: '2026-07-13T17:30:00',
+  },
+]
+
+const fl004Penaksiran: PenaksiranRecord[] = [
+  {
+    id: 'pk-fl004-1', day: 9, date: '2026-07-02', flId: 'fl-004',
+    barangType: 'Emas', barangDescription: 'Emas 24K — gelang 8 gram',
+    flEstimate: 7500000, intoolsValue: 7480000, accuracy: 99.7,
+    kanitScore: 98, kanitNote: 'Hampir sempurna! Penaksiran sangat presisi.', kanitScoredAt: '2026-07-02T18:00:00',
+  },
+  {
+    id: 'pk-fl004-2', day: 10, date: '2026-07-03', flId: 'fl-004',
+    barangType: 'Elektronik', barangDescription: 'Samsung Galaxy S23 second',
+    flEstimate: 7000000, intoolsValue: 6800000, accuracy: 97.1,
+    kanitScore: 90, kanitNote: 'Akurasi bagus untuk elektronik second.', kanitScoredAt: '2026-07-03T18:00:00',
+  },
+  {
+    id: 'pk-fl004-3', day: 11, date: '2026-07-04', flId: 'fl-004',
+    barangType: 'Emas', barangDescription: 'Emas 18K — cincin 4 gram',
+    flEstimate: 2800000, intoolsValue: 2950000, accuracy: 94.9,
+    kanitScore: 85, kanitNote: 'Perhatikan konversi kadar 18K lebih teliti.', kanitScoredAt: '2026-07-04T18:00:00',
+  },
+]
+
 export const INITIAL_CHECKLISTS: DailyChecklist[] = [
   ...fl001Checklists,
   ...fl002Checklists,
   ...fl003Checklists,
+  ...fl004Checklists,
   ...pendingChecklists,
 ]
 
@@ -644,18 +794,140 @@ export const INITIAL_PENAKSIRAN: PenaksiranRecord[] = [
     flEstimate: 7500000, intoolsValue: 7480000, accuracy: 99.7,
     kanitScore: 98, kanitNote: 'Hampir sempurna! Penaksiran yang sangat presisi.', kanitScoredAt: '2026-07-06T18:00:00',
   },
+  ...fl004Penaksiran,
 ]
 
-export const INITIAL_ASSESSMENTS: Assessment[] = []
-
 export const ASSESSMENT_QUESTIONS = [
-  { id: 'q1', question: 'Jelaskan langkah-langkah prosedur opening kantor yang benar!' },
-  { id: 'q2', question: 'Apa yang harus dilakukan jika terdapat selisih pada rekap kas harian?' },
-  { id: 'q3', question: 'Bagaimana cara menentukan nilai taksiran emas 24K seberat 5 gram, jika harga emas hari ini Rp 1.000.000/gram?' },
-  { id: 'q4', question: 'Jelaskan alur transaksi gadai baru dari awal hingga nasabah menerima uang!' },
-  { id: 'q5', question: 'Apa saja yang harus tertulis pada label barang gadai?' },
-  { id: 'q6', question: 'Bagaimana cara menangani nasabah yang komplain dengan tepat?' },
-  { id: 'q7', question: 'Sebutkan minimal 5 langkah canvassing yang efektif!' },
+  {
+    id: 'q1',
+    question: 'Berapa menit sebelum jam buka, frontliner harus sudah tiba di kantor untuk melakukan opening?',
+    options: ['15 menit', '30 menit', '45 menit', '60 menit'],
+    correctIndex: 1,
+  },
+  {
+    id: 'q2',
+    question: 'Jika terdapat selisih pada rekap kas harian, langkah pertama yang harus dilakukan adalah...',
+    options: ['Langsung laporkan ke Kanit', 'Hitung ulang semua uang fisik', 'Abaikan jika selisihnya kecil', 'Catat di buku harian dan lanjutkan'],
+    correctIndex: 1,
+  },
+  {
+    id: 'q3',
+    question: 'Harga emas hari ini Rp 1.050.000/gram. Berapakah nilai taksiran emas 24K seberat 5 gram?',
+    options: ['Rp 4.200.000', 'Rp 5.000.000', 'Rp 5.250.000', 'Rp 6.000.000'],
+    correctIndex: 2,
+  },
+  {
+    id: 'q4',
+    question: 'Manakah urutan alur transaksi gadai baru yang benar?',
+    options: [
+      'Taksir barang → Identifikasi nasabah → Buat SBG → Serahkan uang',
+      'Identifikasi nasabah → Taksir barang → Buat SBG → Serahkan uang',
+      'Buat SBG → Identifikasi nasabah → Taksir barang → Serahkan uang',
+      'Identifikasi nasabah → Buat SBG → Taksir barang → Serahkan uang',
+    ],
+    correctIndex: 1,
+  },
+  {
+    id: 'q5',
+    question: 'Apa yang WAJIB tertulis pada label/stiker barang gadai?',
+    options: [
+      'Nama nasabah, nomor SBG, dan nama frontliner',
+      'Nomor SBG, tanggal gadai, dan paraf frontliner',
+      'Nama nasabah, nilai taksiran, dan tanggal jatuh tempo',
+      'Nomor SBG, nama kantor cabang, dan nilai taksiran',
+    ],
+    correctIndex: 1,
+  },
+  {
+    id: 'q6',
+    question: 'Prinsip penanganan komplain nasabah yang diajarkan selama OJT disingkat...',
+    options: ['CARE', 'HEAR', 'STAR', 'HELP'],
+    correctIndex: 1,
+  },
+  {
+    id: 'q7',
+    question: 'Manakah dari berikut ini yang BUKAN standar greeting nasabah di Pandai Gadai?',
+    options: [
+      'Berdiri saat nasabah datang',
+      'Menyapa dengan senyum',
+      'Langsung duduk dan bertanya keperluan',
+      'Mempersilakan nasabah duduk',
+    ],
+    correctIndex: 2,
+  },
+  {
+    id: 'q8',
+    question: 'Tujuan utama dari proses packing & sealing barang gadai adalah...',
+    options: [
+      'Mempercantik tampilan barang',
+      'Memudahkan penyimpanan di gudang',
+      'Menjaga keamanan dan identitas barang gadai',
+      'Memenuhi standar ISO perusahaan',
+    ],
+    correctIndex: 2,
+  },
+  {
+    id: 'q9',
+    question: 'Dalam canvassing, pendekatan yang paling efektif untuk mendapatkan nasabah baru adalah...',
+    options: [
+      'Menyebar brosur di tempat umum tanpa seleksi',
+      'Menghubungi referensi dari nasabah yang sudah ada',
+      'Memasang iklan di media sosial pribadi',
+      'Menunggu nasabah datang sendiri ke kantor',
+    ],
+    correctIndex: 1,
+  },
+  {
+    id: 'q10',
+    question: 'Dokumen utama yang dipegang nasabah sebagai bukti gadai disebut...',
+    options: ['Surat Perjanjian Kredit (SPK)', 'Surat Bukti Gadai (SBG)', 'Formulir Taksiran Barang (FTB)', 'Kartu Nasabah (KN)'],
+    correctIndex: 1,
+  },
+  {
+    id: 'q11',
+    question: 'Nasabah ingin memperpanjang masa gadai. Langkah pertama frontliner adalah...',
+    options: [
+      'Taksir ulang barang gadai',
+      'Cetak formulir perpanjangan langsung',
+      'Verifikasi identitas nasabah dan nomor SBG',
+      'Hitung bunga yang harus dibayar',
+    ],
+    correctIndex: 2,
+  },
+  {
+    id: 'q12',
+    question: 'Apa perbedaan utama dalam menghitung taksiran emas 18K dibanding 24K?',
+    options: [
+      'Tidak ada perbedaan, harga per gram sama',
+      'Emas 18K dikalikan faktor konversi kadar (18/24)',
+      'Emas 18K selalu lebih mahal dari 24K',
+      'Emas 18K menggunakan harga pasar berbeda',
+    ],
+    correctIndex: 1,
+  },
+  {
+    id: 'q13',
+    question: 'Berapa toleransi selisih rekap kas yang diperbolehkan tanpa harus melapor ke Kanit?',
+    options: ['Rp 1.000', 'Rp 5.000', 'Rp 10.000', 'Tidak ada — selisih sekecil apapun harus dilaporkan'],
+    correctIndex: 3,
+  },
+  {
+    id: 'q14',
+    question: 'Nilai akhir OJT dihitung dari berapa komponen penilaian?',
+    options: ['2 komponen', '3 komponen', '4 komponen', '5 komponen'],
+    correctIndex: 1,
+  },
+  {
+    id: 'q15',
+    question: 'Saat closing kantor, laporan yang HARUS diselesaikan sebelum frontliner meninggalkan kantor adalah...',
+    options: [
+      'Laporan kunjungan nasabah harian',
+      'Laporan penaksiran barang',
+      'Laporan transaksi harian dan rekap kas',
+      'Laporan canvassing mingguan',
+    ],
+    correctIndex: 2,
+  },
 ]
 
 export const MASTERY_MATERIALS = [
@@ -665,4 +937,41 @@ export const MASTERY_MATERIALS = [
   { materialId: 'pd', material: 'Standar Pelayanan dan Penanganan Komplain' },
   { materialId: 'pt', material: 'Alur Transaksi Gadai, Tebus, dan Perpanjangan' },
   { materialId: 'pn', material: 'Teknik Penaksiran dan Penggunaan Intools' },
+]
+
+export const INITIAL_ASSESSMENTS: Assessment[] = [
+  {
+    id: 'assess-fl-004',
+    flId: 'fl-004',
+    day: 14,
+    date: '2026-07-13',
+    masteryChecks: [
+      { materialId: 'oc', material: 'SOP Opening & Closing Kantor', mastered: true },
+      { materialId: 'ps', material: 'Standar Packing & Sealing Barang Gadai', mastered: true },
+      { materialId: 'cv', material: 'Teknik dan Script Canvassing', mastered: true },
+      { materialId: 'pd', material: 'Standar Pelayanan dan Penanganan Komplain', mastered: true },
+      { materialId: 'pt', material: 'Alur Transaksi Gadai, Tebus, dan Perpanjangan', mastered: false },
+      { materialId: 'pn', material: 'Teknik Penaksiran dan Penggunaan Intools', mastered: true },
+    ],
+    answers: [
+      { questionId: 'q1', question: 'Berapa menit sebelum jam buka, frontliner harus sudah tiba di kantor untuk melakukan opening?', answer: '30 menit' },
+      { questionId: 'q2', question: 'Jika terdapat selisih pada rekap kas harian, langkah pertama yang harus dilakukan adalah...', answer: 'Hitung ulang semua uang fisik' },
+      { questionId: 'q3', question: 'Harga emas hari ini Rp 1.050.000/gram. Berapakah nilai taksiran emas 24K seberat 5 gram?', answer: 'Rp 5.000.000' },
+      { questionId: 'q4', question: 'Manakah urutan alur transaksi gadai baru yang benar?', answer: 'Identifikasi nasabah → Taksir barang → Buat SBG → Serahkan uang' },
+      { questionId: 'q5', question: 'Apa yang WAJIB tertulis pada label/stiker barang gadai?', answer: 'Nomor SBG, tanggal gadai, dan paraf frontliner' },
+      { questionId: 'q6', question: 'Prinsip penanganan komplain nasabah yang diajarkan selama OJT disingkat...', answer: 'HEAR' },
+      { questionId: 'q7', question: 'Manakah dari berikut ini yang BUKAN standar greeting nasabah di Pandai Gadai?', answer: 'Langsung duduk dan bertanya keperluan' },
+      { questionId: 'q8', question: 'Tujuan utama dari proses packing & sealing barang gadai adalah...', answer: 'Menjaga keamanan dan identitas barang gadai' },
+      { questionId: 'q9', question: 'Dalam canvassing, pendekatan yang paling efektif untuk mendapatkan nasabah baru adalah...', answer: 'Menyebar brosur di tempat umum tanpa seleksi' },
+      { questionId: 'q10', question: 'Dokumen utama yang dipegang nasabah sebagai bukti gadai disebut...', answer: 'Surat Bukti Gadai (SBG)' },
+      { questionId: 'q11', question: 'Nasabah ingin memperpanjang masa gadai. Langkah pertama frontliner adalah...', answer: 'Hitung bunga yang harus dibayar' },
+      { questionId: 'q12', question: 'Apa perbedaan utama dalam menghitung taksiran emas 18K dibanding 24K?', answer: 'Emas 18K dikalikan faktor konversi kadar (18/24)' },
+      { questionId: 'q13', question: 'Berapa toleransi selisih rekap kas yang diperbolehkan tanpa harus melapor ke Kanit?', answer: 'Rp 5.000' },
+      { questionId: 'q14', question: 'Nilai akhir OJT dihitung dari berapa komponen penilaian?', answer: '3 komponen' },
+      { questionId: 'q15', question: 'Saat closing kantor, laporan yang HARUS diselesaikan sebelum frontliner meninggalkan kantor adalah...', answer: 'Laporan transaksi harian dan rekap kas' },
+    ],
+    status: 'selesai',
+    submittedAt: '2026-07-13T18:30:00',
+    mcqScore: 73,
+  },
 ]

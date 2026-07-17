@@ -22,10 +22,10 @@ export default function FLChecklistDetail() {
   const allItems = MILESTONES.flatMap(m => m.checklistItems)
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-[#65758B] mb-6">
-        <Link to="/fl/checklist" className="hover:text-[#023DFF] transition-colors">Daily Checklist</Link>
+        <Link to="/fl/checklist" className="hover:text-[#023DFF] transition-colors">Checklist</Link>
         <span>/</span>
         <span className="text-[#0F1729]">Hari {cl.day}</span>
       </div>
@@ -77,7 +77,7 @@ export default function FLChecklistDetail() {
 
       {/* Tasks (new format) */}
       {cl.tasks && (
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           {cl.tasks.map((task, idx) => (
             <div key={task.taskId} className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
               <div className="px-5 py-3.5 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-center gap-3">

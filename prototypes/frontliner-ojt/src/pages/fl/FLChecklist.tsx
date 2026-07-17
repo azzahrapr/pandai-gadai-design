@@ -4,6 +4,28 @@ import { useApp } from '../../context/AppContext'
 import { DAILY_TASKS } from '../../data/mockData'
 import type { FLProfile, DailyChecklist, DailyTaskRecord } from '../../types'
 
+const MILESTONE_TASK_MAP: Record<string, string[]> = {
+  'opening-closing': ['opening', 'closing'],
+  'canvassing': ['canvassing'],
+  'pelayanan-dasar': ['pelayanan-dasar'],
+  'pelayanan-transaksi': ['pelayanan-transaksi'],
+  'penaksiran': ['penaksiran-elektronik'],
+  'packing-sealing': ['packing-sealing'],
+}
+
+const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
+  'opening-closing': 13,
+  'packing-sealing': 4,
+  'canvassing': 2,
+  'pelayanan-dasar': 6,
+  'pelayanan-transaksi': 6,
+  'penaksiran': 6,
+}
+
+const TASK_TO_MILESTONE: Record<string, string> = Object.fromEntries(
+  Object.entries(MILESTONE_TASK_MAP).flatMap(([milId, taskIds]) => taskIds.map(tid => [tid, milId]))
+)
+
 type TaskState = {
   checkedIds: Set<string>
   reflection: string
@@ -11,11 +33,34 @@ type TaskState = {
   submittedAt?: string
 }
 
+function avgColor(s: number | null) {
+  if (s === null) return 'text-[#CBD5E1]'
+  if (s >= 85) return 'text-[#15803D]'
+  if (s >= 75) return 'text-[#B27202]'
+  return 'text-[#B91C1C]'
+}
+
 export default function FLChecklist() {
   const { currentUser, submitChecklist, getTodayChecklist, getFlChecklists } = useApp()
   const profile = currentUser!.profile as FLProfile
   const currentDay = profile.currentDay
   const existing = getTodayChecklist(currentUser!.id)
+
+  const allSubmittedChecklists = getFlChecklists(currentUser!.id).filter(c =>
+    c.status === 'submitted' || c.status === 'scored'
+  )
+
+  const incompleteModuleTaskIds = new Set<string>()
+  const activeMilestoneTaskIds = new Set<string>()
+  for (const milId of (profile.activeMilestoneIds ?? [])) {
+    const taskIds = MILESTONE_TASK_MAP[milId] ?? []
+    const expected = MILESTONE_EXPECTED_COUNT[milId] ?? 14
+    const actual = allSubmittedChecklists.filter(cl => cl.tasks?.some(t => taskIds.includes(t.taskId))).length
+    for (const tid of taskIds) activeMilestoneTaskIds.add(tid)
+    if (actual < expected) for (const tid of taskIds) incompleteModuleTaskIds.add(tid)
+  }
+
+  const activeTasks = DAILY_TASKS.filter(t => incompleteModuleTaskIds.has(t.id))
 
   const [taskStates, setTaskStates] = useState<Record<string, TaskState>>(() => {
     if (existing?.tasks) {
@@ -40,11 +85,13 @@ export default function FLChecklist() {
     !!(existing?.tasks && DAILY_TASKS.every(t => existing.tasks!.find(r => r.taskId === t.id)))
   )
 
-  const allTasksDone = DAILY_TASKS.every(t => taskStates[t.id]?.submitted)
+  const allTasksDone = activeTasks.length > 0
+    ? activeTasks.every(t => taskStates[t.id]?.submitted)
+    : false
 
   useEffect(() => {
     if (allTasksDone && !overallSubmitted) {
-      const tasks: DailyTaskRecord[] = DAILY_TASKS.map(t => ({
+      const tasks: DailyTaskRecord[] = activeTasks.map(t => ({
         taskId: t.id,
         taskName: t.name,
         completedItemIds: [...taskStates[t.id].checkedIds],
@@ -85,28 +132,62 @@ export default function FLChecklist() {
     }))
   }
 
-  const doneCount = DAILY_TASKS.filter(t => taskStates[t.id]?.submitted).length
+  const doneCount = activeTasks.filter(t => taskStates[t.id]?.submitted).length
   const history = getFlChecklists(currentUser!.id).filter(c => c.day !== currentDay).sort((a, b) => b.day - a.day)
-  const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
+
+  const taskOrder: string[] = []
+  const taskNames: Record<string, string> = {}
+  const taskDayScores: Record<string, Record<number, number | null>> = {}
+  for (const cl of history) {
+    if (!cl.tasks) continue
+    for (const t of cl.tasks) {
+      if (!taskOrder.includes(t.taskId)) { taskOrder.push(t.taskId); taskNames[t.taskId] = t.taskName }
+      if (!taskDayScores[t.taskId]) taskDayScores[t.taskId] = {}
+      taskDayScores[t.taskId][cl.day] = t.kanitScore ?? null
+    }
+  }
+
+  const filteredTaskOrder = taskOrder
+    .filter(tid => activeMilestoneTaskIds.has(tid))
+    .sort((a, b) => {
+      const isComplete = (tid: string) => {
+        const milId = TASK_TO_MILESTONE[tid]
+        const taskIds = MILESTONE_TASK_MAP[milId ?? ''] ?? []
+        const expected = MILESTONE_EXPECTED_COUNT[milId ?? ''] ?? 14
+        const actual = allSubmittedChecklists.filter(cl => cl.tasks?.some(t => taskIds.includes(t.taskId))).length
+        return actual >= expected ? 1 : 0
+      }
+      return isComplete(a) - isComplete(b)
+    })
 
   return (
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#0F1729]">Daily Checklist</h1>
-        <p className="text-[#65758B] text-sm mt-1">Hari ke-{currentDay} dari 14</p>
+        <h1 className="text-2xl font-bold text-[#0F1729]">Checklist</h1>
+        <p className="text-[#65758B] text-sm mt-1">
+          {currentDay === 14 ? 'OJT selesai · 14 hari' : `Hari ke-${currentDay} dari 14`}
+        </p>
       </div>
 
-      {/* Overall progress bar */}
-      <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
+      {currentDay === 14 && (
+        <div className="bg-[#F0FDF4] rounded-xl border border-[#16A34A]/20 p-5 mb-6 text-center">
+          <p className="text-3xl mb-2">🎉</p>
+          <p className="text-base font-bold text-[#15803D]">Semua checklist sudah selesai!</p>
+          <p className="text-sm text-[#15803D]/70 mt-1">Kamu sudah menyelesaikan seluruh 14 hari checklist OJT.</p>
+        </div>
+      )}
+
+      {/* Overall progress bar + task cards (hidden on day 14) */}
+      {currentDay < 14 && (<><div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-semibold text-[#0F1729]">Progress hari ini</span>
-          <span className="text-sm font-bold text-[#023DFF]">{doneCount}/{DAILY_TASKS.length} task selesai</span>
+          <span className="text-sm font-bold text-[#023DFF]">{doneCount}/{activeTasks.length} task selesai</span>
         </div>
         <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
           <div
             className="h-full bg-[#023DFF] rounded-full transition-all duration-500"
-            style={{ width: `${(doneCount / DAILY_TASKS.length) * 100}%` }}
+            style={{ width: `${activeTasks.length > 0 ? (doneCount / activeTasks.length) * 100 : 0}%` }}
           />
         </div>
         {allTasksDone && (
@@ -122,7 +203,7 @@ export default function FLChecklist() {
 
       {/* Task cards */}
       <div className="grid grid-cols-2 gap-4">
-        {DAILY_TASKS.map((task, tIdx) => {
+        {activeTasks.map((task, tIdx) => {
           const ts = taskStates[task.id]
           const isSubmitted = ts?.submitted ?? false
           const canSubmit = (ts?.reflection.trim().length ?? 0) > 0
@@ -234,6 +315,7 @@ export default function FLChecklist() {
           )
         })}
       </div>
+      </>)}
 
       {/* History */}
       {history.length > 0 && (
@@ -243,90 +325,63 @@ export default function FLChecklist() {
             <h2 className="text-base font-bold text-[#0F1729]">Riwayat Checklist</h2>
           </div>
           <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
-            {history.map((cl, idx) => {
-              const isExpanded = expandedHistory === cl.id
-              const taskCount = cl.tasks ? cl.tasks.length : 1
-
+            {filteredTaskOrder.length > 0 ? filteredTaskOrder.map((taskId, idx) => {
+              const dayMap = taskDayScores[taskId] ?? {}
+              const milId = TASK_TO_MILESTONE[taskId]
+              const milTaskIds = MILESTONE_TASK_MAP[milId ?? ''] ?? []
+              const milExpected = MILESTONE_EXPECTED_COUNT[milId ?? ''] ?? 14
+              const milActual = allSubmittedChecklists.filter(cl =>
+                cl.tasks?.some(t => milTaskIds.includes(t.taskId))
+              ).length
+              const isChecklistComplete = milActual >= milExpected
+              const displayCount = Math.min(Object.keys(dayMap).length, milExpected)
+              const scored = Object.values(dayMap).filter((s): s is number => s !== null)
+              const avg = scored.length > 0 ? Math.round(scored.reduce((a, b) => a + b, 0) / scored.length) : null
               return (
-                <div key={cl.id} className={idx < history.length - 1 ? 'border-b border-[#E1E7EF]' : ''}>
-                  {/* Row */}
-                  <button
-                    onClick={() => setExpandedHistory(isExpanded ? null : cl.id)}
-                    className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-[#F8FAFC] transition-colors"
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      cl.status === 'scored'
-                        ? (cl.kanitScore ?? 0) >= 85 ? 'bg-[#F0FDF4] text-[#15803D]'
-                          : (cl.kanitScore ?? 0) >= 75 ? 'bg-[#FEFDEA] text-[#B27202]'
-                          : 'bg-[#FEF2F2] text-[#B91C1C]'
-                        : 'bg-[#F1F5F9] text-[#65758B]'
-                    }`}>
-                      {cl.day}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#0F1729]">Hari {cl.day}</p>
-                      <p className="text-xs text-[#65758B] mt-0.5">
-                        {cl.date} · {taskCount} task
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      {cl.status === 'scored' ? (
-                        <>
-                          <span className={`text-sm font-bold ${
-                            (cl.kanitScore ?? 0) >= 85 ? 'text-[#15803D]'
-                            : (cl.kanitScore ?? 0) >= 75 ? 'text-[#B27202]'
-                            : 'text-[#B91C1C]'
-                          }`}>{cl.kanitScore}/100</span>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D]">Dinilai</span>
-                        </>
-                      ) : (
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FEFDEA] text-[#B27202]">Menunggu</span>
+                <Link
+                  key={taskId}
+                  to={`/fl/checklist/task/${taskId}`}
+                  className={`flex items-center gap-4 px-5 py-4 hover:bg-[#F8FAFC] transition-colors ${idx < filteredTaskOrder.length - 1 ? 'border-b border-[#E1E7EF]' : ''}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-[#0F1729]">{taskNames[taskId]}</p>
+                      {isChecklistComplete && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D]">Selesai</span>
                       )}
-                      <svg
-                        className={`text-[#94A3B8] transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-                        width="16" height="16" viewBox="0 0 16 16" fill="none"
-                      >
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
                     </div>
-                  </button>
-
-                  {/* Expanded detail */}
-                  {isExpanded && (
-                    <div className="px-5 pb-5 border-t border-[#E1E7EF] pt-4 bg-[#F8FAFC] space-y-3">
-                      {cl.tasks ? (
-                        <div className="space-y-2">
-                          {cl.tasks.map((task, tIdx) => (
-                            <div key={task.taskId} className="bg-white rounded-lg border border-[#E1E7EF] px-4 py-3 flex items-center gap-3">
-                              <div className="w-6 h-6 rounded-md bg-[#F1F5F9] flex items-center justify-center text-xs font-bold text-[#65758B] flex-shrink-0">
-                                {tIdx + 1}
-                              </div>
-                              <p className="text-sm font-semibold text-[#0F1729] flex-1">{task.taskName}</p>
-                              <span className="text-xs text-[#65758B]">{task.completedItemIds.length} item selesai</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : cl.items ? (
-                        <div className="bg-white rounded-lg border border-[#E1E7EF] px-4 py-3 flex items-center justify-between">
-                          <span className="text-sm text-[#0F1729] font-semibold">{cl.milestoneName}</span>
-                          <span className="text-xs text-[#65758B]">{cl.items.filter(i => i.completed).length}/{cl.items.length} item selesai</span>
-                        </div>
-                      ) : null}
-                      {cl.kanitNote && (
-                        <div className="bg-[#E5F2FF] rounded-lg border border-[#023DFF]/20 px-4 py-3">
-                          <p className="text-xs font-semibold text-[#023DFF] mb-1">Catatan Kanit</p>
-                          <p className="text-sm text-[#001CDB]">"{cl.kanitNote}"</p>
-                        </div>
-                      )}
-                      <Link
-                        to={`/fl/checklist/${cl.id}`}
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#023DFF] hover:underline"
-                      >
-                        Lihat Detail →
-                      </Link>
-                    </div>
+                    <p className="text-xs text-[#65758B] mt-0.5">{displayCount} checklist sudah disubmit</p>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center gap-3">
+                    {avg !== null && (
+                      <div className="text-right">
+                        <p className="text-[9px] text-[#94A3B8] mb-0.5">Rata-rata</p>
+                        <p className={`text-base font-black ${avgColor(avg)}`}>{avg}</p>
+                      </div>
+                    )}
+                    <svg className="text-[#94A3B8] flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </Link>
+              )
+            }) : history.map((cl, idx) => {
+              const taskCount = cl.tasks ? cl.tasks.length : 1
+              return (
+                <div key={cl.id} className={`flex items-center gap-4 px-5 py-4 ${idx < history.length - 1 ? 'border-b border-[#E1E7EF]' : ''}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                    cl.status === 'scored'
+                      ? (cl.kanitScore ?? 0) >= 85 ? 'bg-[#F0FDF4] text-[#15803D]'
+                        : (cl.kanitScore ?? 0) >= 75 ? 'bg-[#FEFDEA] text-[#B27202]'
+                        : 'bg-[#FEF2F2] text-[#B91C1C]'
+                      : 'bg-[#F1F5F9] text-[#65758B]'
+                  }`}>{cl.day}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#0F1729]">Hari {cl.day}</p>
+                    <p className="text-xs text-[#65758B] mt-0.5">{cl.date} · {taskCount} task</p>
+                  </div>
+                  {cl.status === 'scored' && (
+                    <span className={`text-sm font-bold ${avgColor(cl.kanitScore ?? null)}`}>{cl.kanitScore}/100</span>
                   )}
                 </div>
               )
