@@ -36,8 +36,7 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Badge | `badge-notification` | component_set | `0e55c157dac05a65b63978b1d13790227e1444a6` |
 | Badge | `badge-product` | component_set | `38214736ae3e67379551ddc86ccd1ee36ae65787` |
 | Badge | `badge-status` | component_set | `831717d904e0c80de8e6ddcda4f71c5ac4c8c906` |
-| Banner Info | `banner - desktop` | component_set | `f82ebac1f10ef3c6525daa5af9c3d15afd5a3522` |
-| Banner Info | `banner - mobile` | component_set | `4013bbe387c4f23cdd1a13ccc8f3ea4be08dcae8` |
+| Banner Info | `banner - info` | component_set | `f82ebac1f10ef3c6525daa5af9c3d15afd5a3522` |
 | Benefits Strip | `icon.cuan-pandai` | local asset | `public/assets/icon.cuan-pandai.png` |
 | Benefits Strip | `icon.poin-emas` | local asset | `public/assets/icon.poin-emas.png` |
 | Benefits Strip | `icon.transaksi` | local asset | `public/assets/icon.transaksi.png` |
@@ -125,44 +124,54 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | variant=heavy | `e15a62bbf7f82a9b7013010a51d397706c06106c` |
 
 ### badge-status
+
+2026-07-23: `state=finished` (light) renamed to `state=default` in Figma — same key. Solid axis was partially renamed: `type10`→success, `type8`→warning, `type7`→error, `type6`→default all now carry semantic Figma names; `type9` (informative) was **not** renamed and is still a placeholder. Keys below are unchanged either way — map by key, not by trusting the current Figma name.
+
 | Variant | Key |
 |---|---|
 | state=success, type=light | `658b9c51c98cfe54c80908d80e96d42be49e82d3` |
 | state=informative, type=light | `95744d4cd822f15d28f7e5b2d0fd011075884133` |
 | state=warning, type=light | `70440476ca10eec29d01a565bd03c959b746e342` |
 | state=error, type=light | `e6b028bd52cb97057da774ec435a2784ccc55685` |
-| state=finished, type=light | `15d70f5c0ff74f9cd075d84b7a2451324b35bcf1` |
-| state=type10, type=solid | `a96309ac14d1d6ef2cce08c0eae5a531bec4aa27` |
-| state=type9, type=solid | `d9b6bb3bc6d6a4e161a5d75932a1633af223aaf8` |
-| state=type8, type=solid | `54427d2ea94c416cfa4d51485010048c4c16e8b1` |
-| state=type7, type=solid | `b4d6ab12995f9782d5e9c828547ca708cb93aef2` |
-| state=type6, type=solid | `f261b5fe2c1f59a2177ace35b5695607ffe0adfa` |
+| state=default (was `finished`), type=light | `15d70f5c0ff74f9cd075d84b7a2451324b35bcf1` |
+| state=success (was `type10`), type=solid | `a96309ac14d1d6ef2cce08c0eae5a531bec4aa27` |
+| state=type9 (informative, still unrenamed), type=solid | `d9b6bb3bc6d6a4e161a5d75932a1633af223aaf8` |
+| state=warning (was `type8`), type=solid | `54427d2ea94c416cfa4d51485010048c4c16e8b1` |
+| state=error (was `type7`), type=solid | `b4d6ab12995f9782d5e9c828547ca708cb93aef2` |
+| state=default (was `type6`), type=solid | `f261b5fe2c1f59a2177ace35b5695607ffe0adfa` |
 
-### banner - mobile
+### banner - info
+
+Merged into a single component set on 2026-07-02 (previously two separate sets, `banner - desktop` and `banner - mobile`, with the mobile set using unlabeled variants — `Property 1=info/Type6/Variant3/Variant4/Variant5`). Variant axis is now `Type` × `Device`, both using the same 5 semantic types.
+
+Also exposes boolean props: `icon`, `title`, `actionButton`, `closeButton`, `closeIcon`.
+
 | Variant | Key |
 |---|---|
-| Property 1=info | `499ce59d5e0d7a213507737dcf153a44a3fce3fb` |
-| Property 1=Type6 | `32c0d8253fcf9dade351e6d3ce342dc0baba9656` |
-| Property 1=Variant3 | `b0893fa1648a7340f003e725b584c3d2f93d4b62` |
-| Property 1=Variant4 | `c2b525347bc68c54eda18a8d8e130cfe816709de` |
-| Property 1=Variant5 | `59a0a581c109aad93d41365117bfdfc768d25e82` |
-
-### banner - desktop
-| Variant | Key |
-|---|---|
-| Type=Base | `dc3c923d6426d3d9d752592a83021397ba092be5` |
-| Type=Informative | `26d44817ae083e712b03ba38eae3eb49c8c6da27` |
-| Type=Success | `c91243fa238a6df6bf5e483c85e8955c8cedb7b5` |
-| Type=Alert | `745645f7841d875d78c7041fbfec8a1f2e70aabb` |
-| Type=Error | `baf9d9c227cf9893ef233ba824c11c416e4bfd79` |
+| Type=Base, Device=Desktop | `dc3c923d6426d3d9d752592a83021397ba092be5` |
+| Type=Informative, Device=Desktop | `26d44817ae083e712b03ba38eae3eb49c8c6da27` |
+| Type=Success, Device=Desktop | `c91243fa238a6df6bf5e483c85e8955c8cedb7b5` |
+| Type=Alert, Device=Desktop | `745645f7841d875d78c7041fbfec8a1f2e70aabb` |
+| Type=Error, Device=Desktop | `baf9d9c227cf9893ef233ba824c11c416e4bfd79` |
+| Type=Base, Device=Mobile | `32c0d8253fcf9dade351e6d3ce342dc0baba9656` |
+| Type=Informative, Device=Mobile | `499ce59d5e0d7a213507737dcf153a44a3fce3fb` |
+| Type=Alert, Device=Mobile | `b0893fa1648a7340f003e725b584c3d2f93d4b62` |
+| Type=Success, Device=Mobile | `c2b525347bc68c54eda18a8d8e130cfe816709de` |
+| Type=Error, Device=Mobile | `59a0a581c109aad93d41365117bfdfc768d25e82` |
 
 ### menu-home
+
+2026-07-23: gained a boolean `Badge` prop (default `true`, renders a red "99+" notification pill) on both variants — not previously indexed.
+
 | Variant | Key |
 |---|---|
 | State=Unselected | `d47029749c7de1778538e53e3db0df7e664a56de` |
 | State=Selected | `daaaff90a12676f9bc1c4eeae23bdc59d2cba5ba` |
 
 ### menu-pinjaman
+
+2026-07-23: same new `Badge` prop as menu-home. Selected icon also drifted to `background/primary` instead of `icon/info` — see [component-specs.md](component-specs.md#bottom-navbar).
+
 | Variant | Key |
 |---|---|
 | State=Unselected | `17b8603e4a08f62d0810e6f4f1dd151170670a33` |
@@ -171,6 +180,9 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 **Local asset:** `public/assets/credit-card.png` (use for Unselected state in prototype)
 
 ### menu-emas
+
+2026-07-23: same new `Badge` prop. Icon fills on **both** states are unbound raw hex — no token binding at all, unlike its 3 siblings.
+
 | Variant | Key |
 |---|---|
 | State=Unselected | `15a4ca31ea98c1081f097196feab880851d19947` |
@@ -179,6 +191,9 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 **Local asset:** `public/assets/poinemas.outline.png` (use for Unselected state in prototype)
 
 ### menu-profile
+
+2026-07-23: same new `Badge` prop. This is the one menu item whose color tokens are still correct (`icon/info` on Selected).
+
 | Variant | Key |
 |---|---|
 | State=Unselected | `34733afd4afec84f50736e8364696bb2745e0369` |
@@ -270,10 +285,13 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | State=Disabled Selected | `b657959e8b82bc60cd45d4b31a109b482bd8c68c` |
 
 ### chips/badge
+
+`state=Variant2` re-checked 2026-07-23 — **still** not renamed to "active" despite the vague name flagged in earlier reviews.
+
 | Variant | Key |
 |---|---|
 | state=badge | `4589d215f8c74dc92939baae3bae7e179c69a0e3` |
-| state=Variant2 | `11e7f5cbbfe549cf97045914dc0d64e634e722d3` |
+| state=Variant2 (functions as "active") | `11e7f5cbbfe549cf97045914dc0d64e634e722d3` |
 | state=disabled | `9de73d214cb5ae2cc790ae5a39a36c88bbd5ff12` |
 
 ### chips/default
@@ -511,6 +529,9 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Variant=Multiple Action, Type=General | `72a0673f8ad4aea8ac8de11578baf2d76e2abdd9` |
 
 ### top-navigation-bar
+
+2026-07-23: `Intools-Tablet/Desktop` measured at 589px wide in Figma, not the 1440px this doc previously listed — see [component-specs.md](component-specs.md#top-navbar) for full token drift on this component.
+
 | Variant | Key |
 |---|---|
 | Variant=CustomerApp-Default | `7fbe07218222f4b4ed721727bb5eba782a848135` |
@@ -519,6 +540,15 @@ Use keys directly with `importComponentByKeyAsync` / `importComponentSetByKeyAsy
 | Variant=LandingPage - Mobile | `f868e6e7aba900a1e79a5cbb08c294e0c3d466e9` |
 | Variant=LandingPage - Tablet/Desktop | `4769e82b14c42f3e9f087c04fa3d6c6dfa1dec91` |
 
+### Tablet/Desktop-Leading-TopNavBar
+
+Gap filled 2026-07-23 — this component set previously had zero variants indexed.
+
+| Variant | Key |
+|---|---|
+| Variant=Page Title | `f7d64ef34dbf6c6f94a5e3cd4e6f859f1bbf6690` |
+| Variant=Search | `e89dac159118cc4c4795de4921051c15d817c900` |
+
 ---
 
-*Last indexed: 2026-05-18 — Added `bottom-navbar` (assembled component) and `action` (List page component set). If new components are added to the DS, re-run the indexing and update this file.*
+*Last indexed: 2026-07-23. Full re-audit against live Figma found 32 of 38 components with real drift (renamed variants, swapped/removed tokens, or rebuilt anatomy) — see `component-specs.md` for the per-component detail and the "Generic Token Migration" note at its end for the cross-cutting pattern behind most of it. All Figma keys on this page were re-confirmed current as of this audit; where a key's *name* changed in Figma without the key itself changing, both names are noted inline. Previously indexed 2026-05-18: added `bottom-navbar` (assembled component) and `action` (List page component set). If new components are added to the DS, re-run the indexing and update this file.*

@@ -129,6 +129,12 @@ Primitive color scales. **Do not use these directly in components — use semant
 | `background/error` | red/600 | `#DC2626` |
 | `background/error-subtle` | red/50 | `#FEF2F2` |
 | `background/info-subtle` | blue/50 | `#E5F2FF` |
+| `info-background` | — (unaliased) | `#EFF6FF` |
+| `warning-background` | — (unaliased) | `#FEFCE8` |
+| `success-background` | — (unaliased) | `#F0FDF4` |
+| `error-background` | — (unaliased) | `#FEF2F2` |
+
+> `info-background` and `warning-background` are **not** the same color as `background/info-subtle` / `background/warning-subtle` despite the similar names — added 2026-07-02 for the desktop `banner - info` variant, which uses these instead of the `-subtle` tokens mobile uses. `success-background` / `error-background` currently resolve to the same hex as their `-subtle` counterparts but are separate variables.
 
 ### Text
 | Token | Maps to | Hex |
@@ -181,6 +187,27 @@ Primitive color scales. **Do not use these directly in components — use semant
 | Token | Value |
 |---|---|
 | `overlay/default` | `rgba(15, 17, 41, 0.7)` |
+
+---
+
+## ⚠ Generic / Parallel Tokens (found 2026-07-23 — not part of the official Cortes set)
+
+A full re-audit of the Figma file found these variable names showing up across many components (Accordion, Bottom Navbar, Date Picker, Bottom Sheet, Tab/Primary, Tab/Secondary, Uploader: General, table-cell) **alongside** the semantic tokens above — not replacing them everywhere, just in some places. They read as an in-progress migration to a shadcn/ui-style generic naming scheme, not an intentional addition to the Cortes system. Do not treat these as stable — confirm with whoever owns the DS before relying on them, and prefer the semantic token above wherever one exists.
+
+| Token | Where seen | Resolved value | Nearest semantic equivalent |
+|---|---|---|---|
+| `background` | Accordion, Bottom Navbar, Bottom Sheet | `#FFFFFF` | `background/neutral` |
+| `foreground` | Accordion (as chevron color), Date Picker (day text) | `#020617` (slate/950 — one step darker than `text/default`) | `text/default` / `icon/default` |
+| `muted-foreground` | Date Picker, Uploader: General | not precisely resolved; visually close to `text/subtle` | `text/subtle` |
+| `primary` | Date Picker (selected day bg) | same as `background/primary` `#023DFF` | `background/primary` |
+| `primary-foreground` | Date Picker (selected day text) | `#F8FAFC` — near-white, **not** pure white | `text/neutral` (but lower contrast against `primary`) |
+| `border` | Date Picker, Bottom Sheet's `Token` collection | not precisely resolved; visually close to `border/subtle`/`border/default` | `border/subtle` or `border/default` |
+| `info-border` | Tab/Primary (Inactive bottom stroke) | not precisely resolved | `border/info` |
+| `bluects/400` | Tab/Secondary (Default state bg, raw/unbound) | `~#3D7AFF` (identical to primitive `blue/400`) | — |
+| `Colors/Text/text-primary (900)` | table-cell ("avatar + text" content) | `#181D27` | `text/default` (`#0F1729`, close but not identical) |
+| `Colors/Text/text-tertiary (600)` | table-cell ("avatar + text" content) | `#535862` | `text/subtle` (`#65758B`, close but not identical) |
+
+**Bottom Sheet's new `Token` collection:** its background fill now resolves through a variable named `background` inside a brand-new 4-mode collection — `light/bluects`, `dark/slate`, `light/zinc`, `dark/zinc` — that has no other footprint in this file yet. `bluects/400` above (used raw, unbound, on Tab/Secondary) shares the `bluects` name with this collection's `light/bluects` mode — this is likely the same underlying migration surfacing in two different components, not two unrelated changes.
 
 ---
 
@@ -270,6 +297,10 @@ Use these keys with `figma.variables.importVariableByKeyAsync(key)` in plugin co
 | `background/error` | `ce7e9441ea9ee25c539bcc9b746eae815421caba` |
 | `background/error-subtle` | `578abf67833a0fe712da5971c97a0562f0334d96` |
 | `background/info-subtle` | `3c06ceb6c31f00891c6e7478a620a6095d5c69e3` |
+| `info-background` | `b696f9925cd964ea198dca8eda329a965330ca5d` |
+| `warning-background` | `2869868218bcd5530b0facd7528c53f1c884ca37` |
+| `success-background` | `ba920b0550188a97c06e9d065793a4ec4073e612` |
+| `error-background` | `c169eeabcaa8fad9f75666821fe548c80e7914b6` |
 
 ### Semantic – Text
 | Token | Key |
