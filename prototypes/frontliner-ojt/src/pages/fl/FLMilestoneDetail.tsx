@@ -24,8 +24,8 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
 }
 
 const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
-  'closing-cabang': 2,
-  'opening-cabang': 2,
+  'closing-cabang': 3,
+  'opening-cabang': 3,
   'personal-grooming': 12,
   'pengenalan-produk': 3,
   'canvassing': 3,
@@ -33,8 +33,8 @@ const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
   'sop-administrasi': 5,
   'packing-sealing': 3,
   'offloading': 1,
-  'pelayanan-nasabah': 5,
-  'customer-service-wa': 2,
+  'pelayanan-nasabah': 6,
+  'customer-service-wa': 3,
   'penaksiran-elektronik': 2,
   'penaksiran-emas': 1,
   'penaksiran-bpkb': 2,
@@ -59,7 +59,15 @@ export default function FLMilestoneDetail() {
   const milestoneSubmissions = isPenaksiran
     ? allChecklists.filter(cl => cl.milestoneId === milestone!.id).length
     : relatedTaskIds.length > 0
-      ? allChecklists.filter(cl => cl.tasks?.some(t => relatedTaskIds.includes(t.taskId))).length
+      ? allChecklists.filter(cl =>
+          cl.tasks?.some(t => {
+            if (!relatedTaskIds.includes(t.taskId)) return false
+            if (t.reflection?.startsWith('Kode SBG:')) return true
+            const ms = MILESTONES.find(m => m.id === t.taskId)
+            const total = ms?.checklistItems?.length ?? 0
+            return total === 0 || t.completedItemIds.length >= total
+          })
+        ).length
       : 0
 
   // For individual-type modules: track per-item confirmations
@@ -77,6 +85,12 @@ export default function FLMilestoneDetail() {
   const allItemsConfirmed = isIndividual
     ? (milestone?.checklistItems ?? []).every(item => confirmedItemIds.has(item.id))
     : false
+  const actualIndividualCount = isIndividual
+    ? Object.values(itemConfirmationCounts).reduce((s, n) => s + n, 0)
+    : 0
+  const expectedIndividualCount = isIndividual
+    ? (milestone?.checklistItems ?? []).reduce((s, item) => s + (item.target ?? 1), 0)
+    : 0
 
   const explicitlyCompleted = milestone ? (profile.completedMilestoneIds?.includes(milestone.id) ?? false) : false
   const effectiveSubmissions = explicitlyCompleted ? expectedCount : milestoneSubmissions
@@ -159,54 +173,52 @@ export default function FLMilestoneDetail() {
 
   // IA conditions
   const hasActiveTugas = isIndividual
-    ? confirmedItemIds.size > 0
+    ? actualIndividualCount > 0
     : effectiveSubmissions > 0 || hasMeaningfulDraft
 
   // Progress block — rendered either above or below content depending on hasActiveTugas
   const progressBlock = isIndividual ? (
     <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
-      <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Progress Tugas</p>
+      <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Latihan</p>
       <div className="space-y-3 text-sm">
         <div className="flex justify-between items-center">
-          <span className="text-[#65758B]">Tugas selesai</span>
+          <span className="text-[#65758B]">Target penyelesaian</span>
           <span className={`font-semibold ${isCompleted ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
-            {confirmedItemIds.size}/{milestone.checklistItems.length}
+            {actualIndividualCount}/{expectedIndividualCount} latihan
           </span>
         </div>
         <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${isCompleted ? 'bg-[#16A34A]' : 'bg-[#023DFF]'}`}
-            style={{ width: `${Math.min(100, (confirmedItemIds.size / milestone.checklistItems.length) * 100)}%` }}
+            style={{ width: `${expectedIndividualCount > 0 ? Math.min(100, (actualIndividualCount / expectedIndividualCount) * 100) : 0}%` }}
           />
         </div>
-        {isCompleted ? (
-          <div className="space-y-2.5">
-            <p className="text-xs text-[#15803D] font-medium">✓ Semua tugas sudah selesai</p>
-            <Link
-              to={`/fl/milestones/${milestone.id}/tasks`}
-              className="w-full flex items-center justify-center gap-1.5 h-9 bg-white border border-[#E1E7EF] hover:bg-[#F8FAFC] text-[#65758B] text-sm font-semibold rounded-lg transition-colors"
-            >
-              Lihat Daftar Tugas
-            </Link>
-          </div>
-        ) : (
+        {!isCompleted && (
           <Link
             to={`/fl/milestones/${milestone.id}/tasks`}
             className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            Kerjakan Tugas →
+            {actualIndividualCount === 0 ? 'Mulai Latihan' : 'Lanjutkan'}
           </Link>
+        )}
+        {actualIndividualCount > 0 && (
+          <p className="text-xs text-[#65758B]">
+            Total {actualIndividualCount} latihan sudah disubmit.{' '}
+            <Link to={`/fl/checklist/module/${milestone.id}`} className="text-[#023DFF] hover:underline font-medium">
+              Lihat riwayat →
+            </Link>
+          </p>
         )}
       </div>
     </div>
   ) : (
     <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
-      <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Progress Tugas</p>
+      <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Latihan</p>
       <div className="space-y-3 text-sm">
         <div className="flex justify-between items-center">
-          <span className="text-[#65758B]">Sesi selesai</span>
+          <span className="text-[#65758B]">Target penyelesaian</span>
           <span className={`font-semibold ${isCompleted ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
-            {Math.min(effectiveSubmissions, expectedCount)}/{expectedCount}
+            {Math.min(effectiveSubmissions, expectedCount)}/{expectedCount} latihan
           </span>
         </div>
         <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
@@ -215,35 +227,34 @@ export default function FLMilestoneDetail() {
             style={{ width: `${Math.min(100, (effectiveSubmissions / expectedCount) * 100)}%` }}
           />
         </div>
-        {isCompleted ? (
-          <p className="text-xs text-[#15803D] font-medium">✓ Semua tugas sudah selesai</p>
-        ) : hasMeaningfulDraft ? (
+        {hasMeaningfulDraft ? (
           <div className="space-y-2.5">
             <div className="flex items-start gap-2 bg-[#F0FDF4] border border-[#16A34A]/20 rounded-lg px-3 py-2.5">
               <span className="text-sm flex-shrink-0">🔄</span>
-              <p className="text-xs text-[#15803D] font-medium leading-relaxed">Ada draft sesi yang tersimpan.</p>
+              <p className="text-xs text-[#15803D] font-medium leading-relaxed">Ada draft latihan yang tersimpan.</p>
             </div>
             <Link
               to={`/fl/milestones/${milestone.id}/tasks`}
               className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
             >
-              Lanjutkan Sesi →
+              Lanjutkan →
             </Link>
           </div>
-        ) : ocAlreadyDoneToday ? (
-          <p className="text-xs text-[#15803D] font-medium">✓ Sesi ini sudah dilakukan hari ini</p>
-        ) : (
-          <div className="space-y-2.5">
-            {effectiveSubmissions > 0 && (
-              <p className="text-xs text-[#65758B]">{Math.max(0, expectedCount - effectiveSubmissions)} sesi lagi untuk selesaikan modul ini.</p>
-            )}
-            <button
-              onClick={handleMulaiSesi}
-              className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
-            >
-              Kerjakan Tugas →
-            </button>
-          </div>
+        ) : !isCompleted && !ocAlreadyDoneToday ? (
+          <button
+            onClick={handleMulaiSesi}
+            className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            {effectiveSubmissions === 0 ? 'Mulai Latihan' : 'Lanjutkan'}
+          </button>
+        ) : null}
+        {milestoneSubmissions > 0 && (
+          <p className="text-xs text-[#65758B]">
+            Total {milestoneSubmissions} latihan sudah disubmit.{' '}
+            <Link to={`/fl/checklist/module/${milestone.id}`} className="text-[#023DFF] hover:underline font-medium">
+              Lihat riwayat →
+            </Link>
+          </p>
         )}
       </div>
     </div>
@@ -356,8 +367,8 @@ export default function FLMilestoneDetail() {
             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${activeSection === 'progress' ? 'bg-[#E5F2FF] text-[#023DFF] font-medium' : 'text-[#65758B] hover:bg-[#F8FAFC]'}`}
           >
             <span className="w-4 text-center flex-shrink-0 text-sm leading-none">🎯</span>
-            <span className="truncate">Progress Tugas</span>
-            {isCompleted && <span className="ml-auto text-[10px] font-bold text-[#15803D] flex-shrink-0">✓</span>}
+            <span className="truncate">Latihan</span>
+            {isCompleted && <span className="ml-auto flex-shrink-0 inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold bg-[#F0FDF4] border border-[#16A34A] text-[#15803D]">Lulus</span>}
           </button>
           {hasQuiz && (
             <button
@@ -381,7 +392,7 @@ export default function FLMilestoneDetail() {
         </div>
       </div>
 
-      {/* b: Progress Tugas above content when user has active/ongoing tugas */}
+      {/* b: Progress Latihan above content when user has active/ongoing tugas */}
       {hasActiveTugas && <div ref={progressRef}>{progressBlock}</div>}
 
       {/* Content viewer */}
@@ -423,7 +434,7 @@ export default function FLMilestoneDetail() {
                 <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] flex items-center justify-center text-xl flex-shrink-0">🔒</div>
                 <div>
                   <p className="font-bold text-[#0F1729] text-sm">Mini Quiz terkunci</p>
-                  <p className="text-xs text-[#65758B] mt-1 leading-relaxed">Selesaikan semua target sesi tugas untuk membuka mini quiz.</p>
+                  <p className="text-xs text-[#65758B] mt-1 leading-relaxed">Selesaikan semua target latihan untuk membuka mini quiz.</p>
                 </div>
               </div>
             )}
@@ -431,7 +442,7 @@ export default function FLMilestoneDetail() {
         )}
       </div>
 
-      {/* a: Progress Tugas below content when no active tugas yet */}
+      {/* a: Progress Latihan below content when no active tugas yet */}
       {!hasActiveTugas && <div ref={progressRef} className="mt-6">{progressBlock}</div>}
 
       {/* Locked quiz — always at the very bottom */}
@@ -440,7 +451,7 @@ export default function FLMilestoneDetail() {
           <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-base flex-shrink-0">🔒</div>
           <div>
             <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-            <p className="text-xs text-[#65758B] mt-0.5">Selesaikan semua target sesi checklist untuk membuka quiz.</p>
+            <p className="text-xs text-[#65758B] mt-0.5">Selesaikan semua target latihan untuk membuka quiz.</p>
           </div>
         </div>
       )}

@@ -78,11 +78,13 @@ export default function FLSubmitTask() {
   )
   const submittedToday = !!todayChecklist
 
-  const passedResult = justSubmittedSingle ? justSubmittedPassed : todayChecklist?.passed
   const isAlreadyDone = submittedToday || justSubmittedSingle
   const submittedCheckedIds: Set<string> = justSubmittedSingle
     ? new Set(checkedIds)
     : new Set(todayChecklist?.tasks?.find(t => t.taskId === id)?.completedItemIds ?? [])
+  const passedResult = justSubmittedSingle
+    ? justSubmittedPassed
+    : dailyTask ? submittedCheckedIds.size >= dailyTask.items.length : false
 
   // ── Single-submission handlers ──────────────────────────────
   function toggleItem(itemId: string) {
@@ -177,7 +179,7 @@ export default function FLSubmitTask() {
         </svg>
       </button>
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl font-bold text-[#0F1729] leading-tight">Submit Tugas</h1>
+        <h1 className="text-xl font-bold text-[#0F1729] leading-tight">Submit Latihan</h1>
         <p className="text-sm text-[#65758B] mt-0.5 truncate">{milestone.name}</p>
       </div>
     </div>
@@ -240,6 +242,15 @@ export default function FLSubmitTask() {
                   <p className="font-bold text-[#0F1729]">{dailyTask.name}</p>
                   <p className="text-xs text-[#65758B] mt-0.5">{submittedCheckedIds.size}/{dailyTask.items.length} item dikerjakan</p>
                 </div>
+                <Link
+                  to={`/fl/milestones/${id}`}
+                  className="flex-shrink-0 h-[30px] px-2 rounded-lg inline-flex items-center gap-1 text-sm font-semibold text-[#023DFF] hover:bg-[#E5F2FF] transition-colors"
+                >
+                  Baca Materi
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
               </div>
               <div className="px-5 py-4 space-y-3">
                 {dailyTask.items.map(item => {
@@ -329,12 +340,12 @@ export default function FLSubmitTask() {
               <path d="M2 5l2 2L8 2.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <p className="text-sm font-semibold text-[#15803D]">Semua tugas sudah selesai</p>
+          <p className="text-sm font-semibold text-[#15803D]">Semua latihan sudah selesai</p>
         </div>
       )}
 
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-[#65758B]">Daftar Tugas</p>
+        <p className="text-sm font-semibold text-[#65758B]">Daftar Latihan</p>
         <span className="text-sm tabular-nums text-[#65758B]">{confirmedCount}/{milestone.checklistItems.length}</span>
       </div>
 
@@ -369,7 +380,7 @@ export default function FLSubmitTask() {
                     : inProgress? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
                     : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
                   }`}>
-                    Target: {currentCount}/{target} sesi
+                    Target: {currentCount}/{target} latihan
                   </span>
                   <p className={`text-sm font-semibold leading-snug ${done ? 'text-[#65758B]' : 'text-[#0F1729]'}`}>{item.text}</p>
                 </div>
@@ -398,7 +409,7 @@ export default function FLSubmitTask() {
                       </div>
                       <div className="flex-1">
                         <p className={`text-sm font-semibold ${done ? 'text-[#15803D]' : 'text-[#1E40AF]'}`}>
-                          {`Sesi ${currentCount} dari ${target} berhasil disubmit.`}
+                          {`Latihan ${currentCount} dari ${target} berhasil disubmit.`}
                         </p>
                         {!done && (
                           <Link
@@ -424,7 +435,7 @@ export default function FLSubmitTask() {
                       onClick={() => setShowFormFor(prev => ({ ...prev, [item.id]: true }))}
                       className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
                     >
-                      Submit Sesi Lain
+                      Submit Lagi
                     </button>
                   ) : (
                     <div className="space-y-3 pt-1">
@@ -450,7 +461,7 @@ export default function FLSubmitTask() {
                             : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
                         }`}
                       >
-                        Submit Task
+                        Submit
                       </button>
                     </div>
                   )}

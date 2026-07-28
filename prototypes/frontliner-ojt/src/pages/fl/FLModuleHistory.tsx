@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { MILESTONES, DAILY_TASKS } from '../../data/mockData'
 import type { FLProfile } from '../../types'
@@ -38,6 +38,7 @@ function scoreColor(s: number | null) {
 export default function FLModuleHistory() {
   const { milestoneId } = useParams<{ milestoneId: string }>()
   const { currentUser, getFlChecklists, extensionRequests } = useApp()
+  const navigate = useNavigate()
   const profile = currentUser!.profile as FLProfile
   const flId = currentUser!.id
 
@@ -104,18 +105,23 @@ export default function FLModuleHistory() {
 
   return (
     <div className="p-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-[#65758B] mb-6">
-        <Link to="/fl/checklist" className="hover:text-[#023DFF] transition-colors">Checklist</Link>
-        <span>/</span>
-        <span className="text-[#0F1729]">{milestone.shortName}</span>
-      </div>
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1.5 text-sm text-[#65758B] hover:text-[#023DFF] transition-colors mb-6"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Kembali
+      </button>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F1729]">{milestone.name}</h1>
-          <p className="text-sm text-[#65758B] mt-1">
+          <h1 className="text-2xl font-bold text-[#0F1729]">Riwayat Tugas</h1>
+          <p className="text-sm text-[#65758B] mt-0.5">{milestone.name}</p>
+          <p className="text-xs text-[#94A3B8] mt-0.5">
             {sessions.length} sesi · Hari ke-{profile.currentDay} dari 14
           </p>
         </div>

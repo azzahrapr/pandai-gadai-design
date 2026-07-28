@@ -23,8 +23,8 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
 }
 
 const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
-  'closing-cabang': 2,
-  'opening-cabang': 2,
+  'closing-cabang': 3,
+  'opening-cabang': 3,
   'personal-grooming': 12,
   'pengenalan-produk': 3,
   'canvassing': 3,
@@ -32,15 +32,15 @@ const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
   'sop-administrasi': 5,
   'packing-sealing': 3,
   'offloading': 1,
-  'pelayanan-nasabah': 5,
-  'customer-service-wa': 2,
+  'pelayanan-nasabah': 6,
+  'customer-service-wa': 3,
   'penaksiran-elektronik': 2,
   'penaksiran-emas': 1,
   'penaksiran-bpkb': 2,
 }
 
 export default function FLMilestones() {
-  const { currentUser, getFlChecklists, level2Unlocks } = useApp()
+  const { currentUser, getFlChecklists, level2Unlocks, getItemConfirmations } = useApp()
   const profile = currentUser!.profile as FLProfile
   const level2Unlocked = !!(level2Unlocks[currentUser!.id])
   const minggu1 = MILESTONES.filter(m => m.type === 'minggu1')
@@ -63,10 +63,17 @@ export default function FLMilestones() {
   }
 
   function getMilestoneProgress(milestoneId: string): { actual: number; expected: number; isStarted: boolean; isCompleted: boolean } {
+    const milestone = MILESTONES.find(m => m.id === milestoneId)
+    if (milestone?.submissionType === 'individual') {
+      const actual = milestone.checklistItems.reduce((sum, item) =>
+        sum + getItemConfirmations(currentUser!.id, milestoneId, item.id).length, 0
+      )
+      const expected = milestone.checklistItems.reduce((sum, item) => sum + (item.target ?? 1), 0)
+      return { actual, expected, isStarted: actual > 0, isCompleted: actual >= expected }
+    }
     const expected = MILESTONE_EXPECTED_COUNT[milestoneId] ?? 2
     let actual: number
     if (PENAKSIRAN_MILESTONE_IDS.includes(milestoneId)) {
-      // Only count sessions explicitly tagged to this milestone
       actual = submittedChecklists.filter(cl => cl.milestoneId === milestoneId).length
     } else {
       const taskIds = MILESTONE_TASK_MAP[milestoneId] ?? []
@@ -177,9 +184,14 @@ function MilestoneCard({ milestone: m, isActive, isLocked, isCompleted, progress
     <div className={`bg-white rounded-xl border border-[#E1E7EF] p-6 flex flex-col gap-4 transition-all ${isLocked ? 'opacity-60' : ''}`}>
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[#65758B]">
-            {m.materials.length} materi · {m.submissionType === 'individual' ? m.checklistItems.length : (MILESTONE_EXPECTED_COUNT[m.id] ?? m.checklistItems.length)} tugas{m.quiz ? ` · ${isCompleted ? '🔓' : '🔒'} Mini Quiz` : ''}
-          </span>
+          <div className="flex items-center gap-1.5 text-xs text-[#65758B] flex-wrap">
+            <span>{m.materials.length} materi</span>
+            <span>·</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#E1E7EF] text-[#65758B] font-semibold text-[10px] leading-none tabular-nums">
+              {progress.actual}/{progress.expected} latihan
+            </span>
+            {m.quiz && <><span>·</span><span>{isCompleted ? '🔓' : '🔒'} Mini Quiz</span></>}
+          </div>
           <div className="flex-shrink-0 ml-2">
             {isLocked && <span className="text-[#94A3B8]">🔒</span>}
             {isCompleted && !isLocked && (
@@ -204,7 +216,7 @@ function MilestoneCard({ milestone: m, isActive, isLocked, isCompleted, progress
               : 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
           }`}
         >
-          {isCompleted ? 'Pelajari Lagi' : 'Kerjakan Sekarang'}
+          {isCompleted ? 'Pelajari Lagi' : progress.isStarted ? 'Lanjutkan' : 'Mulai Sekarang'}
         </Link>
       ) : (
         <div className="mt-auto flex items-center justify-center h-9 px-4 rounded-lg bg-[#F1F5F9] text-[#94A3B8] font-semibold text-sm cursor-not-allowed">

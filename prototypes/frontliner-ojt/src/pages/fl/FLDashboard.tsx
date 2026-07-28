@@ -12,8 +12,18 @@ const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'customer-service-wa': { fromDay: 8, toDay: 13 },
 }
 
+const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
+  'closing-cabang': 3, 'opening-cabang': 3, 'personal-grooming': 12,
+  'pengenalan-produk': 3, 'canvassing': 3, 'cash-management': 1,
+  'sop-administrasi': 5, 'packing-sealing': 3, 'offloading': 1,
+  'pelayanan-nasabah': 6, 'customer-service-wa': 3,
+  'penaksiran-elektronik': 2, 'penaksiran-emas': 1, 'penaksiran-bpkb': 2,
+}
+
+const PENAKSIRAN_IDS = new Set(['penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'])
+
 export default function FLDashboard() {
-  const { currentUser, level2Unlocks, getFlChecklists, getFlAssessment } = useApp()
+  const { currentUser, level2Unlocks, getFlChecklists, getFlAssessment, getItemConfirmations } = useApp()
   const profile = currentUser!.profile as FLProfile
   const day = profile.currentDay
   const allChecklists = getFlChecklists(currentUser!.id)
@@ -42,11 +52,50 @@ export default function FLDashboard() {
     ? MILESTONES.filter(m => m.type === currentLevelType && !dailyMilestoneIds.includes(m.id))
     : []
 
+  const submittedAllChecklists = allChecklists.filter(c => c.status === 'submitted' || c.status === 'scored')
+  const weeklyProgress: Record<string, { actual: number; expected: number }> = Object.fromEntries(
+    weeklyModules.map(m => {
+      if (m.submissionType === 'individual') {
+        const actual = m.checklistItems.reduce((sum, item) =>
+          sum + getItemConfirmations(currentUser!.id, m.id, item.id).length, 0
+        )
+        const expected = m.checklistItems.reduce((sum, item) => sum + (item.target ?? 1), 0)
+        return [m.id, { actual, expected }]
+      }
+      const count = PENAKSIRAN_IDS.has(m.id)
+        ? submittedAllChecklists.filter(cl => cl.milestoneId === m.id).length
+        : submittedAllChecklists.filter(cl =>
+            cl.tasks?.some(t => {
+              if (t.taskId !== m.id) return false
+              if (t.reflection?.startsWith('Kode SBG:')) return true
+              const total = m.checklistItems?.length ?? 0
+              return total === 0 || t.completedItemIds.length >= total
+            })
+          ).length
+      return [m.id, { actual: count, expected: MILESTONE_EXPECTED_COUNT[m.id] ?? 2 }]
+    })
+  )
+
+  const submittedTodayTasks = allChecklists
+    .filter(c => c.day === day && (c.status === 'submitted' || c.status === 'scored'))
+    .flatMap(c => c.tasks ?? [])
+    .filter(t => todayDailyMilestoneIds.includes(t.taskId))
+
   const dailyDoneIds = new Set(
-    allChecklists
-      .filter(c => c.day === day && (c.status === 'submitted' || c.status === 'scored'))
-      .flatMap(c => c.tasks?.map(t => t.taskId) ?? [])
-      .filter(id => todayDailyMilestoneIds.includes(id))
+    submittedTodayTasks
+      .filter(t => {
+        if (t.reflection?.startsWith('Kode SBG:')) return true
+        const ms = MILESTONES.find(m => m.id === t.taskId)
+        const total = ms?.checklistItems?.length ?? 0
+        return total === 0 || t.completedItemIds.length >= total
+      })
+      .map(t => t.taskId)
+  )
+
+  const dailyIncompleteIds = new Set(
+    submittedTodayTasks
+      .filter(t => !dailyDoneIds.has(t.taskId))
+      .map(t => t.taskId)
   )
 
   const allDailyDoneToday = todayDailyMilestoneIds.length > 0
@@ -60,8 +109,10 @@ export default function FLDashboard() {
         .filter((m): m is typeof MILESTONES[number] => !!m)
     : []
 
-  const pendingWeeklyItems = weeklyModules
-    .filter(m => !(profile.completedMilestoneIds?.includes(m.id) ?? false))
+  const isWeeklyDone = (m: typeof MILESTONES[0]) =>
+    (profile.completedMilestoneIds?.includes(m.id) ?? false) ||
+    ((weeklyProgress[m.id]?.actual ?? 0) >= (weeklyProgress[m.id]?.expected ?? 1))
+  const pendingWeeklyItems = weeklyModules.filter(m => !isWeeklyDone(m))
 
   const [timeLeft, setTimeLeft] = useState(() => {
     const now = new Date()
@@ -95,9 +146,10 @@ export default function FLDashboard() {
   const l2Available = day >= 8 || !!(level2Unlocks[currentUser!.id])
 
   const completedDailyItems = todayDailyMilestones.filter(m => dailyDoneIds.has(m.id))
-  const doneWeeklyItems = weeklyModules.filter(m => profile.completedMilestoneIds?.includes(m.id) ?? false)
+  const doneWeeklyItems = weeklyModules.filter(m => isWeeklyDone(m))
 
-  const [taskFilter, setTaskFilter] = useState<'pending' | 'done'>('pending')
+  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done'>('all')
+  const [activeCard, setActiveCard] = useState<'level1' | 'level2'>(l2Available ? 'level2' : 'level1')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const l2CardRef = useRef<HTMLDivElement>(null)
 
@@ -106,6 +158,16 @@ export default function FLDashboard() {
       scrollContainerRef.current.scrollLeft = l2CardRef.current.offsetLeft - 16
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (!el) return
+    const handle = () => {
+      setActiveCard(el.scrollLeft > el.clientWidth * 0.4 ? 'level2' : 'level1')
+    }
+    el.addEventListener('scroll', handle, { passive: true })
+    return () => el.removeEventListener('scroll', handle)
+  }, [])
 
   function fmtDeadline(startDate: string, plusDays: number): string {
     const d = new Date(startDate)
@@ -181,9 +243,9 @@ export default function FLDashboard() {
           {/* Level 1 — always first */}
           <div
             className="flex-shrink-0 rounded-2xl p-5 bg-[#F0FDF4] border border-[#BBF7D0]"
-            style={{ width: '82%', scrollSnapAlign: 'start' }}
+            style={{ width: '82%', scrollSnapAlign: 'start', transform: activeCard === 'level1' ? 'scale(1)' : 'scale(0.93)', transition: 'transform 0.3s ease', transformOrigin: 'center' }}
           >
-            <p className="text-base font-bold text-[#0F1729] leading-tight">Materi Level 1</p>
+            <p className="text-base font-bold text-[#0F1729] leading-tight">Level 1</p>
             <p className="text-xs text-[#15803D] mt-1">Deadline: {l1Deadline}</p>
             <div className="mt-3">
               <div className="flex items-center justify-between mb-1.5">
@@ -207,9 +269,9 @@ export default function FLDashboard() {
             <div
               ref={l2CardRef}
               className="flex-shrink-0 rounded-2xl p-5 bg-[#FAF5FF] border border-[#E9D5FF]"
-              style={{ width: '82%', scrollSnapAlign: 'start' }}
+              style={{ width: '82%', scrollSnapAlign: 'start', transform: activeCard === 'level2' ? 'scale(1)' : 'scale(0.93)', transition: 'transform 0.3s ease', transformOrigin: 'center' }}
             >
-              <p className="text-base font-bold text-[#0F1729] leading-tight">Materi Level 2</p>
+              <p className="text-base font-bold text-[#0F1729] leading-tight">Level 2</p>
               <p className="text-xs text-[#7E22CE] mt-1">Deadline: {l2Deadline}</p>
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1.5">
@@ -230,10 +292,10 @@ export default function FLDashboard() {
           ) : (
             <div
               className="flex-shrink-0 rounded-2xl p-5 bg-[#F8FAFC] border border-[#E1E7EF]"
-              style={{ width: '82%', scrollSnapAlign: 'start' }}
+              style={{ width: '82%', scrollSnapAlign: 'start', transform: activeCard === 'level2' ? 'scale(1)' : 'scale(0.93)', transition: 'transform 0.3s ease', transformOrigin: 'center' }}
             >
               <div className="flex items-center justify-between mb-0.5">
-                <p className="text-base font-bold text-[#CBD5E1] leading-tight">Materi Level 2</p>
+                <p className="text-base font-bold text-[#CBD5E1] leading-tight">Level 2</p>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 text-[#CBD5E1]">
                   <rect x="3.5" y="7" width="9" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
                   <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -255,146 +317,188 @@ export default function FLDashboard() {
           {/* right padding sentinel */}
           <div className="flex-shrink-0 w-4" />
         </div>
+        {/* Dot indicators */}
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          <div className={`rounded-full transition-all duration-300 ${activeCard === 'level1' ? 'w-5 h-[6px] bg-[#023DFF]' : 'w-[6px] h-[6px] bg-[#CBD5E1]'}`} />
+          <div className={`rounded-full transition-all duration-300 ${activeCard === 'level2' ? 'w-5 h-[6px] bg-[#023DFF]' : 'w-[6px] h-[6px] bg-[#CBD5E1]'}`} />
+        </div>
       </div>
 
-      {/* Tugas Hari Ini */}
-      {day < 14 && (remainingDailyItems.length > 0 || pendingWeeklyItems.length > 0 || completedDailyItems.length > 0 || doneWeeklyItems.length > 0 || allDailyDoneToday) && (
+      {/* Task / Module list — switches based on which level card is visible */}
+      {day < 14 && (
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-[#0F1729]">Tugas Hari Ini</h3>
-            {checklistHasMore && (
-              <Link to="/fl/checklist" className="text-xs font-medium text-[#023DFF] hover:underline">Lihat semua →</Link>
-            )}
-          </div>
-          {/* Filter chips — DS chips/default spec: h-8 px-3 rounded-3xl text-sm font-semibold */}
-          <div className="flex gap-2 mb-3">
-            {([
-              { key: 'pending', label: 'Belum Dikerjakan', count: remainingDailyItems.length + pendingWeeklyItems.length },
-              { key: 'done', label: 'Sudah Dikerjakan', count: completedDailyItems.length + doneWeeklyItems.length },
-            ] as const).map(chip => (
-              <button
-                key={chip.key}
-                onClick={() => setTaskFilter(chip.key)}
-                className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-3xl text-sm font-semibold border transition-colors ${
-                  taskFilter === chip.key
-                    ? 'bg-[#E5F2FF] border-[#023DFF] text-[#023DFF]'
-                    : 'bg-white border-[#E1E7EF] text-[#0F1729] hover:bg-[#F8FAFC]'
-                }`}
-              >
-                {chip.label}
-                <span className={`inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full text-[10px] font-bold ${
-                  taskFilter === chip.key ? 'bg-[#023DFF] text-white' : 'bg-[#E1E7EF] text-[#65758B]'
-                }`}>{chip.count}</span>
-              </button>
-            ))}
-          </div>
-          <div className="space-y-2">
-            {taskFilter === 'pending' ? (
+          {activeCard === 'level1' ? (() => {
+            // Build unified item list
+            type S = 'pending' | 'incomplete' | 'done' | 'tomorrow'
+            const items: { m: (typeof MILESTONES)[0]; s: S; isDaily: boolean }[] = [
+              ...(!allDailyDoneToday
+                ? remainingDailyItems.map(m => ({ m, s: (dailyIncompleteIds.has(m.id) ? 'incomplete' : 'pending') as S, isDaily: true }))
+                : []),
+              ...completedDailyItems.map(m => ({ m, s: 'done' as S, isDaily: true })),
+              ...pendingWeeklyItems.map(m => ({ m, s: 'pending' as S, isDaily: false })),
+              ...doneWeeklyItems.map(m => ({ m, s: 'done' as S, isDaily: false })),
+              ...(allDailyDoneToday ? tomorrowDailyMilestones.map(m => ({ m, s: 'tomorrow' as S, isDaily: true })) : []),
+            ]
+            if (items.length === 0) return null
+
+            const pendingCount = items.filter(i => i.s === 'pending').length
+            const doneCount = items.filter(i => i.s === 'done' || i.s === 'incomplete').length
+            const visible = taskFilter === 'all' ? items
+              : taskFilter === 'pending' ? items.filter(i => i.s === 'pending')
+              : items.filter(i => i.s === 'done' || i.s === 'incomplete')
+
+            return (
               <>
-                {allDailyDoneToday && tomorrowDailyMilestones.length > 0 && (
-                  <>
-                    <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-widest px-1 mb-1">Besok</p>
-                    {tomorrowDailyMilestones.map(m => (
-                      <div key={m.id} className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 opacity-60">
-                        <div className="w-5 h-5 rounded border-2 border-[#E1E7EF] flex-shrink-0 flex items-center justify-center bg-[#F8FAFC]">
-                          <svg width="9" height="11" viewBox="0 0 9 11" fill="none">
-                            <rect x="0.7" y="4" width="7.6" height="6.3" rx="1.3" stroke="#CBD5E1" strokeWidth="1.4"/>
-                            <path d="M2.5 4V2.8a2 2 0 1 1 4 0V4" stroke="#CBD5E1" strokeWidth="1.4" strokeLinecap="round"/>
-                          </svg>
+                {/* Filter chips */}
+                <div className="flex gap-2 mb-3">
+                  {([
+                    { key: 'all' as const, label: 'Semua', count: items.length },
+                    { key: 'pending' as const, label: 'Belum Dikerjakan', count: pendingCount },
+                    { key: 'done' as const, label: 'Selesai', count: doneCount },
+                  ]).map(chip => (
+                    <button key={chip.key} onClick={() => setTaskFilter(chip.key)}
+                      className={`flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-3xl text-sm font-semibold border transition-colors ${
+                        taskFilter === chip.key
+                          ? 'bg-[#E5F2FF] border-[#023DFF] text-[#023DFF]'
+                          : 'bg-white border-[#E1E7EF] text-[#0F1729] hover:bg-[#F8FAFC]'
+                      }`}
+                    >
+                      {chip.label}
+                      <span className={`inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full text-[10px] font-bold ${
+                        taskFilter === chip.key ? 'bg-[#023DFF] text-white' : 'bg-[#E1E7EF] text-[#65758B]'
+                      }`}>{chip.count}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Unified task cards */}
+                <div className="space-y-2">
+                  {visible.map(({ m, s, isDaily }) => {
+                    const href = s === 'incomplete' ? `/fl/milestones/${m.id}`
+                      : s === 'done' ? (isDaily ? `/fl/milestones/${m.id}/tasks` : `/fl/milestones/${m.id}`)
+                      : s === 'pending' ? `/fl/milestones/${m.id}/tasks` : null
+
+                    const checkbox = s === 'done'
+                      ? <div className="w-5 h-5 rounded border-2 bg-[#16A34A] border-[#16A34A] flex-shrink-0 flex items-center justify-center">
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </div>
+                      : s === 'incomplete'
+                        ? <div className="w-5 h-5 rounded border-2 bg-[#FEE2E2] border-[#FCA5A5] flex-shrink-0 flex items-center justify-center">
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M6.5 1.5l-5 5M1.5 1.5l5 5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                          </div>
+                        : s === 'tomorrow'
+                          ? <div className="w-5 h-5 rounded border-2 border-[#E1E7EF] flex-shrink-0 flex items-center justify-center bg-[#F8FAFC]">
+                              <svg width="9" height="11" viewBox="0 0 9 11" fill="none"><rect x="0.7" y="4" width="7.6" height="6.3" rx="1.3" stroke="#CBD5E1" strokeWidth="1.4"/><path d="M2.5 4V2.8a2 2 0 1 1 4 0V4" stroke="#CBD5E1" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                            </div>
+                          : <div className="w-5 h-5 rounded border-2 border-[#CBD5E1] flex-shrink-0" />
+
+                    const subtitleNode = s === 'done'
+                      ? <span className="text-[#15803D]">{isDaily ? 'Latihan hari ini berhasil dikerjakan.' : 'Semua sesi latihan berhasil dikerjakan.'}</span>
+                      : s === 'incomplete'
+                        ? <span className="text-[#94A3B8]">Belum berhasil · Coba lagi besok</span>
+                        : s === 'tomorrow'
+                          ? <span className="text-[#CBD5E1]">Tersedia mulai besok</span>
+                          : isDaily
+                            ? <span className="text-[#94A3B8]">
+                                Batas pengerjaan{' '}
+                                <span className="whitespace-nowrap">
+                                  hari ini{' '}
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#FEF9C3] text-[#B27202] font-mono text-[10px] font-semibold leading-none align-middle">
+                                    {formatCountdown(timeLeft)}
+                                  </span>
+                                </span>
+                              </span>
+                            : <span className="text-[#94A3B8]">
+                                {weeklyDaysLeft <= 0 ? 'Batas pengerjaan hari ini' : `Batas pengerjaan ${weeklyDaysLeft} hari lagi`}
+                              </span>
+
+                    const titleColor = (s === 'incomplete' || s === 'tomorrow') ? 'text-[#94A3B8]' : 'text-[#0F1729]'
+                    const cardBase = `bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 ${s === 'tomorrow' ? 'opacity-60' : ''}`
+
+                    const inner = (
+                      <>
+                        {checkbox}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate text-[#94A3B8]">{m.name}</p>
-                          <p className="text-xs mt-0.5 text-[#CBD5E1]">Tersedia mulai besok</p>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className={`text-sm font-semibold truncate ${titleColor}`}>{m.name}</p>
+                            {!isDaily && weeklyProgress[m.id] && (
+                              <span className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#E1E7EF] text-[#65758B] leading-none tabular-nums">
+                                {weeklyProgress[m.id].actual}/{weeklyProgress[m.id].expected} latihan
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs mt-0.5">{subtitleNode}</p>
                         </div>
+                        {href && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {s === 'pending' && hasDraft(m.id) && <span className="text-xs text-[#023DFF] font-medium">Lanjutkan</span>}
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] group-hover:text-[#023DFF] transition-colors flex-shrink-0">
+                              <path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        )}
+                      </>
+                    )
+
+                    return href
+                      ? <Link key={`${m.id}-${s}`} to={href} className={`${cardBase} hover:border-[#023DFF]/30 hover:bg-[#F8FAFC] transition-all group`}>{inner}</Link>
+                      : <div key={`${m.id}-${s}`} className={cardBase}>{inner}</div>
+                  })}
+
+                  {visible.length === 0 && taskFilter === 'done' && (
+                    <p className="text-sm text-[#94A3B8] text-center py-4">Belum ada tugas yang selesai.</p>
+                  )}
+                  {visible.length === 0 && taskFilter === 'pending' && (
+                    <p className="text-sm text-[#94A3B8] text-center py-4">Semua tugas sudah dikerjakan 🎉</p>
+                  )}
+                </div>
+              </>
+            )
+          })() : (
+            // ── Level 2: module list ───────────────────────────────────────────
+            <div className="space-y-2">
+              {l2Milestones.map(m => {
+                const isCompleted = profile.completedMilestoneIds?.includes(m.id) ?? false
+                const isLocked = !l2Available
+                if (isLocked) {
+                  return (
+                    <div key={m.id} className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 opacity-50">
+                      <div className="w-5 h-5 rounded border-2 border-[#CBD5E1] flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate text-[#94A3B8]">{m.name}</p>
+                        <p className="text-xs mt-0.5 text-[#CBD5E1]">Tersedia setelah Level 1 selesai</p>
                       </div>
-                    ))}
-                  </>
-                )}
-                {!allDailyDoneToday && remainingDailyItems.map(m => (
-                  <Link key={m.id} to={`/fl/milestones/${m.id}/tasks`}
-                    className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 hover:border-[#023DFF]/30 hover:bg-[#F8FAFC] transition-all group"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-[#0F1729]">{m.name}</p>
-                      <p className="text-xs mt-0.5 text-[#94A3B8] flex items-center gap-1.5">
-                        Batas pengerjaan hari ini
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#FEF9C3] text-[#B27202] font-mono text-[10px] font-semibold leading-none">
-                          {formatCountdown(timeLeft)}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {hasDraft(m.id) && <span className="text-xs text-[#023DFF] font-medium">Lanjutkan</span>}
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] group-hover:text-[#023DFF] transition-colors">
-                        <path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] flex-shrink-0">
+                        <rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
+                        <path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                       </svg>
                     </div>
-                  </Link>
-                ))}
-                {pendingWeeklyItems.map(m => (
-                  <Link
-                    key={m.id}
-                    to={`/fl/milestones/${m.id}/tasks`}
-                    className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 hover:border-[#023DFF]/30 hover:bg-[#F8FAFC] transition-all group"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-[#0F1729]">{m.name}</p>
-                      <p className="text-xs mt-0.5 text-[#94A3B8]">
-                        {weeklyDaysLeft <= 0 ? 'Batas pengerjaan hari ini' : `Batas pengerjaan ${weeklyDaysLeft} hari lagi`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {hasDraft(m.id) && <span className="text-xs text-[#023DFF] font-medium">Lanjutkan</span>}
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] group-hover:text-[#023DFF] transition-colors">
-                        <path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </Link>
-                ))}
-                {remainingDailyItems.length === 0 && pendingWeeklyItems.length === 0 && !allDailyDoneToday && (
-                  <p className="text-sm text-[#94A3B8] text-center py-4">Semua tugas sudah dikerjakan 🎉</p>
-                )}
-              </>
-            ) : (
-              <>
-                {completedDailyItems.map(m => (
-                  <Link key={m.id} to={`/fl/milestones/${m.id}/tasks`}
-                    className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] transition-all group"
-                  >
-                    <div className="w-5 h-5 rounded border-2 bg-[#16A34A] border-[#16A34A] flex-shrink-0 flex items-center justify-center">
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-[#0F1729]">{m.name}</p>
-                      <p className="text-xs mt-0.5 text-[#15803D]">Sudah disubmit hari ini</p>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] group-hover:text-[#023DFF] flex-shrink-0 transition-colors">
-                      <path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </Link>
-                ))}
-                {doneWeeklyItems.map(m => (
+                  )
+                }
+                return (
                   <Link key={m.id} to={`/fl/milestones/${m.id}`}
-                    className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] transition-all group"
+                    className="bg-white rounded-xl border border-[#E1E7EF] px-4 py-3 flex items-center gap-3 hover:border-[#023DFF]/30 hover:bg-[#F8FAFC] transition-all group"
                   >
-                    <div className="w-5 h-5 rounded border-2 bg-[#16A34A] border-[#16A34A] flex-shrink-0 flex items-center justify-center">
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </div>
+                    {isCompleted
+                      ? <div className="w-5 h-5 rounded border-2 bg-[#16A34A] border-[#16A34A] flex-shrink-0 flex items-center justify-center">
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                      : <div className="w-5 h-5 rounded border-2 border-[#CBD5E1] flex-shrink-0" />
+                    }
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate text-[#0F1729]">{m.name}</p>
-                      <p className="text-xs mt-0.5 text-[#15803D]">Modul selesai</p>
+                      <p className={`text-xs mt-0.5 ${isCompleted ? 'text-[#15803D]' : 'text-[#94A3B8]'}`}>
+                        {isCompleted ? 'Modul selesai' : `Batas pengerjaan ${Math.max(0, 13 - day)} hari lagi`}
+                      </p>
                     </div>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#CBD5E1] group-hover:text-[#023DFF] flex-shrink-0 transition-colors">
                       <path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </Link>
-                ))}
-                {completedDailyItems.length === 0 && doneWeeklyItems.length === 0 && (
-                  <p className="text-sm text-[#94A3B8] text-center py-4">Belum ada tugas yang selesai hari ini.</p>
-                )}
-              </>
-            )}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
