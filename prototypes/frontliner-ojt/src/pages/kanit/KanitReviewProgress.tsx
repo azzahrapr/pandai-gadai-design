@@ -1,26 +1,42 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import type { ModuleDecision } from '../../context/AppContext'
 import { MILESTONES } from '../../data/mockData'
-import type { KanitProfile, FLProfile, DailyTaskRecord } from '../../types'
+import type { KanitProfile, FLProfile, DailyTaskRecord, ExtensionRequest } from '../../types'
 
 const MILESTONE_TASK_MAP: Record<string, string[]> = {
-  'opening-closing': ['opening', 'closing'],
+  'closing-cabang': ['closing-cabang'],
+  'opening-cabang': ['opening-cabang'],
+  'personal-grooming': ['personal-grooming'],
+  'pengenalan-produk': ['pengenalan-produk'],
   'canvassing': ['canvassing'],
-  'pelayanan-dasar': ['pelayanan-dasar'],
-  'pelayanan-transaksi': ['pelayanan-transaksi'],
-  'penaksiran': ['penaksiran-elektronik'],
+  'cash-management': ['cash-management'],
+  'sop-administrasi': ['sop-administrasi'],
   'packing-sealing': ['packing-sealing'],
+  'offloading': ['offloading'],
+  'pelayanan-nasabah': ['pelayanan-nasabah'],
+  'customer-service-wa': ['customer-service-wa'],
+  'penaksiran-elektronik': ['penaksiran-elektronik'],
+  'penaksiran-emas': ['penaksiran-emas'],
+  'penaksiran-bpkb': ['penaksiran-bpkb'],
 }
 
 const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
-  'opening-closing': 13,
-  'packing-sealing': 4,
-  'canvassing': 2,
-  'pelayanan-dasar': 6,
-  'pelayanan-transaksi': 6,
-  'penaksiran': 6,
+  'closing-cabang': 2,
+  'opening-cabang': 2,
+  'personal-grooming': 12,
+  'pengenalan-produk': 3,
+  'canvassing': 3,
+  'cash-management': 1,
+  'sop-administrasi': 5,
+  'packing-sealing': 3,
+  'offloading': 1,
+  'pelayanan-nasabah': 5,
+  'customer-service-wa': 2,
+  'penaksiran-elektronik': 2,
+  'penaksiran-emas': 1,
+  'penaksiran-bpkb': 2,
 }
 
 const CARRY_OVER_REASONS = [
@@ -36,6 +52,7 @@ export default function KanitReviewProgress() {
     currentUser, getFlUsers, getFlChecklists,
     scoreChecklist, scoreChecklistTasks,
     level2Unlocks, unlockLevel2,
+    extensionRequests, respondExtension,
   } = useApp()
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
@@ -44,7 +61,10 @@ export default function KanitReviewProgress() {
     const withPending = flUsers.find(u => getFlChecklists(u.id).some(c => c.status === 'submitted'))
     return withPending?.id ?? flUsers[0]?.id ?? ''
   })
-  const [contentTab, setContentTab] = useState<'review' | 'progress'>('review')
+  const [searchParams] = useSearchParams()
+  const [contentTab, setContentTab] = useState<'review' | 'progress'>(
+    searchParams.get('tab') === 'progress' ? 'progress' : 'review'
+  )
 
   // Review Checklist state
   const [justScored, setJustScored] = useState<string | null>(null)
@@ -57,6 +77,9 @@ export default function KanitReviewProgress() {
   const [reviewingId, setReviewingId] = useState<string | null>(null)
   const [score, setScore] = useState('')
   const [note, setNote] = useState('')
+
+  // Extension requests state
+  const [extNotes, setExtNotes] = useState<Record<string, string>>({})
 
   // Progress Belajar state
   const [showUnlockForm, setShowUnlockForm] = useState(false)
@@ -157,6 +180,8 @@ export default function KanitReviewProgress() {
   const level2NeedsUnlock = (flProfile?.currentDay ?? 0) >= 8 && !allLevel1Done && !unlock
   const level2Unlocked = !!unlock
 
+  const dayGroups = pending.map(cl => ({ day: cl.day, checklist: cl })).sort((a, b) => a.day - b.day)
+
   function switchFl(flId: string) {
     setSelectedFlId(flId)
     setExpandedPendingIds(new Set())
@@ -167,7 +192,7 @@ export default function KanitReviewProgress() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0F1729]">Review Progress OJT</h1>
         <p className="text-[#65758B] text-sm mt-1">Pantau dan nilai checklist serta progres materi belajar peserta OJT.</p>
@@ -185,9 +210,11 @@ export default function KanitReviewProgress() {
             {flUsers.map(fl => {
               const fp = fl.profile as FLProfile
               const pend = getFlChecklists(fl.id).filter(c => c.status === 'submitted').length
+              const pendExt = extensionRequests.filter(r => r.flId === fl.id && r.type === 'daily-redo' && r.status === 'pending').length
+              const total = pend + pendExt
               return (
                 <option key={fl.id} value={fl.id}>
-                  {fl.name} — Hari {fp.currentDay}{pend > 0 ? ` (${pend} pending)` : ''}
+                  {fl.name} — Hari {fp.currentDay}{total > 0 ? ` (${total} pending)` : ''}
                 </option>
               )
             })}
@@ -199,7 +226,7 @@ export default function KanitReviewProgress() {
       </div>
 
       {selectedFl && (
-        <div className="grid grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-start">
           <div className="col-span-2">
             {/* Content tabs */}
             <div className="flex border-b border-[#E1E7EF] mb-6">
@@ -213,9 +240,9 @@ export default function KanitReviewProgress() {
               >
                 <span className="flex items-center justify-center gap-2">
                   Review Checklist
-                  {pending.length > 0 && (
+                  {dayGroups.length > 0 && (
                     <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-[10px] font-bold bg-[#DC2626] text-white">
-                      {pending.length}
+                      {dayGroups.length}
                     </span>
                   )}
                 </span>
@@ -240,39 +267,34 @@ export default function KanitReviewProgress() {
             </div>
             {contentTab === 'review' && (
             <div className="space-y-4">
-            {pending.length > 0 ? (
+            {dayGroups.length > 0 ? (
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
-                  <p className="text-sm font-semibold text-[#0F1729]">Menunggu Review ({pending.length})</p>
+                  <p className="text-sm font-semibold text-[#0F1729]">Menunggu Review ({dayGroups.length})</p>
                 </div>
                 <div className="space-y-3">
-                  {pending.map(cl => {
-                    const isExpanded = pending.length === 1 || expandedPendingIds.has(cl.id)
-                    const canToggle = pending.length > 1
+                  {dayGroups.map(group => {
+                    const { day, checklist: cl } = group
+                    const cardKey = `day-${day}`
+                    const canToggle = dayGroups.length > 1
+                    const isExpanded = dayGroups.length === 1 || expandedPendingIds.has(cardKey)
                     const Header = canToggle ? 'button' : 'div'
                     return (
-                      <div key={cl.id} className={`bg-white rounded-xl border overflow-hidden transition-all ${isExpanded ? 'border-[#023DFF]/30' : 'border-[#E1E7EF]'}`}>
+                      <div key={cardKey} className={`bg-white rounded-xl border overflow-hidden transition-all ${isExpanded ? 'border-[#023DFF]/30' : 'border-[#E1E7EF]'}`}>
                         <Header
-                          {...(canToggle ? { onClick: () => togglePending(cl.id) } : {})}
+                          {...(canToggle ? { onClick: () => togglePending(cardKey) } : {})}
                           className={`w-full p-5 flex items-start justify-between text-left ${canToggle ? 'hover:bg-[#F8FAFC] transition-colors cursor-pointer' : ''}`}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="bg-[#E5F2FF] text-[#023DFF] text-xs font-bold px-2.5 py-0.5 rounded-full flex-shrink-0">Hari {cl.day}</span>
-                              <span className="text-xs text-[#65758B]">{cl.date}</span>
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {cl && <span className="text-xs text-[#65758B]">{cl.date}</span>}
                             </div>
-                            <p className="font-semibold text-[#0F1729]">
-                              {cl.tasks ? `Checklist Hari ke-${cl.day}` : cl.milestoneName}
-                            </p>
+                            <p className="font-semibold text-[#0F1729]">Checklist Hari ke-{day}</p>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                            {cl.tasks ? (
+                            {cl?.tasks && (
                               <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2 py-1 rounded-lg">{cl.tasks.length} task</span>
-                            ) : cl.items && (
-                              <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2 py-1 rounded-lg">
-                                {cl.items.filter(i => i.completed).length}/{cl.items.length} selesai
-                              </span>
                             )}
                             {canToggle && (
                               <span className={`text-[#94A3B8] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -284,123 +306,127 @@ export default function KanitReviewProgress() {
 
                         {isExpanded && (
                           <div className="border-t border-[#E1E7EF]">
-                            {cl.tasks ? (
-                              <div className="p-5 space-y-3">
-                                {cl.tasks.map(task => {
-                                  const taskScore = calcTaskScore(cl.id, task.completedItemIds)
-                                  const markedCount = task.completedItemIds.filter(id => id in (clItemYesNo[cl.id] ?? {})).length
-                                  return (
-                                    <div key={task.taskId} className="border border-[#E1E7EF] rounded-lg overflow-hidden">
-                                      <div className="px-4 py-2.5 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-center justify-between">
-                                        <p className="text-xs font-bold text-[#0F1729] uppercase tracking-wide">{task.taskName}</p>
-                                        {taskScore !== null ? (
-                                          <span className={`text-xs font-bold ${taskScore >= 85 ? 'text-[#15803D]' : taskScore >= 75 ? 'text-[#B27202]' : 'text-[#DC2626]'}`}>{taskScore}/100</span>
-                                        ) : (
-                                          <span className="text-[11px] text-[#94A3B8]">{markedCount}/{task.completedItemIds.length} ditandai</span>
+                            {cl && (
+                              <>
+                                {cl.tasks ? (
+                                  <div className="p-5 space-y-3">
+                                    {cl.tasks.map((task, tIdx) => {
+                                      const taskScore = calcTaskScore(cl.id, task.completedItemIds)
+                                      const markedCount = task.completedItemIds.filter(id => id in (clItemYesNo[cl.id] ?? {})).length
+                                      return (
+                                        <div key={task.taskId} className="border border-[#E1E7EF] rounded-lg overflow-hidden">
+                                          <div className="px-4 py-2.5 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-center justify-between">
+                                            <p className="text-xs font-bold text-[#0F1729] uppercase tracking-wide">{tIdx + 1}. {task.taskName}</p>
+                                            {taskScore !== null ? (
+                                              <span className={`text-xs font-bold ${taskScore >= 85 ? 'text-[#15803D]' : taskScore >= 75 ? 'text-[#B27202]' : 'text-[#DC2626]'}`}>{taskScore}/100</span>
+                                            ) : (
+                                              <span className="text-[11px] text-[#94A3B8]">{markedCount}/{task.completedItemIds.length} ditandai</span>
+                                            )}
+                                          </div>
+                                          <div className="p-4 space-y-2">
+                                            <div className="flex justify-end mb-1">
+                                              <p className="text-[11px] font-semibold text-[#65758B] uppercase tracking-wide">Memenuhi Standar</p>
+                                            </div>
+                                            {task.completedItemIds.map(itemId => {
+                                              const itemMark = clItemYesNo[cl.id]?.[itemId]
+                                              const itemText = MILESTONES.flatMap(m => m.checklistItems).find(ci => ci.id === itemId)?.text ?? itemId
+                                              const isUnmarked = submitAttempted[cl.id] && itemMark === undefined
+                                              return (
+                                                <div key={itemId} className={`flex items-center gap-2.5 rounded-lg transition-colors ${isUnmarked ? 'bg-[#FEF2F2] -mx-2 px-2 py-1' : ''}`}>
+                                                  <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center bg-[#BFDBFE] pointer-events-none">
+                                                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#2563EB" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                  </div>
+                                                  <p className="text-sm text-[#65758B] flex-1">{itemText}</p>
+                                                  <div className="flex gap-1 flex-shrink-0">
+                                                    <button onClick={() => setItemMark(cl.id, itemId, true)} className={`h-6 px-2.5 rounded text-[11px] font-semibold transition-all ${itemMark === true ? 'bg-[#16A34A] text-white' : 'bg-[#F1F5F9] text-[#65758B] hover:bg-[#DCFCE7] hover:text-[#16A34A]'}`}>Ya</button>
+                                                    <button onClick={() => setItemMark(cl.id, itemId, false)} className={`h-6 px-2.5 rounded text-[11px] font-semibold transition-all ${itemMark === false ? 'bg-[#DC2626] text-white' : 'bg-[#F1F5F9] text-[#65758B] hover:bg-[#FEE2E2] hover:text-[#DC2626]'}`}>Tidak</button>
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                            <div className="mt-3 pt-3 border-t border-[#E1E7EF]">
+                                              <p className="text-xs font-semibold text-[#65758B] mb-1">Refleksi peserta</p>
+                                              <p className="text-sm text-[#0F1729] italic">"{task.reflection}"</p>
+                                            </div>
+                                            <textarea
+                                              value={clTaskNotes[cl.id]?.[task.taskId] ?? ''}
+                                              onChange={e => setClTaskNotes(prev => ({ ...prev, [cl.id]: { ...(prev[cl.id] ?? {}), [task.taskId]: e.target.value } }))}
+                                              placeholder={`Catatan untuk task ${task.taskName} (opsional)`}
+                                              className="w-full border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2 text-xs outline-none transition-colors resize-none text-[#0F1729] placeholder:text-[#94A3B8]"
+                                              rows={2}
+                                            />
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                ) : cl.items && (
+                                  <div className="p-5 space-y-2">
+                                    {cl.items.map(it => {
+                                      const checkItem = MILESTONES.flatMap(m => m.checklistItems).find(ci => ci.id === it.itemId)
+                                      return (
+                                        <div key={it.itemId} className="flex items-start gap-2.5">
+                                          <div className={`w-4 h-4 rounded flex-shrink-0 mt-0.5 flex items-center justify-center ${it.completed ? 'bg-[#023DFF]' : 'bg-[#F1F5F9] border border-[#CBD5E1]'}`}>
+                                            {it.completed && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                          </div>
+                                          <div>
+                                            <p className={`text-sm ${it.completed ? 'text-[#0F1729]' : 'text-[#94A3B8]'}`}>{checkItem?.text ?? it.itemId}</p>
+                                            {it.note && <p className="text-xs text-[#65758B] italic mt-0.5">"{it.note}"</p>}
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                                <div className="px-5 pb-5">
+                                  {justScored === cl.id ? (
+                                    <div className="bg-[#F0FDF4] text-[#15803D] text-sm font-semibold rounded-xl px-4 py-3 text-center">✅ Penilaian berhasil disimpan!</div>
+                                  ) : cl.tasks ? (() => {
+                                    const canSubmit = allTasksScored(cl.id, cl.tasks)
+                                    const attempted = submitAttempted[cl.id]
+                                    return (
+                                      <div className="space-y-2">
+                                        <button
+                                          onClick={() => {
+                                            if (canSubmit) {
+                                              handleSubmitTasks(cl.id, cl.tasks!)
+                                            } else {
+                                              setSubmitAttempted(prev => ({ ...prev, [cl.id]: true }))
+                                            }
+                                          }}
+                                          className="w-full h-9 rounded-lg font-semibold text-sm bg-[#023DFF] hover:bg-[#001CDB] text-white transition-all"
+                                        >
+                                          Submit Penilaian
+                                        </button>
+                                        {attempted && !canSubmit && (
+                                          <p className="text-xs text-[#DC2626]">Semua item harus ditandai Ya atau Tidak sebelum submit</p>
                                         )}
                                       </div>
-                                      <div className="p-4 space-y-2">
-                                        <div className="flex justify-end mb-1">
-                                          <p className="text-[11px] font-semibold text-[#65758B] uppercase tracking-wide">Memenuhi Standar</p>
-                                        </div>
-                                        {task.completedItemIds.map(itemId => {
-                                          const itemMark = clItemYesNo[cl.id]?.[itemId]
-                                          const itemText = MILESTONES.flatMap(m => m.checklistItems).find(ci => ci.id === itemId)?.text ?? itemId
-                                          const isUnmarked = submitAttempted[cl.id] && itemMark === undefined
-                                          return (
-                                            <div key={itemId} className={`flex items-center gap-2.5 rounded-lg transition-colors ${isUnmarked ? 'bg-[#FEF2F2] -mx-2 px-2 py-1' : ''}`}>
-                                              <div className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center bg-[#BFDBFE] pointer-events-none">
-                                                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#2563EB" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                              </div>
-                                              <p className="text-sm text-[#65758B] flex-1">{itemText}</p>
-                                              <div className="flex gap-1 flex-shrink-0">
-                                                <button onClick={() => setItemMark(cl.id, itemId, true)} className={`h-6 px-2.5 rounded text-[11px] font-semibold transition-all ${itemMark === true ? 'bg-[#16A34A] text-white' : 'bg-[#F1F5F9] text-[#65758B] hover:bg-[#DCFCE7] hover:text-[#16A34A]'}`}>Ya</button>
-                                                <button onClick={() => setItemMark(cl.id, itemId, false)} className={`h-6 px-2.5 rounded text-[11px] font-semibold transition-all ${itemMark === false ? 'bg-[#DC2626] text-white' : 'bg-[#F1F5F9] text-[#65758B] hover:bg-[#FEE2E2] hover:text-[#DC2626]'}`}>Tidak</button>
-                                              </div>
-                                            </div>
-                                          )
-                                        })}
-                                        <div className="mt-3 pt-3 border-t border-[#E1E7EF]">
-                                          <p className="text-xs font-semibold text-[#65758B] mb-1">Refleksi peserta</p>
-                                          <p className="text-sm text-[#0F1729] italic">"{task.reflection}"</p>
-                                        </div>
-                                        <textarea
-                                          value={clTaskNotes[cl.id]?.[task.taskId] ?? ''}
-                                          onChange={e => setClTaskNotes(prev => ({ ...prev, [cl.id]: { ...(prev[cl.id] ?? {}), [task.taskId]: e.target.value } }))}
-                                          placeholder={`Catatan untuk task ${task.taskName} (opsional)`}
-                                          className="w-full border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2 text-xs outline-none transition-colors resize-none text-[#0F1729] placeholder:text-[#94A3B8]"
-                                          rows={2}
-                                        />
-                                      </div>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            ) : cl.items && (
-                              <div className="p-5 space-y-2">
-                                {cl.items.map(it => {
-                                  const checkItem = MILESTONES.flatMap(m => m.checklistItems).find(ci => ci.id === it.itemId)
-                                  return (
-                                    <div key={it.itemId} className="flex items-start gap-2.5">
-                                      <div className={`w-4 h-4 rounded flex-shrink-0 mt-0.5 flex items-center justify-center ${it.completed ? 'bg-[#023DFF]' : 'bg-[#F1F5F9] border border-[#CBD5E1]'}`}>
-                                        {it.completed && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                      </div>
+                                    )
+                                  })() : reviewingId === cl.id ? (
+                                    <div className="border border-[#E1E7EF] rounded-xl p-4 space-y-3 bg-[#F8FAFC]">
                                       <div>
-                                        <p className={`text-sm ${it.completed ? 'text-[#0F1729]' : 'text-[#94A3B8]'}`}>{checkItem?.text ?? it.itemId}</p>
-                                        {it.note && <p className="text-xs text-[#65758B] italic mt-0.5">"{it.note}"</p>}
+                                        <label className="text-xs font-semibold text-[#65758B] uppercase tracking-wide">Nilai (0–100)*</label>
+                                        <div className="flex flex-wrap gap-2 mt-2 mb-3">
+                                          {[70, 75, 80, 85, 90, 95].map(s => (
+                                            <button key={s} onClick={() => setScore(String(s))} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${score === String(s) ? 'bg-[#023DFF] text-white' : 'bg-white text-[#65758B] border border-[#CBD5E1] hover:border-[#023DFF]'}`}>{s}</button>
+                                          ))}
+                                          <input type="number" min="0" max="100" value={score} onChange={e => setScore(e.target.value)} placeholder="Nilai lain" className="w-24 border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
+                                        </div>
+                                      </div>
+                                      <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Catatan untuk peserta..." className="w-full border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2.5 text-sm outline-none transition-colors resize-none" rows={2} />
+                                      <div className="flex gap-3">
+                                        <button onClick={() => setReviewingId(null)} className="flex-1 h-9 rounded-lg border border-[#CBD5E1] text-sm font-semibold text-[#65758B]">Batal</button>
+                                        <button onClick={() => handleScore(cl.id)} disabled={!score} className={`flex-1 h-9 rounded-lg text-sm font-semibold text-white transition-all ${score ? 'bg-[#023DFF] hover:bg-[#001CDB]' : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'}`}>Simpan Nilai</button>
                                       </div>
                                     </div>
-                                  )
-                                })}
-                              </div>
+                                  ) : (
+                                    <button onClick={() => { setReviewingId(cl.id); setScore(''); setNote('') }} className="w-full h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors">Beri Nilai →</button>
+                                  )}
+                                </div>
+                              </>
                             )}
 
-                            <div className="px-5 pb-5">
-                              {justScored === cl.id ? (
-                                <div className="bg-[#F0FDF4] text-[#15803D] text-sm font-semibold rounded-xl px-4 py-3 text-center">✅ Penilaian berhasil disimpan!</div>
-                              ) : cl.tasks ? (() => {
-                                const canSubmit = allTasksScored(cl.id, cl.tasks)
-                                const attempted = submitAttempted[cl.id]
-                                return (
-                                  <div className="space-y-2">
-                                    <button
-                                      onClick={() => {
-                                        if (canSubmit) {
-                                          handleSubmitTasks(cl.id, cl.tasks!)
-                                        } else {
-                                          setSubmitAttempted(prev => ({ ...prev, [cl.id]: true }))
-                                        }
-                                      }}
-                                      className="w-full h-9 rounded-lg font-semibold text-sm bg-[#023DFF] hover:bg-[#001CDB] text-white transition-all"
-                                    >
-                                      Submit Penilaian
-                                    </button>
-                                    {attempted && !canSubmit && (
-                                      <p className="text-xs text-[#DC2626]">Semua item harus ditandai Ya atau Tidak sebelum submit</p>
-                                    )}
-                                  </div>
-                                )
-                              })() : reviewingId === cl.id ? (
-                                <div className="border border-[#E1E7EF] rounded-xl p-4 space-y-3 bg-[#F8FAFC]">
-                                  <div>
-                                    <label className="text-xs font-semibold text-[#65758B] uppercase tracking-wide">Nilai (0–100)*</label>
-                                    <div className="flex flex-wrap gap-2 mt-2 mb-3">
-                                      {[70, 75, 80, 85, 90, 95].map(s => (
-                                        <button key={s} onClick={() => setScore(String(s))} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${score === String(s) ? 'bg-[#023DFF] text-white' : 'bg-white text-[#65758B] border border-[#CBD5E1] hover:border-[#023DFF]'}`}>{s}</button>
-                                      ))}
-                                      <input type="number" min="0" max="100" value={score} onChange={e => setScore(e.target.value)} placeholder="Nilai lain" className="w-24 border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
-                                    </div>
-                                  </div>
-                                  <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Catatan untuk peserta..." className="w-full border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-3 py-2.5 text-sm outline-none transition-colors resize-none" rows={2} />
-                                  <div className="flex gap-3">
-                                    <button onClick={() => setReviewingId(null)} className="flex-1 h-9 rounded-lg border border-[#CBD5E1] text-sm font-semibold text-[#65758B]">Batal</button>
-                                    <button onClick={() => handleScore(cl.id)} disabled={!score} className={`flex-1 h-9 rounded-lg text-sm font-semibold text-white transition-all ${score ? 'bg-[#023DFF] hover:bg-[#001CDB]' : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'}`}>Simpan Nilai</button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <button onClick={() => { setReviewingId(cl.id); setScore(''); setNote('') }} className="w-full h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors">Beri Nilai →</button>
-                              )}
-                            </div>
                           </div>
                         )}
                       </div>
@@ -414,6 +440,7 @@ export default function KanitReviewProgress() {
                 <p className="font-semibold text-[#15803D] mt-2 text-sm">Tidak ada checklist pending untuk {selectedFl.name.split(' ')[0]}</p>
               </div>
             )}
+
             </div>
             )}
             {contentTab === 'progress' && flProfile && (
@@ -424,7 +451,7 @@ export default function KanitReviewProgress() {
                     <h2 className="text-base font-bold text-[#0F1729]">Level 1</h2>
                     <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">Hari 1–7</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {MILESTONES.filter(m => m.type === 'minggu1' && flProfile.activeMilestoneIds.includes(m.id)).map(m => {
                       const progress = getMilestoneProgress(selectedFlId, m.id)
                       const completed = isMilestoneCompleted(selectedFlId, m.id)
@@ -470,7 +497,7 @@ export default function KanitReviewProgress() {
                       <button onClick={() => setShowUnlockForm(true)} className="flex-shrink-0 h-9 px-4 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors">Buka Akses →</button>
                     </div>
                   ) : null}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {MILESTONES.filter(m => m.type === 'minggu2').map(m => {
                       const isLocked = !level2Unlocked && (flProfile.currentDay < 8 || !allLevel1Done)
                       const progress = getMilestoneProgress(selectedFlId, m.id)

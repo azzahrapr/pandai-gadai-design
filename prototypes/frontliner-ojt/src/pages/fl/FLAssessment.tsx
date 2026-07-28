@@ -75,7 +75,7 @@ export default function FLAssessment() {
     }, 0) / ASSESSMENT_QUESTIONS.length * 100
 
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#0F1729]">Assessment Akhir OJT</h1>
           <p className="text-[#65758B] text-sm mt-1">Penilaian akhir program OJT kamu</p>
@@ -128,7 +128,7 @@ export default function FLAssessment() {
 
   if (step === 'intro') {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#0F1729]">Assessment Akhir OJT</h1>
           <p className="text-[#65758B] text-sm mt-1">Penilaian akhir program OJT kamu</p>
@@ -192,7 +192,7 @@ export default function FLAssessment() {
 
   if (step === 'mastery') {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="flex items-center gap-3 mb-2">
           <button onClick={() => setStep('intro')} className="text-[#65758B] hover:text-[#0F1729] transition-colors">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -252,7 +252,7 @@ export default function FLAssessment() {
 
   // step === 'questions'
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center gap-3 mb-2">
         <button onClick={() => setStep('mastery')} className="text-[#65758B] hover:text-[#0F1729] transition-colors">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>

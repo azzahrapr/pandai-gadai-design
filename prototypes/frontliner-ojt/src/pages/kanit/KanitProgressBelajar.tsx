@@ -4,21 +4,37 @@ import { MILESTONES } from '../../data/mockData'
 import type { FLProfile } from '../../types'
 
 const MILESTONE_TASK_MAP: Record<string, string[]> = {
-  'opening-closing': ['opening', 'closing'],
+  'closing-cabang': ['closing-cabang'],
+  'opening-cabang': ['opening-cabang'],
+  'personal-grooming': ['personal-grooming'],
+  'pengenalan-produk': ['pengenalan-produk'],
   'canvassing': ['canvassing'],
-  'pelayanan-dasar': ['pelayanan-dasar'],
-  'pelayanan-transaksi': ['pelayanan-transaksi'],
-  'penaksiran': ['penaksiran-elektronik'],
+  'cash-management': ['cash-management'],
+  'sop-administrasi': ['sop-administrasi'],
   'packing-sealing': ['packing-sealing'],
+  'offloading': ['offloading'],
+  'pelayanan-nasabah': ['pelayanan-nasabah'],
+  'customer-service-wa': ['customer-service-wa'],
+  'penaksiran-elektronik': ['penaksiran-elektronik'],
+  'penaksiran-emas': ['penaksiran-emas'],
+  'penaksiran-bpkb': ['penaksiran-bpkb'],
 }
 
 const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
-  'opening-closing': 13,
-  'packing-sealing': 4,
-  'canvassing': 2,
-  'pelayanan-dasar': 6,
-  'pelayanan-transaksi': 6,
-  'penaksiran': 6,
+  'closing-cabang': 2,
+  'opening-cabang': 2,
+  'personal-grooming': 12,
+  'pengenalan-produk': 3,
+  'canvassing': 3,
+  'cash-management': 1,
+  'sop-administrasi': 5,
+  'packing-sealing': 3,
+  'offloading': 1,
+  'pelayanan-nasabah': 5,
+  'customer-service-wa': 2,
+  'penaksiran-elektronik': 2,
+  'penaksiran-emas': 1,
+  'penaksiran-bpkb': 2,
 }
 
 const UNLOCK_REASONS = [
@@ -153,7 +169,7 @@ export default function KanitProgressBelajar() {
                 <h2 className="text-base font-bold text-[#0F1729]">Level 1</h2>
                 <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">Hari 1–7</span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {minggu1.filter(m => profile.activeMilestoneIds.includes(m.id)).map(m => {
                   const progress = getMilestoneProgress(selectedFlId, m.id)
                   const completed = isMilestoneCompleted(selectedFlId, m.id)
@@ -264,7 +280,7 @@ export default function KanitProgressBelajar() {
 
               {/* Level 2 module grid */}
               {(profile.currentDay >= 8 || unlock) && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {minggu2.filter(m => profile.activeMilestoneIds.includes(m.id)).map(m => {
                     const progress = getMilestoneProgress(selectedFlId, m.id)
                     const completed = isMilestoneCompleted(selectedFlId, m.id)

@@ -19,38 +19,17 @@ export default function FLScores() {
   }, 0) : 0
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0F1729]">Nilai OJT Saya</h1>
+        <h1 className="text-2xl font-bold text-[#0F1729]">Nilai Saya</h1>
         <p className="text-[#65758B] text-sm mt-1">{profile.branch} · {profile.position}</p>
       </div>
 
       <div className="space-y-4">
-        {/* 3-card score grid */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* 2-card score grid */}
+        <div className="grid grid-cols-2 gap-3">
           <ScoreCard label="Checklist" weight="60%" score={scores.dailyProgressScore} note={`rata-rata dari ${scores.daysScored}/14 hari`} isActive={selectedCard === 'daily'} onClick={() => setSelectedCard('daily')} />
           <ScoreCard label="Assessment" weight="40%" score={scores.assessmentScore} note={assessment ? `${mcqCorrect}/${ASSESSMENT_QUESTIONS.length} jawaban benar` : 'Belum tersedia'} isActive={selectedCard === 'assessment'} onClick={() => setSelectedCard('assessment')} />
-          {scores.totalScore !== null ? (
-            <div className={`rounded-xl border px-4 py-4 ${
-              !finalEval ? 'bg-[#F8FAFC] border-[#E1E7EF]'
-              : scores.passed ? 'bg-[#F0FDF4] border-[#16A34A]/30' : 'bg-[#FEF2F2] border-[#DC2626]/20'
-            }`}>
-              <p className={`text-xs font-semibold mb-3 ${!finalEval ? 'text-[#65758B]' : scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>Nilai Akhir</p>
-              <p className={`text-3xl font-black mb-2 ${!finalEval ? 'text-[#94A3B8]' : scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{scores.totalScore}</p>
-              <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-xs ${
-                !finalEval ? 'bg-[#F1F5F9] text-[#65758B]'
-                : scores.passed ? 'bg-[#16A34A] text-white' : 'bg-[#DC2626] text-white'
-              }`}>
-                {!finalEval ? 'Menunggu evaluasi akhir' : scores.passed ? '🎉 Rekomendasi: Final' : '❌ Rekomendasi: Tidak Final'}
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-[#E1E7EF] bg-[#F8FAFC] px-4 py-4">
-              <p className="text-xs font-semibold text-[#94A3B8] mb-3">Nilai Akhir</p>
-              <p className="text-3xl font-black text-[#CBD5E1] mb-2">—</p>
-              <p className="text-[11px] text-[#94A3B8] leading-snug">Menunggu semua komponen dinilai</p>
-            </div>
-          )}
         </div>
 
         {/* Detail panel */}

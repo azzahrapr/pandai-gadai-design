@@ -6,8 +6,15 @@ import FLDashboard from './pages/fl/FLDashboard'
 import FLMilestones from './pages/fl/FLMilestones'
 import FLMilestoneDetail from './pages/fl/FLMilestoneDetail'
 import FLChecklist from './pages/fl/FLChecklist'
+import FLDailyChecklist from './pages/fl/FLDailyChecklist'
+import FLChecklistSession from './pages/fl/FLChecklistSession'
 import FLChecklistDetail from './pages/fl/FLChecklistDetail'
 import FLTaskDetail from './pages/fl/FLTaskDetail'
+import FLTaskConfirm from './pages/fl/FLTaskConfirm'
+import FLTaskList from './pages/fl/FLTaskList'
+import FLProfile from './pages/fl/FLProfile'
+import FLModuleHistory from './pages/fl/FLModuleHistory'
+import FLPenaksiranSim from './pages/fl/FLPenaksiranSim'
 import FLPenaksiran from './pages/fl/FLPenaksiran'
 import FLAssessment from './pages/fl/FLAssessment'
 import FLAssessmentReview from './pages/fl/FLAssessmentReview'
@@ -32,8 +39,15 @@ export default function App() {
             <Route path="dashboard" element={<FLDashboard />} />
             <Route path="milestones" element={<FLMilestones />} />
             <Route path="milestones/:id" element={<FLMilestoneDetail />} />
+            <Route path="milestones/:id/tasks" element={<FLTaskList />} />
+            <Route path="profile" element={<FLProfile />} />
             <Route path="checklist" element={<FLChecklist />} />
+            <Route path="checklist/daily/:milestoneId" element={<FLDailyChecklist />} />
+            <Route path="checklist/sesi/:milestoneId" element={<FLChecklistSession />} />
             <Route path="checklist/task/:taskId" element={<FLTaskDetail />} />
+            <Route path="confirm/:milestoneId/:itemId" element={<FLTaskConfirm />} />
+            <Route path="checklist/module/:milestoneId" element={<FLModuleHistory />} />
+            <Route path="checklist/penaksiran-sim/:milestoneId" element={<FLPenaksiranSim />} />
             <Route path="checklist/:checklistId" element={<FLChecklistDetail />} />
             <Route path="penaksiran" element={<FLPenaksiran />} />
             <Route path="assessment" element={<FLAssessment />} />

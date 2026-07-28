@@ -21,6 +21,8 @@ export interface ChecklistItem {
   id: string
   text: string
   category: string
+  description?: string
+  target?: number
 }
 
 export interface Milestone {
@@ -35,6 +37,18 @@ export interface Milestone {
   materials: LearningMaterial[]
   checklistItems: ChecklistItem[]
   quiz?: QuizQuestion[]
+  submissionType?: 'session' | 'individual'
+}
+
+export interface TaskConfirmation {
+  id: string
+  flId: string
+  milestoneId: string
+  itemId: string
+  itemText: string
+  catatan?: string
+  submittedAt: string
+  day: number
 }
 
 export interface ChecklistItemRecord {
@@ -69,6 +83,23 @@ export interface DailyChecklist {
   kanitScore?: number
   kanitNote?: string
   kanitScoredAt?: string
+  // Pass/fail: true = all items checked, false = incomplete
+  passed?: boolean
+}
+
+export type ExtensionType = 'daily-redo' | 'weekly-carryover'
+export type ExtensionStatus = 'pending' | 'approved' | 'rejected'
+
+export interface ExtensionRequest {
+  id: string
+  flId: string
+  milestoneId: string
+  type: ExtensionType
+  status: ExtensionStatus
+  requestedAt: string
+  respondedAt?: string
+  kanitId?: string
+  kanitNote?: string
 }
 
 export interface PenaksiranRecord {

@@ -60,7 +60,7 @@ export default function KanitTaskHistory() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-[#65758B] mb-6">
         <button onClick={() => navigate(-1)} className="hover:text-[#023DFF] transition-colors flex items-center gap-1.5">

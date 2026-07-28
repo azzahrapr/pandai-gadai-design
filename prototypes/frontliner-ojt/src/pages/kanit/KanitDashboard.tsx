@@ -4,7 +4,7 @@ import { MILESTONES } from '../../data/mockData'
 import type { KanitProfile, FLProfile } from '../../types'
 
 export default function KanitDashboard() {
-  const { currentUser, getFlUsers, getFlChecklists, getFlScoreBreakdown, getFlPenaksiran, getFlFinalEvaluation, level2Unlocks } = useApp()
+  const { currentUser, getFlUsers, getFlChecklists, getFlScoreBreakdown, getFlPenaksiran, getFlFinalEvaluation, level2Unlocks, extensionRequests } = useApp()
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
 
@@ -21,11 +21,14 @@ export default function KanitDashboard() {
   const pendingPenaksiran = flUsers.reduce((n, fl) => n + getFlPenaksiran(fl.id).filter(r => r.intoolsValue === undefined).length, 0)
   const pendingLevel2 = flUsers.filter(needsLevel2).length
   const readyForFinalEval = flUsers.filter(fl => getFlScoreBreakdown(fl.id).totalScore !== null && !getFlFinalEvaluation(fl.id)).length
+  const flIdSet = new Set(flUsers.map(u => u.id))
+  const pendingExtensions = extensionRequests.filter(r => flIdSet.has(r.flId) && r.status === 'pending').length
+  const totalReviewPending = pendingReviews + pendingExtensions
 
-  const hasActions = pendingReviews > 0 || pendingPenaksiran > 0 || pendingLevel2 > 0 || readyForFinalEval > 0
+  const hasActions = totalReviewPending > 0 || pendingPenaksiran > 0 || pendingLevel2 > 0 || readyForFinalEval > 0
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
         <div>
@@ -40,21 +43,21 @@ export default function KanitDashboard() {
       {/* Action cards */}
       {hasActions ? (
         <div className="flex gap-4 mb-6">
-          {pendingReviews > 0 && (
+          {totalReviewPending > 0 && (
             <Link to="/kanit/review-progress" className="flex-1 bg-[#FEF2F2] border border-[#DC2626]/20 rounded-xl p-5 flex items-center gap-4 hover:border-[#DC2626]/40 transition-colors">
-              <div className="w-11 h-11 bg-[#DC2626] rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">{pendingReviews}</div>
+              <div className="w-11 h-11 bg-[#DC2626] rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">{totalReviewPending}</div>
               <div>
-                <p className="font-semibold text-[#B91C1C] text-sm">Checklist menunggu penilaian</p>
-                <p className="text-xs text-[#B91C1C]/70 mt-0.5">Beri penilaian sekarang →</p>
+                <p className="font-semibold text-[#B91C1C] text-sm">Checklist & Redo menunggu</p>
+                <p className="text-xs text-[#B91C1C]/70 mt-0.5">Beri penilaian & keputusan →</p>
               </div>
             </Link>
           )}
           {pendingLevel2 > 0 && (
-            <Link to="/kanit/review-progress" className="flex-1 bg-[#F0F4FF] border border-[#023DFF]/20 rounded-xl p-5 flex items-center gap-4 hover:border-[#023DFF]/40 transition-colors">
+            <Link to="/kanit/review-progress?tab=progress" className="flex-1 bg-[#F0F4FF] border border-[#023DFF]/20 rounded-xl p-5 flex items-center gap-4 hover:border-[#023DFF]/40 transition-colors">
               <div className="w-11 h-11 bg-[#023DFF] rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">{pendingLevel2}</div>
               <div>
-                <p className="font-semibold text-[#023DFF] text-sm">Buka Akses Level 2</p>
-                <p className="text-xs text-[#023DFF]/60 mt-0.5">Peserta siap lanjut ke materi lanjutan →</p>
+                <p className="font-semibold text-[#023DFF] text-sm">Buka Akses Materi Belajar</p>
+                <p className="text-xs text-[#023DFF]/60 mt-0.5">Peserta siap lanjut ke materi Level 2 →</p>
               </div>
             </Link>
           )}
@@ -112,10 +115,10 @@ export default function KanitDashboard() {
               // Aksi state: priority order
               let aksi: React.ReactNode
               if (pendingCount > 0 || flNeedsLevel2) {
+                const reviewTo = pendingCount > 0 ? `/kanit/review-progress?flId=${fl.id}` : `/kanit/review-progress?tab=progress`
                 aksi = (
-                  <Link to="/kanit/review-progress" className="inline-flex items-center gap-1 text-xs bg-[#FEFDEA] text-[#B27202] px-2.5 py-1 rounded-full font-semibold hover:bg-[#FFF88F]/40 transition-colors">
+                  <Link to={reviewTo} className="text-xs h-7 px-3 bg-[#023DFF] text-white rounded-lg font-semibold hover:bg-[#001CDB] transition-all inline-flex items-center">
                     Perlu Direview
-                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </Link>
                 )
               } else if (needsFinalEval) {

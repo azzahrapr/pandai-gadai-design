@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { MILESTONES } from '../../data/mockData'
-import type { KanitProfile, FLProfile, DailyTaskRecord } from '../../types'
+import type { KanitProfile, FLProfile, DailyTaskRecord, ExtensionRequest } from '../../types'
 
 export default function KanitReview() {
-  const { currentUser, getFlUsers, getFlChecklists, scoreChecklist, scoreChecklistTasks } = useApp()
+  const { currentUser, getFlUsers, getFlChecklists, scoreChecklist, scoreChecklistTasks, extensionRequests, respondExtension } = useApp()
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
 
@@ -19,6 +19,7 @@ export default function KanitReview() {
   const [clTaskNotes, setClTaskNotes] = useState<Record<string, Record<string, string>>>({})
   const [clOverallNotes, setClOverallNotes] = useState<Record<string, string>>({})
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [extNotes, setExtNotes] = useState<Record<string, string>>({})
   const [expandedPendingId, setExpandedPendingId] = useState<string | null>(() => null)
   // Legacy (items) scoring
   const [reviewingId, setReviewingId] = useState<string | null>(null)
@@ -70,8 +71,77 @@ export default function KanitReview() {
     setNote('')
   }
 
+  const flExtensions = extensionRequests
+    .filter(r => r.flId === selectedFlId)
+    .sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1
+      if (b.status === 'pending' && a.status !== 'pending') return 1
+      return b.requestedAt.localeCompare(a.requestedAt)
+    })
+  const pendingExtCount = flExtensions.filter(r => r.status === 'pending').length
+
+  function ExtCard({ req }: { req: ExtensionRequest }) {
+    const isPending = req.status === 'pending'
+    const note = extNotes[req.id] ?? ''
+    const milestone = MILESTONES.find(m => m.id === req.milestoneId)
+    return (
+      <div className={`bg-white rounded-xl border overflow-hidden ${
+        isPending ? 'border-[#E0A200]/40' : req.status === 'approved' ? 'border-[#16A34A]/20' : 'border-[#E1E7EF]'
+      }`}>
+        <div className={`flex items-center justify-between px-4 py-3 border-b ${
+          isPending ? 'bg-[#FEFDEA] border-[#E0A200]/20' : req.status === 'approved' ? 'bg-[#F0FDF4] border-[#16A34A]/10' : 'bg-[#F8FAFC] border-[#E1E7EF]'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              isPending ? 'bg-[#E0A200]/20 text-[#B27202]' : req.status === 'approved' ? 'bg-[#16A34A]/10 text-[#15803D]' : 'bg-[#E1E7EF] text-[#65758B]'
+            }`}>
+              {isPending ? 'Menunggu' : req.status === 'approved' ? 'Disetujui' : 'Ditolak'}
+            </span>
+            <span className="text-xs font-semibold text-[#0F1729]">
+              {req.type === 'daily-redo' ? 'Perlu Remedial' : 'Carry-Over Mingguan'}
+            </span>
+          </div>
+          <span className="text-xs text-[#94A3B8]">{milestone?.shortName ?? req.milestoneId}</span>
+        </div>
+        <div className="px-4 py-3.5">
+          <p className="text-sm text-[#65758B]">
+            {req.type === 'daily-redo'
+              ? `Tidak lulus ${milestone?.name ?? req.milestoneId}. Jika disetujui, perpanjang 1 hari tambahan.`
+              : `Tidak menyelesaikan ${milestone?.name ?? req.milestoneId} tepat waktu — carry-over ke minggu 2.`}
+          </p>
+          {!isPending && req.kanitNote && (
+            <div className="mt-2.5 bg-[#F8FAFC] rounded-lg border border-[#E1E7EF] px-3 py-2">
+              <p className="text-xs text-[#65758B]">Catatan: <span className="text-[#0F1729] italic">"{req.kanitNote}"</span></p>
+            </div>
+          )}
+          {isPending && (
+            <div className="mt-3 space-y-2">
+              <input
+                type="text"
+                placeholder="Catatan (opsional)..."
+                value={note}
+                onChange={e => setExtNotes(prev => ({ ...prev, [req.id]: e.target.value }))}
+                className="w-full border border-[#CBD5E1] rounded-lg px-3 py-2 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => respondExtension(req.id, 'rejected', note || undefined)}
+                  className="flex-1 h-9 rounded-lg font-semibold text-sm border border-[#E1E7EF] text-[#65758B] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+                >Tolak</button>
+                <button
+                  onClick={() => respondExtension(req.id, 'approved', note || undefined)}
+                  className="flex-1 h-9 rounded-lg font-semibold text-sm bg-[#16A34A] hover:bg-[#15803D] text-white transition-colors"
+                >Setujui</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#0F1729]">Review Checklist</h1>
         <p className="text-[#65758B] text-sm mt-1">Tinjau dan beri penilaian checklist OJT peserta.</p>
@@ -83,6 +153,8 @@ export default function KanitReview() {
           {flUsers.map(fl => {
             const flProfile = fl.profile as FLProfile
             const pend = getFlChecklists(fl.id).filter(c => c.status === 'submitted').length
+            const pendExt = extensionRequests.filter(r => r.flId === fl.id && r.status === 'pending').length
+            const totalBadge = pend + pendExt
             const isActive = selectedFlId === fl.id
             return (
               <button
@@ -94,8 +166,8 @@ export default function KanitReview() {
               >
                 {fl.name.split(' ')[0]}
                 <span className="text-xs opacity-70">Hari {flProfile.currentDay}</span>
-                {pend > 0 && (
-                  <span className="absolute -top-0.5 right-1 w-4 h-4 bg-[#DC2626] text-white rounded-full text-[9px] font-bold flex items-center justify-center">{pend}</span>
+                {totalBadge > 0 && (
+                  <span className="absolute -top-0.5 right-1 w-4 h-4 bg-[#DC2626] text-white rounded-full text-[9px] font-bold flex items-center justify-center">{totalBadge}</span>
                 )}
               </button>
             )
@@ -104,7 +176,7 @@ export default function KanitReview() {
       </div>
 
       {selectedFl && (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* Left 2/3: checklists */}
           <div className="col-span-2 space-y-4">
             {/* Pending */}
@@ -351,6 +423,21 @@ export default function KanitReview() {
               </div>
             )}
 
+            {/* Redo & Carry-Over requests */}
+            {flExtensions.length > 0 && (
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-[#B27202]" />
+                  <p className="text-sm font-semibold text-[#0F1729]">
+                    Redo & Carry-Over
+                    {pendingExtCount > 0 && <span className="ml-1.5 text-[#B91C1C]">({pendingExtCount} menunggu)</span>}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {flExtensions.map(req => <ExtCard key={req.id} req={req} />)}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right sidebar */}

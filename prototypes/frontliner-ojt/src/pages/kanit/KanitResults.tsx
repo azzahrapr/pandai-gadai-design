@@ -32,7 +32,7 @@ export default function KanitResults() {
   const PASSING_SCORE = 75
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#0F1729]">Hasil Akhir OJT</h1>
         <p className="text-[#65758B] text-sm mt-1">Rekap nilai akhir seluruh peserta OJT.</p>

@@ -38,7 +38,7 @@ export default function KanitPenaksiran() {
     : null
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#0F1729]">Verifikasi Penaksiran</h1>
         <p className="text-[#65758B] text-sm mt-1">Masukkan nilai Intools dan beri penilaian sesi penaksiran peserta.</p>
@@ -69,7 +69,7 @@ export default function KanitPenaksiran() {
       </div>
 
       {selectedFl && (
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* Left 2/3 */}
           <div className="col-span-2 space-y-4">
             {/* Pending */}

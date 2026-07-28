@@ -93,7 +93,7 @@ export default function KanitFinalEval() {
     : null
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center gap-3 mb-2">
         <Link to="/kanit/results" className="text-sm text-[#65758B] hover:text-[#023DFF] transition-colors">← Hasil Akhir OJT</Link>
       </div>
@@ -110,7 +110,7 @@ export default function KanitFinalEval() {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <div className="col-span-2 space-y-5">
           {/* Score summary */}
           <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
