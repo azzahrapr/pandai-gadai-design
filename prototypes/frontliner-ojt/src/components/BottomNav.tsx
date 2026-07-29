@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
 
 interface NavItem {
   to: string
@@ -8,6 +9,8 @@ interface NavItem {
 }
 
 export function FLBottomNav() {
+  const { unreadNotificationCount } = useApp()
+
   const items: NavItem[] = [
     {
       to: '/fl/dashboard',
@@ -26,6 +29,12 @@ export function FLBottomNav() {
       label: 'Nilai Saya',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 15l3-3-3-3M8 12H5m14 0h-3M12 3v3m0 12v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/></svg>,
       activeIcon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="currentColor" opacity=".15"/><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 8v4l2.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+    },
+    {
+      to: '/fl/notifications',
+      label: 'Notifikasi',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+      activeIcon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="currentColor" opacity=".15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     {
       to: '/fl/profile',
@@ -47,7 +56,14 @@ export function FLBottomNav() {
         >
           {({ isActive }) => (
             <>
-              {isActive ? item.activeIcon : item.icon}
+              <span className="relative">
+                {isActive ? item.activeIcon : item.icon}
+                {item.to === '/fl/notifications' && unreadNotificationCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] bg-[#DC2626] rounded-full flex items-center justify-center text-white text-[9px] font-bold px-0.5 leading-none">
+                    {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                  </span>
+                )}
+              </span>
               <span>{item.label}</span>
             </>
           )}

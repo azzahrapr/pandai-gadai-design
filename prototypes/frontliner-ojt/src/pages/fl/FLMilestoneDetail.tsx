@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { MILESTONES } from '../../data/mockData'
+import { useState, useRef, useEffect } from 'react'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
+import { MILESTONES, DAILY_TASKS } from '../../data/mockData'
 import { useApp } from '../../context/AppContext'
-import type { FLProfile, QuizQuestion } from '../../types'
+import type { FLProfile } from '../../types'
 
 const PENAKSIRAN_MILESTONE_IDS = ['penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb']
 
@@ -22,6 +22,8 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'penaksiran-emas': ['penaksiran-emas'],
   'penaksiran-bpkb': ['penaksiran-bpkb'],
 }
+
+const DAILY_MILESTONE_IDS = new Set(['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'pelayanan-nasabah', 'customer-service-wa'])
 
 const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
   'closing-cabang': 3,
@@ -43,7 +45,8 @@ const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
 export default function FLMilestoneDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { currentUser, getFlChecklists, startMilestone, startSession, activeSession, saveQuizResult, getItemConfirmations } = useApp()
+  const location = useLocation()
+  const { currentUser, getFlChecklists, startMilestone, startSession, activeSession, getItemConfirmations } = useApp()
   const profile = currentUser!.profile as FLProfile
   const milestone = MILESTONES.find(m => m.id === id)
 
@@ -140,14 +143,45 @@ export default function FLMilestoneDetail() {
   const progressRef = useRef<HTMLDivElement>(null)
 
   const [currentMaterialIdx, setCurrentMaterialIdx] = useState<number>(0)
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>(
+  const [quizAnswers] = useState<Record<string, number>>(
     () => (milestone?.id && profile.quizAnswers?.[milestone.id]) ? profile.quizAnswers[milestone.id] : {}
   )
-  const [quizSubmitted, setQuizSubmitted] = useState<boolean>(
+  const [quizSubmitted] = useState<boolean>(
     () => !!(milestone?.quiz?.length) && profile.quizScores?.[milestone.id] !== undefined
   )
-  const [view, setView] = useState<'materi' | 'quiz'>('materi')
   const [activeSection, setActiveSection] = useState<'progress' | null>(null)
+  const [showHistory, setShowHistory] = useState(() => !!(location.state as { openHistory?: boolean } | null)?.openHistory)
+  const [expandedHistorySessions, setExpandedHistorySessions] = useState<Set<string>>(new Set())
+  const [expandedHistoryConfs, setExpandedHistoryConfs] = useState<Set<string>>(new Set())
+
+  // Deadline badge
+  const isDaily = DAILY_MILESTONE_IDS.has(milestone?.id ?? '')
+  const daysLeft = !milestone ? 0 : isDaily ? 0 : milestone.type === 'minggu1' ? 7 - profile.currentDay : 13 - profile.currentDay
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const now = new Date(), end = new Date()
+    end.setHours(23, 59, 59, 999)
+    return Math.max(0, end.getTime() - now.getTime())
+  })
+  useEffect(() => {
+    if (isCompleted || daysLeft !== 0) return
+    const iv = setInterval(() => {
+      const now = new Date(), end = new Date()
+      end.setHours(23, 59, 59, 999)
+      setTimeLeft(Math.max(0, end.getTime() - now.getTime()))
+    }, 1000)
+    return () => clearInterval(iv)
+  }, [isCompleted, daysLeft])
+  function formatCountdown(ms: number) {
+    const s = Math.floor(ms / 1000)
+    return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+  }
+  const deadlineText = !isCompleted ? (
+    daysLeft > 0
+      ? <p className="text-xs text-[#94A3B8] mt-2 text-center">Batas pengerjaan <span className="text-[#B27202] font-medium">{daysLeft} hari lagi</span></p>
+      : daysLeft === 0
+        ? <p className="text-xs text-[#94A3B8] mt-2 text-center">Batas pengerjaan hari ini <span className="text-[#B27202] font-medium tabular-nums">{formatCountdown(timeLeft)}</span></p>
+        : null
+  ) : null
 
   if (!milestone) {
     return (
@@ -162,6 +196,40 @@ export default function FLMilestoneDetail() {
   }
 
   const isLevel2 = milestone.type === 'minggu2'
+
+  const historySessions = !isIndividual
+    ? (isPenaksiran
+        ? allChecklists.filter(cl => cl.milestoneId === milestone.id)
+        : allChecklists.filter(cl => cl.tasks?.some(t => relatedTaskIds.includes(t.taskId)))
+      ).sort((a, b) => b.day - a.day || (b.submittedAt ?? '').localeCompare(a.submittedAt ?? ''))
+    : []
+
+  const itemHistory = isIndividual
+    ? milestone.checklistItems
+        .map(item => ({
+          item,
+          confirmations: getItemConfirmations(currentUser!.id, milestone.id, item.id)
+            .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)),
+        }))
+        .filter(g => g.confirmations.length > 0)
+    : []
+  const submittedToday = !isIndividual && !isPenaksiran && allChecklists.some(c =>
+    c.day === profile.currentDay && c.tasks?.some(t => relatedTaskIds.includes(t.taskId))
+  )
+
+  const MILESTONE_FROM_DAY: Record<string, number> = {
+    'closing-cabang': 1, 'opening-cabang': 4, 'personal-grooming': 1,
+    'pelayanan-nasabah': 8, 'customer-service-wa': 8,
+  }
+  const scheduleFromDay = MILESTONE_FROM_DAY[milestone.id] ?? 1
+  const isScheduleLocked = !isIndividual && !isPenaksiran && profile.currentDay < scheduleFromDay
+  const scheduleStartDateStr = (() => {
+    const d = new Date(profile.startDate)
+    d.setDate(d.getDate() + scheduleFromDay - 1)
+    const mo = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+    return `${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()}`
+  })()
+
   const hasQuiz = !!(milestone.quiz && milestone.quiz.length > 0)
 
   const quizScore: number | null = hasQuiz && quizSubmitted
@@ -178,7 +246,8 @@ export default function FLMilestoneDetail() {
 
   // Progress block — rendered either above or below content depending on hasActiveTugas
   const progressBlock = isIndividual ? (
-    <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
+    <div className="mb-6">
+    <div className="bg-white rounded-xl border border-[#E1E7EF] p-4">
       <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Latihan</p>
       <div className="space-y-3 text-sm">
         <div className="flex justify-between items-center">
@@ -204,15 +273,18 @@ export default function FLMilestoneDetail() {
         {actualIndividualCount > 0 && (
           <p className="text-xs text-[#65758B]">
             Total {actualIndividualCount} latihan sudah disubmit.{' '}
-            <Link to={`/fl/checklist/module/${milestone.id}`} className="text-[#023DFF] hover:underline font-medium">
+            <button onClick={() => setShowHistory(true)} className="text-[#023DFF] hover:underline font-medium">
               Lihat riwayat →
-            </Link>
+            </button>
           </p>
         )}
       </div>
     </div>
+    {deadlineText}
+    </div>
   ) : (
-    <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
+    <div className="mb-6">
+    <div className="bg-white rounded-xl border border-[#E1E7EF] p-4">
       <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Latihan</p>
       <div className="space-y-3 text-sm">
         <div className="flex justify-between items-center">
@@ -227,6 +299,22 @@ export default function FLMilestoneDetail() {
             style={{ width: `${Math.min(100, (effectiveSubmissions / expectedCount) * 100)}%` }}
           />
         </div>
+        {submittedToday && !isCompleted && isDaily && (
+          <div className="flex items-center gap-2.5 bg-[#F0FDF4] border border-[#16A34A]/20 rounded-lg px-3 py-2.5">
+            <div className="w-4 h-4 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-xs text-[#15803D] leading-relaxed">Latihan hari ini berhasil dikerjakan. Silakan kembali lagi besok.</p>
+          </div>
+        )}
+        {isScheduleLocked && (
+          <div className="flex items-center gap-2.5 bg-[#F8FAFC] border border-[#E1E7EF] rounded-lg px-3 py-2.5">
+            <span className="text-sm flex-shrink-0">🔒</span>
+            <p className="text-xs text-[#65758B]">Latihan ini tersedia mulai <span className="text-[#0F1729] font-medium">{scheduleStartDateStr}</span></p>
+          </div>
+        )}
         {hasMeaningfulDraft ? (
           <div className="space-y-2.5">
             <div className="flex items-start gap-2 bg-[#F0FDF4] border border-[#16A34A]/20 rounded-lg px-3 py-2.5">
@@ -240,7 +328,7 @@ export default function FLMilestoneDetail() {
               Lanjutkan →
             </Link>
           </div>
-        ) : !isCompleted && !ocAlreadyDoneToday ? (
+        ) : !isCompleted && !ocAlreadyDoneToday && !isScheduleLocked ? (
           <button
             onClick={handleMulaiSesi}
             className="w-full flex items-center justify-center gap-1.5 h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
@@ -248,57 +336,67 @@ export default function FLMilestoneDetail() {
             {effectiveSubmissions === 0 ? 'Mulai Latihan' : 'Lanjutkan'}
           </button>
         ) : null}
-        {milestoneSubmissions > 0 && (
+        {effectiveSubmissions > 0 && (
           <p className="text-xs text-[#65758B]">
-            Total {milestoneSubmissions} latihan sudah disubmit.{' '}
-            <Link to={`/fl/checklist/module/${milestone.id}`} className="text-[#023DFF] hover:underline font-medium">
+            Total {effectiveSubmissions} latihan sudah disubmit.{' '}
+            <button onClick={() => setShowHistory(true)} className="text-[#023DFF] hover:underline font-medium">
               Lihat riwayat →
-            </Link>
+            </button>
           </p>
         )}
       </div>
+    </div>
+    {deadlineText}
     </div>
   )
 
   // Quiz card — floated above materi when unlocked (condition c)
   const quizCard = hasQuiz ? (
     quizSubmitted ? (
-      <div className={`bg-white rounded-xl border p-5 flex items-center gap-4 mb-6 ${quizPassing ? 'border-[#16A34A]' : 'border-[#DC2626]/40'}`}>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0 ${quizPassing ? 'bg-[#F0FDF4]' : 'bg-[#FEF2F2]'}`}>📝</div>
-        <div className="flex-1">
-          <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-          <p className={`text-xs mt-0.5 ${quizPassing ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>
-            {quizPassing ? 'Selesai · Quiz sudah dikerjakan' : 'Skor belum memenuhi standar kelulusan'}
-          </p>
+      <div className={`bg-white rounded-xl border p-4 mb-6 ${quizPassing ? 'border-[#E1E7EF]' : 'border-[#DC2626]/40'}`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0 ${quizPassing ? 'bg-[#F0FDF4]' : 'bg-[#FEF2F2]'}`}>📝</div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-sm font-bold ${quizPassing ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>
+                {quizScore}/100
+              </span>
+              <span className={`inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold border ${
+                quizPassing
+                  ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
+                  : 'bg-[#FEF2F2] border-[#DC2626]/50 text-[#DC2626]'
+              }`}>
+                {quizPassing ? 'Lulus' : 'Tidak Lulus'}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/fl/milestones/${milestone.id}/quiz`)}
+            className="flex-shrink-0 h-8 px-3 bg-white border border-[#CBD5E1] text-[#0F1729] text-xs font-semibold rounded-lg hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF] transition-all"
+          >
+            Lihat Jawaban
+          </button>
         </div>
-        <span className={`text-sm font-bold px-3 py-1 rounded-full flex-shrink-0 ${quizPassing ? 'bg-[#F0FDF4] text-[#15803D]' : 'bg-[#FEF2F2] text-[#DC2626]'}`}>
-          {quizScore}/100
-        </span>
-        <button
-          onClick={() => setView('quiz')}
-          className="flex-shrink-0 h-8 px-3 bg-white border border-[#CBD5E1] text-[#0F1729] text-xs font-semibold rounded-lg hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF] transition-all"
-        >
-          Lihat Jawaban
-        </button>
       </div>
     ) : quizUnlocked ? (
       <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] flex items-center justify-center text-base flex-shrink-0">🔓</div>
+          <div className="w-8 h-8 rounded-lg bg-[#FFF7ED] flex items-center justify-center text-base flex-shrink-0">📝</div>
           <div>
             <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-            <p className="text-xs text-[#65758B] mt-0.5">Semua tugas selesai. Kamu siap mengerjakan quiz!</p>
+            <p className="text-xs text-[#65758B] mt-0.5">Satu langkah lagi! Kerjakan quiz untuk menyelesaikan modul.</p>
           </div>
         </div>
-        <div className="bg-[#FEF2F2] border border-[#DC2626]/20 rounded-lg px-4 py-3 flex items-start gap-2.5">
+        <div className="bg-[#FEFDEA] border border-[#E0A200]/30 rounded-lg px-4 py-3 flex items-start gap-2.5">
           <span className="text-sm flex-shrink-0">⚠️</span>
-          <p className="text-xs text-[#DC2626] leading-relaxed">
-            Quiz ini hanya bisa dikerjakan <strong>1 kali</strong>. Kerjakan dengan serius karena hasilnya akan dipertimbangkan dalam penilaian akhir.
+          <p className="text-xs text-[#B27202] leading-relaxed">
+            Quiz hanya bisa dikerjakan <strong>1 kali</strong> — kerjakan dengan serius.
           </p>
         </div>
         <button
-          onClick={() => setView('quiz')}
-          className="h-9 px-4 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors self-start"
+          onClick={() => navigate(`/fl/milestones/${milestone.id}/quiz`)}
+          className="w-full h-9 px-4 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
         >
           Mulai Quiz →
         </button>
@@ -307,6 +405,7 @@ export default function FLMilestoneDetail() {
   ) : null
 
   return (
+    <>
     <div className="p-4 md:p-8">
       {/* Header with back button */}
       <div className="flex items-center gap-3 mb-4">
@@ -342,9 +441,6 @@ export default function FLMilestoneDetail() {
         </div>
       </div>
 
-      {/* c: Mini quiz floated above materi when unlocked */}
-      {quizUnlocked && view !== 'quiz' && quizCard}
-
       {/* 3. Daftar Isi */}
       <div className="bg-white rounded-xl border border-[#E1E7EF] p-4 mb-6">
         <p className="text-xs font-semibold text-[#65758B] uppercase tracking-wide mb-3">Daftar Isi</p>
@@ -352,9 +448,9 @@ export default function FLMilestoneDetail() {
           {milestone.materials.map((m, idx) => (
             <button
               key={m.id}
-              onClick={() => { setCurrentMaterialIdx(idx); setView('materi'); setActiveSection(null) }}
+              onClick={() => { setCurrentMaterialIdx(idx); setActiveSection(null) }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${
-                view === 'materi' && currentMaterialIdx === idx && activeSection === null ? 'bg-[#E5F2FF] text-[#023DFF] font-medium' : 'text-[#65758B] hover:bg-[#F8FAFC]'
+                currentMaterialIdx === idx && activeSection === null ? 'bg-[#E5F2FF] text-[#023DFF] font-medium' : 'text-[#65758B] hover:bg-[#F8FAFC]'
               }`}
             >
               <span className="text-xs font-bold w-4 text-center flex-shrink-0 text-[#94A3B8]">{idx + 1}</span>
@@ -372,18 +468,19 @@ export default function FLMilestoneDetail() {
           </button>
           {hasQuiz && (
             <button
-              onClick={() => { setView('quiz'); setActiveSection(null) }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${
-                view === 'quiz' && activeSection === null ? 'bg-[#E5F2FF] text-[#023DFF] font-medium'
-                : 'text-[#65758B] hover:bg-[#F8FAFC]'
-              }`}
+              onClick={() => quizUnlocked && navigate(`/fl/milestones/${milestone.id}/quiz`)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all text-[#65758B] hover:bg-[#F8FAFC]"
             >
-              <span className={`text-xs font-bold w-4 text-center flex-shrink-0 ${quizPassing ? 'text-[#15803D]' : ''}`}>
-                {quizPassing ? '✓' : '📝'}
-              </span>
+              <span className="text-xs font-bold w-4 text-center flex-shrink-0">📝</span>
               <span className="truncate flex-1">Mini Quiz</span>
               {quizSubmitted ? (
-                <span className={`ml-auto text-[10px] font-bold flex-shrink-0 ${quizPassing ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{quizScore}/100</span>
+                <span className={`ml-auto flex-shrink-0 inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold border ${
+                  quizPassing
+                    ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
+                    : 'bg-[#FEF2F2] border-[#DC2626]/50 text-[#DC2626]'
+                }`}>
+                  {quizPassing ? 'Lulus' : 'Tidak Lulus'}
+                </span>
               ) : !quizUnlocked ? (
                 <span className="ml-auto text-[10px] text-[#CBD5E1] flex-shrink-0">🔒</span>
               ) : null}
@@ -392,61 +489,26 @@ export default function FLMilestoneDetail() {
         </div>
       </div>
 
+      {/* Quiz card — below daftar isi when unlocked or submitted */}
+      {quizUnlocked && quizCard}
+
       {/* b: Progress Latihan above content when user has active/ongoing tugas */}
       {hasActiveTugas && <div ref={progressRef}>{progressBlock}</div>}
 
       {/* Content viewer */}
       <div className="space-y-3">
-        {view === 'materi' ? (
-          <>
-            <SlideViewer
-              materials={milestone.materials}
-              currentIdx={currentMaterialIdx}
-              onNavigate={setCurrentMaterialIdx}
-            />
-
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setView('materi')}
-              className="flex items-center gap-2 text-sm text-[#65758B] hover:text-[#023DFF] transition-colors"
-            >
-              ← Kembali ke Materi
-            </button>
-            {quizUnlocked ? (
-              <QuizSection
-                quiz={milestone.quiz!}
-                answers={quizAnswers}
-                submitted={quizSubmitted}
-                score={quizScore}
-                onAnswer={(qId, idx) => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [qId]: idx }))}
-                onSubmit={() => {
-                  const score = Math.round(
-                    milestone.quiz!.filter(q => quizAnswers[q.id] === q.correctIndex).length / milestone.quiz!.length * 100
-                  )
-                  setQuizSubmitted(true)
-                  saveQuizResult(milestone.id, score, quizAnswers)
-                }}
-              />
-            ) : (
-              <div className="bg-white rounded-xl border border-[#E1E7EF] p-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] flex items-center justify-center text-xl flex-shrink-0">🔒</div>
-                <div>
-                  <p className="font-bold text-[#0F1729] text-sm">Mini Quiz terkunci</p>
-                  <p className="text-xs text-[#65758B] mt-1 leading-relaxed">Selesaikan semua target latihan untuk membuka mini quiz.</p>
-                </div>
-              </div>
-            )}
-          </>
-        )}
+        <SlideViewer
+          materials={milestone.materials}
+          currentIdx={currentMaterialIdx}
+          onNavigate={setCurrentMaterialIdx}
+        />
       </div>
 
       {/* a: Progress Latihan below content when no active tugas yet */}
       {!hasActiveTugas && <div ref={progressRef} className="mt-6">{progressBlock}</div>}
 
       {/* Locked quiz — always at the very bottom */}
-      {hasQuiz && !quizUnlocked && view !== 'quiz' && (
+      {hasQuiz && !quizUnlocked && (
         <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 flex items-center gap-4 opacity-60 mt-3">
           <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-base flex-shrink-0">🔒</div>
           <div>
@@ -457,6 +519,198 @@ export default function FLMilestoneDetail() {
       )}
 
     </div>
+
+    {/* Riwayat Latihan bottom sheet */}
+    {showHistory && (
+      <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="absolute inset-0 bg-black/40" onClick={() => setShowHistory(false)} />
+        <div className="relative bg-white rounded-t-2xl max-h-[80vh] flex flex-col shadow-xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#E1E7EF] flex-shrink-0">
+            <div>
+              <p className="font-bold text-[#0F1729]">Riwayat Latihan</p>
+              <p className="text-xs text-[#65758B] mt-0.5">{milestone!.name}</p>
+            </div>
+            <button
+              onClick={() => setShowHistory(false)}
+              className="w-8 h-8 rounded-full border border-[#E1E7EF] flex items-center justify-center text-[#65758B] hover:border-[#023DFF] hover:text-[#023DFF] transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div className="overflow-y-auto flex-1 p-4 space-y-3">
+            {isIndividual ? (
+              itemHistory.length === 0 ? (
+                <p className="text-sm text-[#94A3B8] text-center py-8">Belum ada riwayat untuk modul ini.</p>
+              ) : itemHistory.map(({ item, confirmations }) => (
+                <div key={item.id} className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
+                  <div className="px-4 py-3 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-[#0F1729] leading-snug">{item.text}</p>
+                    <span className="flex-shrink-0 text-xs text-[#94A3B8] tabular-nums">
+                      {confirmations.length}/{item.target ?? 1} latihan
+                    </span>
+                  </div>
+                  <div className="divide-y divide-[#F1F5F9]">
+                    {confirmations.map((conf, i) => {
+                      const confExpanded = expandedHistoryConfs.has(conf.id)
+                      const d = new Date(conf.submittedAt)
+                      const mo = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+                      const dateStr = `${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()}, ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')}`
+                      return (
+                        <div key={conf.id}>
+                          <button
+                            onClick={() => setExpandedHistoryConfs(prev => {
+                              const next = new Set(prev)
+                              next.has(conf.id) ? next.delete(conf.id) : next.add(conf.id)
+                              return next
+                            })}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#F8FAFC] transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-[#0F1729]">Sesi {confirmations.length - i}</p>
+                              <p className="text-[10px] text-[#94A3B8] tabular-nums mt-0.5">{dateStr}</p>
+                            </div>
+                            <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] border border-[#16A34A]/30 text-[#15803D]">
+                              Lulus
+                            </span>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                              className={`flex-shrink-0 text-[#CBD5E1] transition-transform duration-200 ${confExpanded ? '-rotate-90' : 'rotate-90'}`}
+                            >
+                              <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          {confExpanded && (
+                            <div className="px-4 pb-3 pt-1 space-y-1.5">
+                              {conf.nomorSbg && (
+                                <p className="text-xs text-[#65758B]">Nomor SBG: <span className="text-[#0F1729] font-medium">{conf.nomorSbg}</span></p>
+                              )}
+                              {conf.nomorBox && conf.nomorBox.length > 0 && (
+                                <p className="text-xs text-[#65758B]">Nomor Box: <span className="text-[#0F1729] font-medium">{conf.nomorBox.join(', ')}</span></p>
+                              )}
+                              {conf.catatan && (
+                                <p className="text-xs text-[#65758B]">Refleksi: <span className="text-[#0F1729] italic">"{conf.catatan}"</span></p>
+                              )}
+                              {conf.kanitNote && (
+                                <div className="flex items-start gap-2 bg-[#FEFDEA] border border-[#E0A200]/30 rounded-lg px-3 py-2.5 mt-1.5">
+                                  <div className="w-3.5 h-3.5 rounded-full bg-[#E0A200] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+                                      <path d="M3 1.5v2" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
+                                      <circle cx="3" cy="4.5" r="0.5" fill="white"/>
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <p className="text-[10px] font-semibold text-[#B27202] uppercase tracking-wide mb-0.5">Feedback Kanit</p>
+                                    <p className="text-xs text-[#92400E] italic leading-relaxed">"{conf.kanitNote}"</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
+            ) : (
+              historySessions.length === 0 ? (
+                <p className="text-sm text-[#94A3B8] text-center py-8">Belum ada riwayat untuk modul ini.</p>
+              ) : historySessions.map((cl, revIdx) => {
+                const sessionIdx = historySessions.length - 1 - revIdx
+                const relevantTasks = cl.tasks?.filter(t => relatedTaskIds.includes(t.taskId)) ?? []
+                const scored = relevantTasks.filter(t => t.kanitScore !== undefined)
+                const sessionScore = scored.length > 0
+                  ? Math.round(scored.reduce((sum, t) => sum + t.kanitScore!, 0) / scored.length)
+                  : null
+                const isExpanded = expandedHistorySessions.has(cl.id)
+                const mo = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+                const [y, m2, d2] = cl.date.split('-').map(Number)
+                const dateStr = `${d2} ${mo[m2 - 1]} ${y}`
+                return (
+                  <div key={cl.id} className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
+                    <button
+                      onClick={() => setExpandedHistorySessions(prev => {
+                        const next = new Set(prev)
+                        next.has(cl.id) ? next.delete(cl.id) : next.add(cl.id)
+                        return next
+                      })}
+                      className="w-full px-4 py-3 bg-[#F8FAFC] flex items-center gap-3 text-left hover:bg-[#F1F5F9] transition-colors"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-white border border-[#E1E7EF] flex items-center justify-center text-xs font-bold text-[#65758B] flex-shrink-0">
+                        {sessionIdx + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-[#0F1729]">Sesi {sessionIdx + 1}</p>
+                        <p className="text-xs text-[#65758B]">{dateStr}</p>
+                      </div>
+                      {sessionScore !== null ? (
+                        <span className="text-sm font-bold text-[#15803D] flex-shrink-0">{sessionScore}</span>
+                      ) : (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FEFDEA] text-[#B27202] flex-shrink-0">Menunggu nilai</span>
+                      )}
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        className={`flex-shrink-0 text-[#CBD5E1] transition-transform duration-200 ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
+                      >
+                        <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    {isExpanded && (
+                      <div className="border-t border-[#E1E7EF] px-4 py-3 space-y-4">
+                        {relevantTasks.map(taskRecord => {
+                          const taskDef = DAILY_TASKS.find(t => t.id === taskRecord.taskId)
+                          return (
+                            <div key={taskRecord.taskId}>
+                              {taskDef && taskDef.items.length > 0 && (
+                                <div className="space-y-2 mb-3">
+                                  <p className="text-[10px] font-semibold text-[#65758B] uppercase tracking-wide">
+                                    Checklist ({taskRecord.completedItemIds.length}/{taskDef.items.length})
+                                  </p>
+                                  {taskDef.items.map(item => {
+                                    const done = taskRecord.completedItemIds.includes(item.id)
+                                    return (
+                                      <div key={item.id} className="flex items-start gap-2.5">
+                                        <div className={`w-4 h-4 rounded flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                                          done ? 'bg-[#023DFF]' : 'bg-[#F1F5F9] border border-[#CBD5E1]'
+                                        }`}>
+                                          {done && (
+                                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                                              <path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                          )}
+                                        </div>
+                                        <p className={`text-xs leading-snug ${done ? 'text-[#0F1729]' : 'text-[#94A3B8]'}`}>{item.text}</p>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                              {taskRecord.kanitNote && (
+                                <div className="bg-[#F8FAFC] rounded-lg px-3 py-2.5 mb-2">
+                                  <p className="text-[10px] font-semibold text-[#65758B] uppercase tracking-wide mb-1">Catatan Kanit</p>
+                                  <p className="text-xs text-[#0F1729] italic leading-relaxed">"{taskRecord.kanitNote}"</p>
+                                </div>
+                              )}
+                              {taskRecord.reflection && (
+                                <div>
+                                  <p className="text-[10px] font-semibold text-[#65758B] uppercase tracking-wide mb-1">Refleksi</p>
+                                  <p className="text-xs text-[#0F1729] italic leading-relaxed">"{taskRecord.reflection}"</p>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 
@@ -624,103 +878,6 @@ function SlideViewer({
     <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden shadow-sm">
       {toolbar}
       {slideContent}
-    </div>
-  )
-}
-
-function QuizSection({ quiz, answers, submitted, score, onAnswer, onSubmit }: {
-  quiz: QuizQuestion[]
-  answers: Record<string, number>
-  submitted: boolean
-  score: number | null
-  onAnswer: (qId: string, idx: number) => void
-  onSubmit: () => void
-}) {
-  const allAnswered = quiz.every(q => answers[q.id] !== undefined)
-  const passing = score !== null && score >= 75
-
-  return (
-    <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
-      <div className="p-5 border-b border-[#E1E7EF] flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#FFF7ED] flex items-center justify-center text-base flex-shrink-0">📝</div>
-        <div>
-          <p className="font-bold text-[#0F1729] text-sm">Mini Quiz</p>
-          <p className="text-xs text-[#65758B]">{quiz.length} soal · Minimal {Math.ceil(quiz.length * 0.75)}/{quiz.length} benar untuk lulus</p>
-        </div>
-        {submitted && (
-          <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${passing ? 'bg-[#F0FDF4] text-[#15803D]' : 'bg-[#FEF2F2] text-[#DC2626]'}`}>
-            {score}/100
-          </span>
-        )}
-      </div>
-
-      <div className="p-5 space-y-6">
-        {quiz.map((q, qIdx) => {
-          const selected = answers[q.id]
-          return (
-            <div key={q.id}>
-              <p className="text-sm font-semibold text-[#0F1729] mb-3">{qIdx + 1}. {q.question}</p>
-              <div className="space-y-2">
-                {q.options.map((opt, oIdx) => {
-                  let cls = 'border-[#E1E7EF] text-[#0F1729] hover:border-[#023DFF]/40'
-                  if (!submitted) {
-                    if (selected === oIdx) cls = 'border-[#023DFF] bg-[#E5F2FF] text-[#023DFF]'
-                  } else {
-                    if (oIdx === q.correctIndex) cls = 'border-[#16A34A] bg-[#F0FDF4] text-[#15803D]'
-                    else if (selected === oIdx) cls = 'border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]'
-                    else cls = 'border-[#E1E7EF] text-[#94A3B8]'
-                  }
-                  return (
-                    <button
-                      key={oIdx}
-                      disabled={submitted}
-                      onClick={() => onAnswer(q.id, oIdx)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm text-left transition-all ${cls} ${submitted ? 'cursor-default' : 'cursor-pointer'}`}
-                    >
-                      <span className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center text-xs font-bold ${
-                        !submitted && selected === oIdx ? 'border-[#023DFF] bg-[#023DFF] text-white' : 'border-current'
-                      }`}>
-                        {String.fromCharCode(65 + oIdx)}
-                      </span>
-                      {opt}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-
-        {!submitted ? (
-          <button
-            disabled={!allAnswered}
-            onClick={onSubmit}
-            className={`w-full h-10 rounded-lg font-semibold text-sm transition-all ${
-              allAnswered ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white' : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
-            }`}
-          >
-            {allAnswered ? 'Submit Quiz' : `Jawab semua soal dulu (${Object.keys(answers).length}/${quiz.length})`}
-          </button>
-        ) : (
-          <div className={`rounded-xl p-4 ${
-            passing ? 'bg-[#F0FDF4] border border-[#16A34A]/20'
-            : score !== null && score <= 50 ? 'bg-[#F8FAFC] border border-[#E1E7EF]'
-            : 'bg-[#FEF2F2] border border-[#DC2626]/20'
-          }`}>
-            <p className={`font-bold text-sm ${
-              passing ? 'text-[#15803D]'
-              : score !== null && score <= 50 ? 'text-[#65758B]'
-              : 'text-[#DC2626]'
-            }`}>
-              {passing
-                ? `🎉 Selamat! Skor kamu ${score}/100.`
-                : score !== null && score <= 50
-                  ? `Skor kamu ${score}/100. Yuk belajar lagi — pastikan kamu pahami materi sebelum lanjut. 💪`
-                  : `Skor kamu ${score}/100. Pelajari kembali materi yang belum dipahami ya.`}
-            </p>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import type { AppUser, DailyChecklist, PenaksiranRecord, Assessment, FinalEvaluation, ScoreBreakdown, FLProfile, ExtensionRequest, ExtensionType, TaskConfirmation } from '../types'
+import type { AppUser, DailyChecklist, PenaksiranRecord, Assessment, FinalEvaluation, ScoreBreakdown, FLProfile, ExtensionRequest, ExtensionType, TaskConfirmation, FLNotification } from '../types'
+import { MOCK_TASK_CONFIRMATIONS, MOCK_NOTIFICATIONS } from '../data/mockData'
 import { MOCK_USERS, MILESTONES, INITIAL_CHECKLISTS, INITIAL_PENAKSIRAN, INITIAL_ASSESSMENTS } from '../data/mockData'
 
 export interface ModuleDecision {
@@ -61,6 +62,10 @@ interface AppContextType {
   taskConfirmations: TaskConfirmation[]
   submitTaskConfirmation: (confirmation: TaskConfirmation) => void
   getItemConfirmations: (flId: string, milestoneId: string, itemId: string) => TaskConfirmation[]
+  notifications: FLNotification[]
+  unreadNotificationCount: number
+  markNotificationRead: (id: string) => void
+  markAllNotificationsRead: () => void
 }
 
 const AppContext = createContext<AppContextType>(null!)
@@ -637,7 +642,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── Read helpers (unchanged) ─────────────────────────────
 
   const [taskConfirmations, setTaskConfirmations] = useState<TaskConfirmation[]>(() => {
-    try { return JSON.parse(localStorage.getItem('task-confirmations') ?? '[]') } catch { return [] }
+    try {
+      const stored = localStorage.getItem('task-confirmations')
+      const fromStorage: TaskConfirmation[] = stored ? JSON.parse(stored) : []
+      const storedIds = new Set(fromStorage.map(c => c.id))
+      const extras = MOCK_TASK_CONFIRMATIONS.filter(m => !storedIds.has(m.id))
+      return [...fromStorage, ...extras]
+    } catch { return MOCK_TASK_CONFIRMATIONS }
   })
 
   function submitTaskConfirmation(confirmation: TaskConfirmation) {
@@ -650,6 +661,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   function getItemConfirmations(flId: string, milestoneId: string, itemId: string): TaskConfirmation[] {
     return taskConfirmations.filter(c => c.flId === flId && c.milestoneId === milestoneId && c.itemId === itemId)
+  }
+
+  const [notificationsAll, setNotificationsAll] = useState<FLNotification[]>(MOCK_NOTIFICATIONS)
+
+  const notifications = notificationsAll.filter(n => n.flId === currentUser?.id)
+  const unreadNotificationCount = notifications.filter(n => !n.read).length
+
+  function markNotificationRead(id: string) {
+    setNotificationsAll(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  }
+
+  function markAllNotificationsRead() {
+    setNotificationsAll(prev => prev.map(n => ({ ...n, read: true })))
   }
 
   function getFlUsers() { return MOCK_USERS.filter(u => u.role === 'fl') }
@@ -711,6 +735,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getFlUsers, getUserById, getFlChecklists, getFlPenaksiran,
       getFlAssessment, getFlFinalEvaluation, getFlScoreBreakdown, getTodayChecklist,
       taskConfirmations, submitTaskConfirmation, getItemConfirmations,
+      notifications, unreadNotificationCount, markNotificationRead, markAllNotificationsRead,
     }}>
       {children}
     </AppContext.Provider>

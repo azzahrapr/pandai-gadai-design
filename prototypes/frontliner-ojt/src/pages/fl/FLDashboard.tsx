@@ -186,29 +186,23 @@ export default function FLDashboard() {
         <h1 className="text-2xl font-bold text-[#0F1729]">Halo, {profile.name.split(' ')[0]}</h1>
         <p className="text-[#65758B] text-sm mt-1">
           {day === 14
-            ? 'Hari ini adalah hari assessment — selesaikan penilaian akhir OJT kamu.'
-            : day === 1
-              ? 'Mulai pelajari materi dan kerjakan tugas sekarang!'
-              : completedL1 === l1Milestones.length && completedL2 === l2Milestones.length
-                ? 'Semua modul selesai! Siapkan diri untuk assessment.'
-                : l2Available
-                  ? 'Level 2 terbuka — lanjutkan perjalanan belajarmu.'
-                  : `${completedL1} dari ${l1Milestones.length} modul Level 1 selesai.`}
+            ? 'Hari terakhir OJT! Kerjakan final assessment sekarang.'
+            : l2Available
+              ? 'Segera selesaikan materi di Level 2!'
+              : 'Segera selesaikan materi di Level 1!'}
         </p>
       </div>
 
       {/* Assessment alert */}
       {day === 14 && !existingAssessment && (
-        <div className="bg-[#FEFDEA] border border-[#E0A200] rounded-xl p-4 flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🎓</span>
-            <div>
-              <p className="font-semibold text-[#B27202]">Ini adalah Hari ke-14 — Hari Assessment kamu!</p>
-              <p className="text-sm text-[#B27202]/80 mt-0.5">Selesaikan assessment hari ini untuk mendapatkan nilai akhir OJT.</p>
-            </div>
+        <div className="bg-white border border-[#E1E7EF] rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="text-xl">🎓</span>
+            <p className="font-bold text-[#0F1729] text-sm">Final Assessment siap dikerjakan!</p>
           </div>
-          <Link to="/fl/assessment" className="flex-shrink-0 h-[38px] px-4 bg-[#E0A200] hover:bg-[#B27202] text-white font-semibold text-sm rounded-lg flex items-center transition-colors">
-            Mulai Assessment →
+          <p className="text-xs text-[#65758B] leading-relaxed mb-4">Kamu sudah mencapai hari akhir training. Selesaikan assessment untuk mendapatkan penilaian akhir.</p>
+          <Link to="/fl/assessment" className="w-full h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg flex items-center justify-center transition-colors">
+            Mulai Sekarang →
           </Link>
         </div>
       )}
@@ -258,9 +252,9 @@ export default function FLDashboard() {
             </div>
             <Link
               to="/fl/milestones"
-              className="mt-4 flex items-center justify-center h-9 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-sm font-semibold transition-colors"
+              className={`mt-4 flex items-center justify-center h-9 rounded-xl text-sm font-semibold transition-colors ${l1Pct === 100 ? 'bg-white text-[#0F1729] border border-[#CBD5E1] hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF]' : 'bg-[#16A34A] hover:bg-[#15803D] text-white'}`}
             >
-              {l1Pct === 100 ? 'Lihat Level 1' : day === 1 ? 'Mulai Belajar' : 'Lanjut Belajar'}
+              {l1Pct === 100 ? 'Pelajari Lagi' : day === 1 ? 'Mulai Belajar' : 'Lanjut Belajar'}
             </Link>
           </div>
 
@@ -284,9 +278,9 @@ export default function FLDashboard() {
               </div>
               <Link
                 to="/fl/milestones"
-                className="mt-4 flex items-center justify-center h-9 rounded-xl bg-[#9333EA] hover:bg-[#7E22CE] text-white text-sm font-semibold transition-colors"
+                className={`mt-4 flex items-center justify-center h-9 rounded-xl text-sm font-semibold transition-colors ${l2Pct === 100 ? 'bg-white text-[#0F1729] border border-[#CBD5E1] hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF]' : 'bg-[#9333EA] hover:bg-[#7E22CE] text-white'}`}
               >
-                Lanjut Belajar
+                {l2Pct === 100 ? 'Pelajari Lagi' : 'Lanjut Belajar'}
               </Link>
             </div>
           ) : (
@@ -393,23 +387,22 @@ export default function FLDashboard() {
                           : <div className="w-5 h-5 rounded border-2 border-[#CBD5E1] flex-shrink-0" />
 
                     const subtitleNode = s === 'done'
-                      ? <span className="text-[#15803D]">{isDaily ? 'Latihan hari ini berhasil dikerjakan.' : 'Semua sesi latihan berhasil dikerjakan.'}</span>
+                      ? <span className="text-[#94A3B8]">{isDaily ? 'Latihan hari ini berhasil dikerjakan.' : 'Modul selesai — target latihan tercapai.'}</span>
                       : s === 'incomplete'
                         ? <span className="text-[#94A3B8]">Belum berhasil · Coba lagi besok</span>
                         : s === 'tomorrow'
                           ? <span className="text-[#CBD5E1]">Tersedia mulai besok</span>
                           : isDaily
                             ? <span className="text-[#94A3B8]">
-                                Batas pengerjaan{' '}
-                                <span className="whitespace-nowrap">
-                                  hari ini{' '}
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#FEF9C3] text-[#B27202] font-mono text-[10px] font-semibold leading-none align-middle">
-                                    {formatCountdown(timeLeft)}
-                                  </span>
+                                Batas pengerjaan hari ini{' '}
+                                <span className="text-xs text-[#B27202] font-medium tabular-nums">
+                                  {formatCountdown(timeLeft)}
                                 </span>
                               </span>
                             : <span className="text-[#94A3B8]">
-                                {weeklyDaysLeft <= 0 ? 'Batas pengerjaan hari ini' : `Batas pengerjaan ${weeklyDaysLeft} hari lagi`}
+                                {weeklyDaysLeft <= 0
+                                  ? <>Batas pengerjaan hari ini{' '}<span className="text-xs text-[#B27202] font-medium tabular-nums">{formatCountdown(timeLeft)}</span></>
+                                  : `Batas pengerjaan ${weeklyDaysLeft} hari lagi`}
                               </span>
 
                     const titleColor = (s === 'incomplete' || s === 'tomorrow') ? 'text-[#94A3B8]' : 'text-[#0F1729]'
@@ -422,7 +415,13 @@ export default function FLDashboard() {
                           <div className="flex items-center gap-1.5 min-w-0">
                             <p className={`text-sm font-semibold truncate ${titleColor}`}>{m.name}</p>
                             {!isDaily && weeklyProgress[m.id] && (
-                              <span className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[#E1E7EF] text-[#65758B] leading-none tabular-nums">
+                              <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full border leading-none tabular-nums ${
+                                (weeklyProgress[m.id].actual ?? 0) >= (weeklyProgress[m.id].expected ?? 1)
+                                  ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
+                                  : (weeklyProgress[m.id].actual ?? 0) > 0
+                                    ? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
+                                    : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
+                              }`}>
                                 {weeklyProgress[m.id].actual}/{weeklyProgress[m.id].expected} latihan
                               </span>
                             )}
@@ -487,7 +486,7 @@ export default function FLDashboard() {
                     }
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate text-[#0F1729]">{m.name}</p>
-                      <p className={`text-xs mt-0.5 ${isCompleted ? 'text-[#15803D]' : 'text-[#94A3B8]'}`}>
+                      <p className="text-xs mt-0.5 text-[#94A3B8]">
                         {isCompleted ? 'Modul selesai' : `Batas pengerjaan ${Math.max(0, 13 - day)} hari lagi`}
                       </p>
                     </div>

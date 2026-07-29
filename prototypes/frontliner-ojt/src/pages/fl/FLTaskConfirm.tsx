@@ -4,6 +4,8 @@ import { useApp } from '../../context/AppContext'
 import { MILESTONES } from '../../data/mockData'
 import type { FLProfile, TaskConfirmation } from '../../types'
 
+const SBG_MILESTONE_IDS = new Set(['sop-administrasi', 'packing-sealing'])
+
 export default function FLTaskConfirm() {
   const { milestoneId, itemId } = useParams<{ milestoneId: string; itemId: string }>()
   const navigate = useNavigate()
@@ -12,6 +14,7 @@ export default function FLTaskConfirm() {
 
   const milestone = MILESTONES.find(m => m.id === milestoneId)
   const item = milestone?.checklistItems.find(i => i.id === itemId)
+  const needsSbg = milestoneId ? SBG_MILESTONE_IDS.has(milestoneId) : false
 
   const target = item?.target ?? 1
   const existing = milestone && item
@@ -19,6 +22,7 @@ export default function FLTaskConfirm() {
     : []
   const atTarget = existing.length >= target
 
+  const [nomorSbg, setNomorSbg] = useState('')
   const [catatan, setCatatan] = useState('')
   const [justSubmittedCount, setJustSubmittedCount] = useState<number | null>(null)
 
@@ -31,12 +35,14 @@ export default function FLTaskConfirm() {
       milestoneId: milestone.id,
       itemId: item.id,
       itemText: item.text,
+      nomorSbg: needsSbg && nomorSbg.trim() ? nomorSbg.trim() : undefined,
       catatan: catatan.trim() || undefined,
       submittedAt: now,
       day: profile.currentDay,
     }
     submitTaskConfirmation(confirmation)
     setJustSubmittedCount(existing.length + 1)
+    setNomorSbg('')
     setCatatan('')
   }
 
@@ -130,6 +136,21 @@ export default function FLTaskConfirm() {
       ) : (
         /* ── Form ── */
         <div className="space-y-4">
+          {needsSbg && (
+            <div className="bg-white rounded-2xl border border-[#E1E7EF] p-5">
+              <label className="text-xs font-semibold text-[#65758B] uppercase tracking-wide block mb-2">
+                Nomor SBG <span className="text-[#DC2626]">*</span>
+              </label>
+              <input
+                type="text"
+                value={nomorSbg}
+                onChange={e => setNomorSbg(e.target.value)}
+                placeholder="Contoh: SBG-2026-00123"
+                className="w-full border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+              />
+            </div>
+          )}
+
           <div className="bg-white rounded-2xl border border-[#E1E7EF] p-5">
             <label className="text-xs font-semibold text-[#65758B] uppercase tracking-wide block mb-2">
               Catatan <span className="normal-case font-normal text-[#94A3B8]">(opsional)</span>
@@ -145,7 +166,12 @@ export default function FLTaskConfirm() {
 
           <button
             onClick={handleSubmit}
-            className="w-full h-12 bg-[#023DFF] hover:bg-[#001CDB] text-white font-bold text-sm rounded-xl transition-colors"
+            disabled={needsSbg && !nomorSbg.trim()}
+            className={`w-full h-12 font-bold text-sm rounded-xl transition-colors ${
+              !needsSbg || nomorSbg.trim()
+                ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
+                : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
+            }`}
           >
             {target === 1 ? 'Submit' : 'Tandai Selesai'}
           </button>

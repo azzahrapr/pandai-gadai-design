@@ -24,16 +24,9 @@ export default function FLProfile() {
 
   return (
     <div className="p-4 md:p-8 max-w-lg">
-      <div className="flex items-center gap-3 mb-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-8 h-8 rounded-full bg-white border border-[#E1E7EF] flex items-center justify-center hover:border-[#023DFF] hover:text-[#023DFF] transition-colors flex-shrink-0"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M9 2.5L5 7l4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className="text-xl font-bold text-[#0F1729]">Profil</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-[#0F1729]">Profil</h1>
+        <p className="text-[#65758B] text-sm mt-1">{profile.branch} · {profile.position}</p>
       </div>
 
       {/* Avatar + name */}

@@ -46,7 +46,10 @@ export interface TaskConfirmation {
   milestoneId: string
   itemId: string
   itemText: string
+  nomorSbg?: string
+  nomorBox?: string[]
   catatan?: string
+  kanitNote?: string
   submittedAt: string
   day: number
 }
@@ -193,4 +196,18 @@ export interface AppUser {
   name: string
   role: UserRole
   profile: FLProfile | KanitProfile
+}
+
+export type FLNotificationType = 'feedback_latihan' | 'persetujuan_kanit' | 'final_assessment'
+
+export interface FLNotification {
+  id: string
+  flId: string
+  type: FLNotificationType
+  title: string
+  body: string
+  milestoneId?: string
+  milestoneName?: string
+  read: boolean
+  createdAt: string
 }

@@ -12,6 +12,8 @@ import FLChecklistDetail from './pages/fl/FLChecklistDetail'
 import FLTaskDetail from './pages/fl/FLTaskDetail'
 import FLTaskConfirm from './pages/fl/FLTaskConfirm'
 import FLTaskList from './pages/fl/FLTaskList'
+import FLQuiz from './pages/fl/FLQuiz'
+import FLNotifications from './pages/fl/FLNotifications'
 import FLProfile from './pages/fl/FLProfile'
 import FLModuleHistory from './pages/fl/FLModuleHistory'
 import FLPenaksiranSim from './pages/fl/FLPenaksiranSim'
@@ -40,6 +42,8 @@ export default function App() {
             <Route path="milestones" element={<FLMilestones />} />
             <Route path="milestones/:id" element={<FLMilestoneDetail />} />
             <Route path="milestones/:id/tasks" element={<FLTaskList />} />
+            <Route path="milestones/:id/quiz" element={<FLQuiz />} />
+            <Route path="notifications" element={<FLNotifications />} />
             <Route path="profile" element={<FLProfile />} />
             <Route path="checklist" element={<FLChecklist />} />
             <Route path="checklist/daily/:milestoneId" element={<FLDailyChecklist />} />

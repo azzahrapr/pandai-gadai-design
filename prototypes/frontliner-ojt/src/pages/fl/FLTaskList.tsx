@@ -4,6 +4,8 @@ import { useApp } from '../../context/AppContext'
 import { MILESTONES, DAILY_TASKS } from '../../data/mockData'
 import type { FLProfile, TaskConfirmation, DailyChecklist } from '../../types'
 
+const SBG_MILESTONE_IDS = new Set(['sop-administrasi', 'packing-sealing'])
+
 const BASE_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':     { fromDay: 1,  toDay: 3  },
   'opening-cabang':     { fromDay: 4,  toDay: 7  },
@@ -39,13 +41,20 @@ export default function FLSubmitTask() {
       return saved ? new Set<string>(JSON.parse(saved)) : new Set<string>()
     } catch { return new Set<string>() }
   })
+  const [singleRefleksi, setSingleRefleksi] = useState('')
   const [justSubmittedSingle, setJustSubmittedSingle] = useState(false)
   const [justSubmittedPassed, setJustSubmittedPassed] = useState(false)
   const [singleDraftSaved, setSingleDraftSaved] = useState(false)
 
+  // ── Offloading state ───────────────────────────────────────
+  const [boxList,            setBoxList]            = useState<string[]>([''])
+  const [offloadRefleksi,    setOffloadRefleksi]    = useState('')
+  const [offloadJustSubmitted, setOffloadJustSubmitted] = useState<number | null>(null)
+
   // ── Multiple-submission state ───────────────────────────────
   const [expandedId,   setExpandedId]   = useState<string | null>(null)
   const [refleksi,     setRefleksi]     = useState<Record<string, string>>({})
+  const [nomorSbgMap,  setNomorSbgMap]  = useState<Record<string, string>>({})
   const [justSubmitted,setJustSubmitted]= useState<Record<string, number>>({})
   const [showFormFor,  setShowFormFor]  = useState<Record<string, boolean>>({})
 
@@ -116,7 +125,7 @@ export default function FLSubmitTask() {
         taskId: id,
         taskName: dailyTask.name,
         completedItemIds: [...checkedIds],
-        reflection: '',
+        reflection: singleRefleksi.trim(),
         submittedAt: now,
       }],
       status: 'submitted',
@@ -146,6 +155,36 @@ export default function FLSubmitTask() {
     : 0
   const isAllDone = confirmedCount === milestone.checklistItems.length
 
+  const needsSbg = id ? SBG_MILESTONE_IDS.has(id) : false
+  const isOffloading = id === 'offloading'
+
+  // ── Offloading helpers ──────────────────────────────────────
+  const offloadItem = milestone?.checklistItems[0]
+  const offloadConfirmations = isOffloading && offloadItem
+    ? getItemConfirmations(currentUser!.id, milestone!.id, offloadItem.id)
+    : []
+
+  function handleOffloadingSubmit() {
+    if (!offloadItem) return
+    const validBoxes = boxList.map(b => b.trim()).filter(Boolean)
+    const now = new Date().toISOString()
+    const confirmation: TaskConfirmation = {
+      id: `confirm-${currentUser!.id}-${milestone!.id}-${offloadItem.id}-${now}`,
+      flId: currentUser!.id,
+      milestoneId: milestone!.id,
+      itemId: offloadItem.id,
+      itemText: offloadItem.text,
+      nomorBox: validBoxes.length > 0 ? validBoxes : undefined,
+      catatan: offloadRefleksi.trim() || undefined,
+      submittedAt: now,
+      day: profile.currentDay,
+    }
+    submitTaskConfirmation(confirmation)
+    setOffloadJustSubmitted(offloadConfirmations.length + 1)
+    setBoxList([''])
+    setOffloadRefleksi('')
+  }
+
   function handleMultiSubmit(itemId: string) {
     const item = milestone.checklistItems.find(i => i.id === itemId)
     if (!item) return
@@ -156,6 +195,7 @@ export default function FLSubmitTask() {
       milestoneId: milestone.id,
       itemId,
       itemText: item.text,
+      nomorSbg: needsSbg && nomorSbgMap[itemId]?.trim() ? nomorSbgMap[itemId].trim() : undefined,
       catatan: refleksi[itemId]?.trim() || undefined,
       submittedAt: now,
       day: profile.currentDay,
@@ -164,6 +204,7 @@ export default function FLSubmitTask() {
     const newCount = (itemConfirmationCounts[itemId] ?? 0) + 1
     setJustSubmitted(prev => ({ ...prev, [itemId]: newCount }))
     setRefleksi(prev => ({ ...prev, [itemId]: '' }))
+    setNomorSbgMap(prev => ({ ...prev, [itemId]: '' }))
     setShowFormFor(prev => ({ ...prev, [itemId]: false }))
   }
 
@@ -300,7 +341,19 @@ export default function FLSubmitTask() {
               })}
             </div>
 
-            <div className="px-5 pb-5 border-t border-[#E1E7EF] pt-4">
+            <div className="px-5 pb-5 border-t border-[#E1E7EF] pt-4 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
+                  Refleksi <span className="text-[#DC2626]">*</span>
+                </label>
+                <textarea
+                  value={singleRefleksi}
+                  onChange={e => setSingleRefleksi(e.target.value)}
+                  placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
+                  rows={3}
+                  className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
+                />
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={saveSingleDraft}
@@ -314,7 +367,12 @@ export default function FLSubmitTask() {
                 </button>
                 <button
                   onClick={handleSingleSubmit}
-                  className="flex-1 h-10 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
+                  disabled={!singleRefleksi.trim()}
+                  className={`flex-1 h-10 font-semibold text-sm rounded-lg transition-colors ${
+                    singleRefleksi.trim()
+                      ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
+                      : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
+                  }`}
                 >
                   Submit
                 </button>
@@ -322,6 +380,115 @@ export default function FLSubmitTask() {
             </div>
           </div>
         )}
+      </div>
+    )
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // OFFLOADING — open form, dynamic box numbers
+  // ════════════════════════════════════════════════════════════
+  if (isOffloading) {
+    const totalSubmitted = offloadConfirmations.length
+    const canSubmit = boxList.some(b => b.trim()) && offloadRefleksi.trim()
+
+    return (
+      <div className="p-4 md:p-8 max-w-xl">
+        {header}
+
+        {/* Success toast */}
+        {offloadJustSubmitted !== null && (
+          <div className="rounded-xl bg-[#F0FDF4] border border-[#16A34A]/20 px-4 py-3 flex items-center gap-3 mb-4">
+            <div className="w-7 h-7 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6l2.5 2.5L9.5 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-[#15803D]">Sesi {offloadJustSubmitted} berhasil disubmit.</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 space-y-4">
+          {/* Progress badge */}
+          <span className={`inline-flex items-center h-5 px-2 rounded-full text-[10px] font-bold border ${
+            totalSubmitted >= (offloadItem?.target ?? 1)
+              ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
+              : totalSubmitted > 0
+                ? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
+                : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
+          }`}>
+            Target: {totalSubmitted}/{offloadItem?.target ?? 1} latihan
+          </span>
+
+          {/* Nomor Box */}
+          <div>
+            <label className="block text-xs font-semibold text-[#0F1729] mb-2">
+              Nomor Box <span className="text-[#DC2626]">*</span>
+            </label>
+            <div className="space-y-2">
+              {boxList.map((box, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={box}
+                    onChange={e => {
+                      const next = [...boxList]
+                      next[idx] = e.target.value
+                      setBoxList(next)
+                    }}
+                    placeholder={`Box ${idx + 1}`}
+                    className="flex-1 border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+                  />
+                  {idx > 0 && (
+                    <button
+                      onClick={() => setBoxList(prev => prev.filter((_, i) => i !== idx))}
+                      className="w-9 h-9 flex-shrink-0 rounded-lg border border-[#E1E7EF] flex items-center justify-center text-[#94A3B8] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M2 3.5h10M5.5 3.5V2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M11 3.5l-.7 7.7a1 1 0 0 1-1 .8H4.7a1 1 0 0 1-1-.8L3 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setBoxList(prev => [...prev, ''])}
+              className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#023DFF] hover:text-[#001CDB] transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Tambah nomor box
+            </button>
+          </div>
+
+          {/* Refleksi */}
+          <div>
+            <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
+              Refleksi <span className="text-[#DC2626]">*</span>
+            </label>
+            <textarea
+              value={offloadRefleksi}
+              onChange={e => setOffloadRefleksi(e.target.value)}
+              placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
+              rows={3}
+              className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
+            />
+          </div>
+
+          <button
+            onClick={handleOffloadingSubmit}
+            disabled={!canSubmit}
+            className={`w-full h-10 font-bold text-sm rounded-lg transition-colors ${
+              canSubmit
+                ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
+                : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
+            }`}
+          >
+            Submit
+          </button>
+        </div>
       </div>
     )
   }
@@ -346,7 +513,17 @@ export default function FLSubmitTask() {
 
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold text-[#65758B]">Daftar Latihan</p>
-        <span className="text-sm tabular-nums text-[#65758B]">{confirmedCount}/{milestone.checklistItems.length}</span>
+        <div className="flex items-center gap-3">
+          <Link
+            to={`/fl/milestones/${id}`}
+            className="flex-shrink-0 h-[30px] px-2 rounded-lg inline-flex items-center gap-1 text-sm font-semibold text-[#023DFF] hover:bg-[#E5F2FF] transition-colors"
+          >
+            Baca Materi
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
@@ -439,24 +616,37 @@ export default function FLSubmitTask() {
                     </button>
                   ) : (
                     <div className="space-y-3 pt-1">
+                      {needsSbg && (
+                        <div>
+                          <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
+                            Nomor SBG <span className="text-[#DC2626]">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={nomorSbgMap[item.id] ?? ''}
+                            onChange={e => setNomorSbgMap(prev => ({ ...prev, [item.id]: e.target.value }))}
+                            placeholder="Contoh: SBG-2026-00123"
+                            className="w-full border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
                           Refleksi <span className="text-[#DC2626]">*</span>
                         </label>
-                        <p className="text-xs text-[#65758B] mb-2">Apa yang sudah kamu lakukan dengan baik, atau yang perlu kamu perbaiki dari task ini?</p>
                         <textarea
                           value={refleksi[item.id] ?? ''}
                           onChange={e => setRefleksi(prev => ({ ...prev, [item.id]: e.target.value }))}
-                          placeholder="Tulis refleksimu di sini..."
+                          placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
                           rows={3}
                           className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
                         />
                       </div>
                       <button
                         onClick={() => handleMultiSubmit(item.id)}
-                        disabled={!refleksi[item.id]?.trim()}
+                        disabled={!refleksi[item.id]?.trim() || (needsSbg && !nomorSbgMap[item.id]?.trim())}
                         className={`w-full h-10 font-bold text-sm rounded-lg transition-colors ${
-                          refleksi[item.id]?.trim()
+                          refleksi[item.id]?.trim() && (!needsSbg || nomorSbgMap[item.id]?.trim())
                             ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
                             : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
                         }`}

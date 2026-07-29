@@ -183,27 +183,26 @@ function MilestoneCard({ milestone: m, isActive, isLocked, isCompleted, progress
   return (
     <div className={`bg-white rounded-xl border border-[#E1E7EF] p-6 flex flex-col gap-4 transition-all ${isLocked ? 'opacity-60' : ''}`}>
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5 text-xs text-[#65758B] flex-wrap">
-            <span>{m.materials.length} materi</span>
-            <span>·</span>
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#E1E7EF] text-[#65758B] font-semibold text-[10px] leading-none tabular-nums">
-              {progress.actual}/{progress.expected} latihan
-            </span>
-            {m.quiz && <><span>·</span><span>{isCompleted ? '🔓' : '🔒'} Mini Quiz</span></>}
-          </div>
-          <div className="flex-shrink-0 ml-2">
-            {isLocked && <span className="text-[#94A3B8]">🔒</span>}
-            {isCompleted && !isLocked && (
-              <span className="inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold border bg-[#F0FDF4] border-[#16A34A] text-[#15803D]">Selesai</span>
-            )}
-            {showInProgress && (
-              <span className="inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold border bg-[#E5F2FF] border-[#023DFF] text-[#001CDB]">Aktif</span>
-            )}
-            {!isLocked && !progress.isStarted && !isCompleted && (
-              <span className="inline-flex items-center h-4 px-2 rounded-full text-[10px] font-bold border bg-[#E1E7EF] border-[#CBD5E1] text-[#65758B]">Belum dimulai</span>
-            )}
-          </div>
+        <div className="flex items-center gap-1.5 text-xs mb-2 flex-wrap">
+          {isLocked
+            ? <span className="text-[#94A3B8]">🔒 Terkunci</span>
+            : isCompleted
+              ? <span className="text-[#15803D] font-medium">Selesai</span>
+              : showInProgress
+                ? <span className="text-[#023DFF] font-medium">Aktif</span>
+                : <span className="text-[#94A3B8]">Belum dimulai</span>
+          }
+          <span className="text-[#CBD5E1]">·</span>
+          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full border font-bold text-[10px] leading-none tabular-nums ${
+            progress.isCompleted
+              ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
+              : progress.isStarted
+                ? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
+                : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
+          }`}>
+            {progress.actual}/{progress.expected} latihan
+          </span>
+          {m.quiz && <><span className="text-[#CBD5E1]">·</span><span className="text-[#65758B]">{isCompleted ? '🔓' : '🔒'} Mini Quiz</span></>}
         </div>
         <h3 className="font-bold text-[#0F1729] text-base">{m.name}</h3>
       </div>
