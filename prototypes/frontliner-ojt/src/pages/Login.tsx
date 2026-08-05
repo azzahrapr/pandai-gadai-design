@@ -5,8 +5,10 @@ import { useApp } from '../context/AppContext'
 const DEMO_ACCOUNTS = [
   { email: 'andi@pandaigadai.com',  label: 'Andi Pratama',       role: 'OJT Frontliner · Hari 7' },
   { email: 'sari@pandaigadai.com',  label: 'Sari Dewi Lestari',  role: 'OJT Frontliner · Hari 8' },
-  { email: 'budi@pandaigadai.com',  label: 'Budi Santoso',       role: 'OJT Frontliner · Hari 12' },
-  { email: 'dewi@pandaigadai.com',  label: 'Dewi Rahmawati',     role: 'OJT Frontliner · Hari 14' },
+  { email: 'budi@pandaigadai.com',  label: 'Budi Santoso',       role: 'OJT Frontliner · Hari 13' },
+  { email: 'dewi@pandaigadai.com',  label: 'Dewi Rahmawati',     role: 'OJT Frontliner · Hari 13' },
+  { email: 'rizky@pandaigadai.com', label: 'Rizky Ramadhan',     role: 'OJT Frontliner · Hari 10' },
+  { email: 'melati@pandaigadai.com', label: 'Melati Anjani',     role: 'OJT Frontliner · Belum Mulai (H-1)' },
   { email: 'kanit@pandaigadai.com', label: 'Kepala Unit',        role: 'Supervisor & Penilai' },
 ]
 

@@ -12,27 +12,17 @@ function relativeTime(isoString: string): string {
   return `${diffDays} hari lalu`
 }
 
-function badgeLabel(type: FLNotification['type']): string {
-  if (type === 'feedback_latihan') return 'Feedback Latihan'
-  if (type === 'persetujuan_kanit') return 'Persetujuan Kanit'
-  return 'Final Assessment'
-}
-
-function badgeCls(type: FLNotification['type']): string {
-  if (type === 'feedback_latihan') return 'bg-[#E5F2FF] text-[#023DFF]'
-  if (type === 'persetujuan_kanit') return 'bg-[#F0FDF4] text-[#15803D]'
-  return 'bg-[#FFF7ED] text-[#C2410C]'
-}
-
 function typeIcon(type: FLNotification['type']): string {
   if (type === 'feedback_latihan') return '💬'
   if (type === 'persetujuan_kanit') return '✅'
+  if (type === 'quiz_unlocked') return '🧩'
   return '🎓'
 }
 
 function iconBg(type: FLNotification['type']): string {
   if (type === 'feedback_latihan') return 'bg-[#F0F4FF]'
   if (type === 'persetujuan_kanit') return 'bg-[#F0FDF4]'
+  if (type === 'quiz_unlocked') return 'bg-[#F5F3FF]'
   return 'bg-[#FFF7ED]'
 }
 
@@ -48,6 +38,8 @@ export default function FLNotifications() {
     markNotificationRead(notif.id)
     if (notif.type === 'final_assessment') {
       navigate('/fl/assessment')
+    } else if (notif.type === 'quiz_unlocked' && notif.milestoneId) {
+      navigate(`/fl/milestones/${notif.milestoneId}`)
     } else if (notif.milestoneId) {
       navigate(`/fl/milestones/${notif.milestoneId}`, { state: { openHistory: true } })
     }
@@ -81,12 +73,7 @@ export default function FLNotifications() {
                   {notif.title}
                 </p>
                 <p className="text-xs text-[#65758B] mt-1 leading-relaxed line-clamp-2">{notif.body}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className={`inline-flex items-center h-[16px] px-2 rounded-full text-[10px] font-bold flex-shrink-0 ${badgeCls(notif.type)}`}>
-                    {badgeLabel(notif.type)}
-                  </span>
-                  <span className="text-[10px] text-[#94A3B8]">{relativeTime(notif.createdAt)}</span>
-                </div>
+                <span className="text-[10px] text-[#94A3B8] mt-1.5 block">{relativeTime(notif.createdAt)}</span>
               </div>
 
               {!notif.read && (

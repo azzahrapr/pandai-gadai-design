@@ -33,7 +33,7 @@ type TaskState = {
 export default function FLChecklistSession() {
   const { milestoneId } = useParams<{ milestoneId: string }>()
   const navigate = useNavigate()
-  const { currentUser, activeSession, submitChecklist, clearSession, startSession } = useApp()
+  const { currentUser, activeSession, submitChecklist, clearSession, startSession, getFlChecklists } = useApp()
   const profile = currentUser!.profile as FLProfile
 
   const milestone = MILESTONES.find(m => m.id === milestoneId)
@@ -94,6 +94,10 @@ export default function FLChecklistSession() {
   const doneCount = sessionTasks.filter(t => taskStates[t.id]?.submitted).length
   const allTasksDone = sessionTasks.length > 0 && doneCount === sessionTasks.length
   const sessionDone = isPenaksiran ? sbgSubmitted : allTasksDone
+  const sessionChecklist = activeSession
+    ? getFlChecklists(currentUser!.id).find(cl => cl.id === activeSession.checklistId)
+    : undefined
+  const isSessionScored = sessionChecklist?.status === 'scored'
 
   useEffect(() => {
     if (sessionDone && activeSession?.checklistId) {
@@ -190,30 +194,57 @@ export default function FLChecklistSession() {
       </div>
 
       {sessionDone ? (
-        <div className="bg-[#F0FDF4] rounded-xl border border-[#16A34A]/20 p-6 flex flex-col items-center text-center gap-3">
-          <p className="text-3xl">✅</p>
-          <div>
-            <p className="text-base font-bold text-[#15803D]">Sesi selesai!</p>
-            <p className="text-sm text-[#15803D]/70 mt-1">
-              {isPenaksiran ? 'Data penaksiran sudah disubmit. Kanit akan memverifikasi.' : 'Semua task sudah disubmit. Menunggu penilaian dari Kanit.'}
-            </p>
+        !isSessionScored ? (
+          <div className="bg-[#FEFDEA] rounded-xl border border-[#E0A200]/30 p-6 flex flex-col items-center text-center gap-3">
+            <p className="text-3xl">⏳</p>
+            <div>
+              <p className="text-base font-bold text-[#B27202]">Menunggu penilaian kanit</p>
+              <p className="text-sm text-[#92400E]/80 mt-1">
+                {isPenaksiran ? 'Data penaksiran sudah disubmit. Kanit akan memverifikasi.' : 'Semua task sudah disubmit. Kanit akan mereview dan menilai hasilnya.'}
+              </p>
+            </div>
+            <div className="flex gap-3 mt-1">
+              <button
+                onClick={() => { clearSession(); navigate('/fl/checklist') }}
+                className="h-9 px-4 bg-white border border-[#E0A200] text-[#B27202] font-semibold text-sm rounded-lg hover:bg-[#FEFDEA] transition-colors"
+              >
+                Ke Checklist
+              </button>
+              <Link
+                to={`/fl/milestones/${milestoneId}`}
+                onClick={clearSession}
+                className="h-9 px-5 bg-[#E0A200] hover:bg-[#B27202] text-white font-semibold text-sm rounded-lg transition-colors flex items-center"
+              >
+                Lihat Progress →
+              </Link>
+            </div>
           </div>
-          <div className="flex gap-3 mt-1">
-            <button
-              onClick={() => { clearSession(); navigate('/fl/checklist') }}
-              className="h-9 px-4 bg-white border border-[#16A34A] text-[#15803D] font-semibold text-sm rounded-lg hover:bg-[#F0FDF4] transition-colors"
-            >
-              Ke Checklist
-            </button>
-            <Link
-              to={`/fl/milestones/${milestoneId}`}
-              onClick={clearSession}
-              className="h-9 px-5 bg-[#16A34A] hover:bg-[#15803D] text-white font-semibold text-sm rounded-lg transition-colors flex items-center"
-            >
-              Lihat Progress →
-            </Link>
+        ) : (
+          <div className="bg-[#F0FDF4] rounded-xl border border-[#16A34A]/20 p-6 flex flex-col items-center text-center gap-3">
+            <p className="text-3xl">✅</p>
+            <div>
+              <p className="text-base font-bold text-[#15803D]">Sesi selesai!</p>
+              <p className="text-sm text-[#15803D]/70 mt-1">
+                {isPenaksiran ? 'Data penaksiran sudah diverifikasi Kanit.' : 'Semua task sudah dinilai oleh Kanit.'}
+              </p>
+            </div>
+            <div className="flex gap-3 mt-1">
+              <button
+                onClick={() => { clearSession(); navigate('/fl/checklist') }}
+                className="h-9 px-4 bg-white border border-[#16A34A] text-[#15803D] font-semibold text-sm rounded-lg hover:bg-[#F0FDF4] transition-colors"
+              >
+                Ke Checklist
+              </button>
+              <Link
+                to={`/fl/milestones/${milestoneId}`}
+                onClick={clearSession}
+                className="h-9 px-5 bg-[#16A34A] hover:bg-[#15803D] text-white font-semibold text-sm rounded-lg transition-colors flex items-center"
+              >
+                Lihat Progress →
+              </Link>
+            </div>
           </div>
-        </div>
+        )
       ) : isPenaksiran ? (
         <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
           <div className="px-5 py-3.5 bg-[#F8FAFC] border-b border-[#E1E7EF]">

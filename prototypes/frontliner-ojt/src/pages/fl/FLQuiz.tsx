@@ -1,15 +1,22 @@
 import { useState, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { MILESTONES } from '../../data/mockData'
 import { useApp } from '../../context/AppContext'
 import type { FLProfile } from '../../types'
 
+const MAX_QUIZ_ATTEMPTS = 2
+
 export default function FLQuiz() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { currentUser, saveQuizResult } = useApp()
   const profile = currentUser!.profile as FLProfile
   const milestone = MILESTONES.find(m => m.id === id)
+  const attemptsUsed = (milestone?.id && profile.quizAttempts?.[milestone.id]) ?? 0
+  // Arriving here via the "Coba Lagi" link from the milestone page should drop
+  // straight into a fresh attempt, not the previous attempt's result screen.
+  const startFresh = !!(location.state as { retry?: boolean } | null)?.retry
 
   const storedQuizScore: number | null =
     milestone?.quiz?.length && profile.quizScores?.[milestone.id] !== undefined
@@ -17,10 +24,10 @@ export default function FLQuiz() {
       : null
 
   const [answers, setAnswers] = useState<Record<string, number>>(
-    () => (milestone?.id && profile.quizAnswers?.[milestone.id]) ? profile.quizAnswers[milestone.id] : {}
+    () => startFresh ? {} : (milestone?.id && profile.quizAnswers?.[milestone.id]) ? profile.quizAnswers[milestone.id] : {}
   )
   const [submitted, setSubmitted] = useState<boolean>(
-    () => !!(milestone?.quiz?.length) && profile.quizScores?.[milestone.id] !== undefined
+    () => !startFresh && !!(milestone?.quiz?.length) && profile.quizScores?.[milestone.id] !== undefined
   )
   const [highlightedQ, setHighlightedQ] = useState<string | null>(null)
   const questionRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -46,6 +53,13 @@ export default function FLQuiz() {
         : Math.round(quiz.filter(q => answers[q.id] === q.correctIndex).length / quiz.length * 100))
     : null
   const passing = score !== null && score >= 75
+  const canRetry = submitted && !passing && attemptsUsed < MAX_QUIZ_ATTEMPTS
+  const revealAnswers = submitted && !canRetry
+
+  function handleRetry() {
+    setAnswers({})
+    setSubmitted(false)
+  }
 
   function handleSubmit() {
     if (!allAnswered) {
@@ -80,7 +94,9 @@ export default function FLQuiz() {
             <p className="text-xs text-[#65758B]">{milestone.name} · {quiz.length} soal</p>
           </div>
           {submitted && (
-            <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${passing ? 'bg-[#F0FDF4] text-[#15803D]' : 'bg-[#FEF2F2] text-[#DC2626]'}`}>
+            <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
+              passing ? 'bg-[#F0FDF4] text-[#15803D]' : 'bg-[#FEF2F2] text-[#DC2626]'
+            }`}>
               {score}/100
             </span>
           )}
@@ -104,9 +120,13 @@ export default function FLQuiz() {
                     let cls = 'border-[#E1E7EF] text-[#0F1729] hover:border-[#023DFF]/40'
                     if (!submitted) {
                       if (selected === oIdx) cls = 'border-[#023DFF] bg-[#E5F2FF] text-[#023DFF]'
-                    } else {
+                    } else if (revealAnswers) {
                       if (oIdx === q.correctIndex) cls = 'border-[#16A34A] bg-[#F0FDF4] text-[#15803D]'
                       else if (selected === oIdx) cls = 'border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]'
+                      else cls = 'border-[#E1E7EF] text-[#94A3B8]'
+                    } else {
+                      // A retry is still available — don't leak the answer key before the next attempt.
+                      if (selected === oIdx) cls = 'border-[#023DFF] bg-[#E5F2FF] text-[#023DFF]'
                       else cls = 'border-[#E1E7EF] text-[#94A3B8]'
                     }
                     return (
@@ -149,13 +169,37 @@ export default function FLQuiz() {
                 ← Kembali ke Materi
               </button>
             </>
+          ) : canRetry ? (
+            <>
+              <div className="rounded-xl p-4 bg-white border border-[#DC2626]/40">
+                <p className="font-bold text-sm text-[#DC2626]">Skor: {score}/100 — Belum Lulus</p>
+              </div>
+              <div className="rounded-lg px-4 py-3 bg-[#FEFDEA] border border-[#E0A200]/30 flex items-start gap-2.5">
+                <span className="text-sm flex-shrink-0">⚠️</span>
+                <p className="text-xs text-[#B27202] leading-relaxed">
+                  Kamu masih punya 1 kali kesempatan lagi. Pelajari kembali materi yang belum dipahami, lalu coba lagi.
+                </p>
+              </div>
+              <button
+                onClick={handleRetry}
+                className="w-full h-10 rounded-lg font-semibold text-sm bg-[#023DFF] hover:bg-[#001CDB] text-white transition-all"
+              >
+                Coba Lagi →
+              </button>
+              <button
+                onClick={() => navigate(`/fl/milestones/${id}`)}
+                className="w-full h-9 rounded-lg text-sm font-semibold bg-white text-[#0F1729] border border-[#CBD5E1] hover:bg-[#E5F2FF] hover:text-[#023DFF] hover:border-[#023DFF] transition-colors"
+              >
+                ← Kembali ke Materi
+              </button>
+            </>
           ) : (
             <>
-              <div className="rounded-xl p-4 bg-[#E5F2FF] border border-[#023DFF]/20">
-                <p className="font-bold text-sm text-[#023DFF]">Skor: {score}/100</p>
+              <div className="rounded-xl p-4 bg-white border border-[#DC2626]/40">
+                <p className="font-bold text-sm text-[#DC2626]">Skor: {score}/100 — Tidak Lulus</p>
                 <p className="text-xs text-[#65758B] mt-1 leading-relaxed">
-                  {score !== null && score <= 50
-                    ? 'Yuk belajar lagi — pastikan kamu pahami materi sebelum lanjut. 💪'
+                  Kesempatan mengerjakan quiz sudah habis. {score !== null && score <= 50
+                    ? 'Yuk belajar lagi — pastikan kamu pahami materi ke depannya. 💪'
                     : 'Pelajari kembali materi yang belum dipahami ya.'}
                 </p>
               </div>

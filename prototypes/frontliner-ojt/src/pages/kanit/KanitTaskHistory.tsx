@@ -118,7 +118,7 @@ export default function KanitTaskHistory() {
                 </div>
               )
             })}
-            {taskHistory.length < 14 && Array.from({ length: 14 - taskHistory.length }, (_, i) => (
+            {taskHistory.length < 13 && Array.from({ length: 13 - taskHistory.length }, (_, i) => (
               <div key={`empty-${i}`} className="flex flex-col items-center gap-1 flex-1">
                 <span className="text-[10px] text-[#CBD5E1]">—</span>
                 <div className="w-full flex items-end justify-center" style={{ height: 64 }}>

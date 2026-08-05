@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import type { ModuleDecision } from '../../context/AppContext'
-import { MILESTONES } from '../../data/mockData'
+import { MILESTONES, getEffectiveTarget } from '../../data/mockData'
 import type { KanitProfile, FLProfile, DailyTaskRecord, ExtensionRequest } from '../../types'
 
 const MILESTONE_TASK_MAP: Record<string, string[]> = {
@@ -16,27 +16,11 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'packing-sealing': ['packing-sealing'],
   'offloading': ['offloading'],
   'pelayanan-nasabah': ['pelayanan-nasabah'],
+  'pelayanan-nasabah-transaksi': ['pelayanan-nasabah-transaksi'],
   'customer-service-wa': ['customer-service-wa'],
   'penaksiran-elektronik': ['penaksiran-elektronik'],
   'penaksiran-emas': ['penaksiran-emas'],
   'penaksiran-bpkb': ['penaksiran-bpkb'],
-}
-
-const MILESTONE_EXPECTED_COUNT: Record<string, number> = {
-  'closing-cabang': 2,
-  'opening-cabang': 2,
-  'personal-grooming': 12,
-  'pengenalan-produk': 3,
-  'canvassing': 3,
-  'cash-management': 1,
-  'sop-administrasi': 5,
-  'packing-sealing': 3,
-  'offloading': 1,
-  'pelayanan-nasabah': 5,
-  'customer-service-wa': 2,
-  'penaksiran-elektronik': 2,
-  'penaksiran-emas': 1,
-  'penaksiran-bpkb': 2,
 }
 
 const CARRY_OVER_REASONS = [
@@ -142,7 +126,10 @@ export default function KanitReviewProgress() {
   function getMilestoneProgress(flId: string, milestoneId: string) {
     const submitted = getFlChecklists(flId).filter(c => c.status === 'submitted' || c.status === 'scored')
     const taskIds = MILESTONE_TASK_MAP[milestoneId] ?? []
-    const expected = MILESTONE_EXPECTED_COUNT[milestoneId] ?? 14
+    const milestone = MILESTONES.find(m => m.id === milestoneId)
+    // Kanit is deciding what to do about a module BEFORE any carry-over exists, so this
+    // always checks against the base (non-expanded) Level 1 target.
+    const expected = milestone ? getEffectiveTarget(milestone, false).forPass : 14
     const actual = taskIds.length > 0
       ? submitted.filter(cl => cl.tasks?.some(t => taskIds.includes(t.taskId))).length
       : 0
@@ -525,7 +512,7 @@ export default function KanitReviewProgress() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-[#0F1729]">{selectedFl.name}</p>
-                  <p className="text-xs text-[#65758B]">{selectedFl.id.toUpperCase()} · Hari {flProfile?.currentDay}/14</p>
+                  <p className="text-xs text-[#65758B]">{selectedFl.id.toUpperCase()} · Hari {flProfile?.currentDay}/13</p>
                 </div>
               </div>
               <div className="border-t border-[#E1E7EF] pt-4 space-y-3 text-sm">

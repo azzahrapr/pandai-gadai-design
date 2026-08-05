@@ -150,7 +150,7 @@ export default function KanitDashboard() {
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#E5F2FF] text-[#023DFF] text-xs font-bold">Hari {flProfile.currentDay}/14</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#E5F2FF] text-[#023DFF] text-xs font-bold">Hari {flProfile.currentDay}/13</span>
                   </td>
                   <td className="py-4 px-4">
                     <div className="min-w-[100px]">

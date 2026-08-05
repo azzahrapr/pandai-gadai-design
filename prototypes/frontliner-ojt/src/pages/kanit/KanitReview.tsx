@@ -453,7 +453,7 @@ export default function KanitReview() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-[#0F1729]">{selectedFl.name}</p>
-                  <p className="text-xs text-[#65758B]">{selectedFl.id.toUpperCase()} · Hari {(selectedFl.profile as FLProfile).currentDay}/14</p>
+                  <p className="text-xs text-[#65758B]">{selectedFl.id.toUpperCase()} · Hari {(selectedFl.profile as FLProfile).currentDay}/13</p>
                 </div>
               </div>
               <div className="border-t border-[#E1E7EF] pt-4 space-y-3 text-sm">

@@ -8,10 +8,17 @@ const SBG_MILESTONE_IDS = new Set(['sop-administrasi', 'packing-sealing'])
 
 const BASE_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':     { fromDay: 1,  toDay: 3  },
-  'opening-cabang':     { fromDay: 4,  toDay: 7  },
-  'personal-grooming':  { fromDay: 1,  toDay: 14 },
+  'opening-cabang':     { fromDay: 4,  toDay: 6  },
+  'personal-grooming':  { fromDay: 1,  toDay: 13 },
   'pelayanan-nasabah':  { fromDay: 8,  toDay: 13 },
   'customer-service-wa':{ fromDay: 8,  toDay: 13 },
+}
+
+// Weekly modules with no fixed daily schedule can be submitted more than once per day —
+// completion is tracked as a total session count against this target.
+const REPEAT_EXPECTED_COUNT: Record<string, number> = {
+  'canvassing': 3,
+  'pengenalan-produk': 3,
 }
 
 export default function FLSubmitTask() {
@@ -24,6 +31,7 @@ export default function FLSubmitTask() {
     submitChecklist,
     getFlChecklists,
     extensionRequests,
+    level2Unlocks,
   } = useApp()
   const profile = currentUser!.profile as FLProfile
 
@@ -42,21 +50,23 @@ export default function FLSubmitTask() {
     } catch { return new Set<string>() }
   })
   const [singleRefleksi, setSingleRefleksi] = useState('')
+  const [singleRefleksiError, setSingleRefleksiError] = useState(false)
   const [justSubmittedSingle, setJustSubmittedSingle] = useState(false)
   const [justSubmittedPassed, setJustSubmittedPassed] = useState(false)
   const [singleDraftSaved, setSingleDraftSaved] = useState(false)
+  const [addingAnotherSession, setAddingAnotherSession] = useState(false)
 
   // ── Offloading state ───────────────────────────────────────
   const [boxList,            setBoxList]            = useState<string[]>([''])
   const [offloadRefleksi,    setOffloadRefleksi]    = useState('')
-  const [offloadJustSubmitted, setOffloadJustSubmitted] = useState<number | null>(null)
+  const [showOffloadForm,    setShowOffloadForm]    = useState(false)
 
   // ── Multiple-submission state ───────────────────────────────
   const [expandedId,   setExpandedId]   = useState<string | null>(null)
   const [refleksi,     setRefleksi]     = useState<Record<string, string>>({})
   const [nomorSbgMap,  setNomorSbgMap]  = useState<Record<string, string>>({})
-  const [justSubmitted,setJustSubmitted]= useState<Record<string, number>>({})
   const [showFormFor,  setShowFormFor]  = useState<Record<string, boolean>>({})
+  const [multiErrors,  setMultiErrors]  = useState<Record<string, { refleksi?: boolean; sbg?: boolean }>>({})
 
   // ── Guard ───────────────────────────────────────────────────
   if (!milestone) {
@@ -76,24 +86,63 @@ export default function FLSubmitTask() {
       ).length
     : 0
   const effectiveToDay = (baseSchedule?.toDay ?? 0) + approvedRedoCount
+  // personal-grooming has no carry-over; all other scheduled modules can be submitted past deadline
+  const canCarryOver = id !== 'personal-grooming'
+  const isPastSchedule = !!baseSchedule && profile.currentDay > effectiveToDay
   const isActiveToday  = !baseSchedule
     || (profile.currentDay >= baseSchedule.fromDay && profile.currentDay <= effectiveToDay)
+    || (canCarryOver && isPastSchedule)
+
+  // Weekly modules with no fixed daily schedule (e.g. Canvassing) can be submitted
+  // more than once per day — only true "1x/day" modules are limited to a single session.
+  const allowsRepeatSameDay = !baseSchedule && !!id && REPEAT_EXPECTED_COUNT[id] !== undefined
+  const expectedRepeatCount = id ? (REPEAT_EXPECTED_COUNT[id] ?? 1) : 1
 
   const allChecklists  = getFlChecklists(currentUser!.id)
-  const todayChecklist = allChecklists.find(c =>
+  const todaysChecklistsForTask = allChecklists.filter(c =>
     c.day === profile.currentDay &&
     (c.status === 'submitted' || c.status === 'scored') &&
     c.tasks?.some(t => t.taskId === id)
   )
+  const todayChecklist = todaysChecklistsForTask[todaysChecklistsForTask.length - 1]
   const submittedToday = !!todayChecklist
 
-  const isAlreadyDone = submittedToday || justSubmittedSingle
+  // A checklist passes once minRequired items are checked — defaults to all items when unset.
+  const requiredCount = dailyTask ? (dailyTask.minRequired ?? dailyTask.items.length) : 0
+
+  const totalPassedSessions = allowsRepeatSameDay && dailyTask
+    ? allChecklists.filter(c =>
+        (c.status === 'submitted' || c.status === 'scored') &&
+        c.tasks?.some(t => t.taskId === id && t.completedItemIds.length >= requiredCount)
+      ).length
+    : 0
+  const totalPendingReviewSessions = allowsRepeatSameDay && dailyTask
+    ? allChecklists.filter(c =>
+        c.status === 'submitted' &&
+        c.tasks?.some(t => t.taskId === id && t.completedItemIds.length >= requiredCount)
+      ).length
+    : 0
+  const canSubmitAnotherSession = allowsRepeatSameDay && totalPassedSessions < expectedRepeatCount
+
+  const isAlreadyDone = (submittedToday || justSubmittedSingle) && !addingAnotherSession
   const submittedCheckedIds: Set<string> = justSubmittedSingle
     ? new Set(checkedIds)
     : new Set(todayChecklist?.tasks?.find(t => t.taskId === id)?.completedItemIds ?? [])
   const passedResult = justSubmittedSingle
     ? justSubmittedPassed
-    : dailyTask ? submittedCheckedIds.size >= dailyTask.items.length : false
+    : dailyTask ? submittedCheckedIds.size >= requiredCount : false
+  const isSingleScored = !justSubmittedSingle && todayChecklist?.status === 'scored'
+  // Incomplete checklists auto-fail — no kanit review needed to know that.
+  const isSinglePendingReview = passedResult && !isSingleScored
+
+  function startAnotherSession() {
+    setCheckedIds(new Set())
+    setSingleRefleksi('')
+    setSingleRefleksiError(false)
+    setJustSubmittedSingle(false)
+    setJustSubmittedPassed(false)
+    setAddingAnotherSession(true)
+  }
 
   // ── Single-submission handlers ──────────────────────────────
   function toggleItem(itemId: string) {
@@ -112,10 +161,16 @@ export default function FLSubmitTask() {
 
   function handleSingleSubmit() {
     if (!dailyTask || !id) return
-    const passed = checkedIds.size === dailyTask.items.length
+    if (!singleRefleksi.trim()) {
+      setSingleRefleksiError(true)
+      return
+    }
+    const passed = checkedIds.size >= requiredCount
     const now    = new Date().toISOString()
     const checklist: DailyChecklist = {
-      id: `cl-daily-${currentUser!.id}-d${profile.currentDay}-${id}`,
+      id: allowsRepeatSameDay
+        ? `cl-daily-${currentUser!.id}-d${profile.currentDay}-${id}-${now}`
+        : `cl-daily-${currentUser!.id}-d${profile.currentDay}-${id}`,
       day: profile.currentDay,
       date: now.slice(0, 10),
       flId: currentUser!.id,
@@ -135,14 +190,17 @@ export default function FLSubmitTask() {
     localStorage.removeItem(draftKey)
     setJustSubmittedPassed(passed)
     setJustSubmittedSingle(true)
+    setAddingAnotherSession(false)
   }
 
   // ── Multiple-submission logic ───────────────────────────────
+  // Confirmations the kanit has reviewed and rejected don't count toward the target —
+  // they need a remedial resubmission instead.
   const itemConfirmationCounts = isIndividual
     ? Object.fromEntries(
         milestone.checklistItems.map(item => [
           item.id,
-          getItemConfirmations(currentUser!.id, milestone.id, item.id).length,
+          getItemConfirmations(currentUser!.id, milestone.id, item.id).filter(c => c.kanitPassed !== false).length,
         ])
       )
     : {}
@@ -150,7 +208,7 @@ export default function FLSubmitTask() {
   const confirmedCount = isIndividual
     ? milestone.checklistItems.filter(item => {
         const target = item.target ?? 1
-        return (itemConfirmationCounts[item.id] ?? 0) >= target
+        return getItemConfirmations(currentUser!.id, milestone.id, item.id).filter(c => c.kanitPassed === true).length >= target
       }).length
     : 0
   const isAllDone = confirmedCount === milestone.checklistItems.length
@@ -180,14 +238,20 @@ export default function FLSubmitTask() {
       day: profile.currentDay,
     }
     submitTaskConfirmation(confirmation)
-    setOffloadJustSubmitted(offloadConfirmations.length + 1)
     setBoxList([''])
     setOffloadRefleksi('')
+    setShowOffloadForm(false)
   }
 
   function handleMultiSubmit(itemId: string) {
     const item = milestone.checklistItems.find(i => i.id === itemId)
     if (!item) return
+    const missingRefleksi = !refleksi[itemId]?.trim()
+    const missingSbg = needsSbg && !nomorSbgMap[itemId]?.trim()
+    if (missingRefleksi || missingSbg) {
+      setMultiErrors(prev => ({ ...prev, [itemId]: { refleksi: missingRefleksi, sbg: missingSbg } }))
+      return
+    }
     const now = new Date().toISOString()
     const confirmation: TaskConfirmation = {
       id: `confirm-${currentUser!.id}-${milestone.id}-${itemId}-${now}`,
@@ -201,8 +265,6 @@ export default function FLSubmitTask() {
       day: profile.currentDay,
     }
     submitTaskConfirmation(confirmation)
-    const newCount = (itemConfirmationCounts[itemId] ?? 0) + 1
-    setJustSubmitted(prev => ({ ...prev, [itemId]: newCount }))
     setRefleksi(prev => ({ ...prev, [itemId]: '' }))
     setNomorSbgMap(prev => ({ ...prev, [itemId]: '' }))
     setShowFormFor(prev => ({ ...prev, [itemId]: false }))
@@ -226,6 +288,22 @@ export default function FLSubmitTask() {
     </div>
   )
 
+  // ── Kanit approval gate ─────────────────────────────────────
+  const allL1Done = MILESTONES
+    .filter(m => m.type === 'minggu1' && profile.activeMilestoneIds.includes(m.id))
+    .every(m => profile.completedMilestoneIds?.includes(m.id) ?? false)
+  const isAwaitingKanitApproval = milestone.type === 'minggu1'
+    && profile.currentDay >= 7
+    && !allL1Done
+    && !level2Unlocks[currentUser!.id]
+
+  const kanitBanner = (
+    <div className="flex items-start gap-2.5 bg-[#F8FAFC] border border-[#E1E7EF] rounded-lg px-3 py-2.5 mb-4">
+      <span className="text-sm flex-shrink-0">⏳</span>
+      <p className="text-xs text-[#65758B] leading-relaxed">Target latihan tidak tercapai tepat waktu. Menunggu persetujuan kanit untuk latihan susulan.</p>
+    </div>
+  )
+
   // ════════════════════════════════════════════════════════════
   // SINGLE SUBMISSION
   // ════════════════════════════════════════════════════════════
@@ -245,68 +323,137 @@ export default function FLSubmitTask() {
       <div className="p-4 md:p-8 max-w-xl">
         {header}
 
-        {!isActiveToday ? (
-          <div className="bg-[#F8FAFC] rounded-xl border border-[#E1E7EF] p-6 text-center">
-            <p className="text-2xl mb-2">📅</p>
-            <p className="text-sm font-semibold text-[#0F1729]">Checklist ini tidak aktif hari ini</p>
-            <p className="text-xs text-[#65758B] mt-1">
-              Aktif dari hari ke-{baseSchedule?.fromDay} sampai hari ke-{effectiveToDay}
+        {isAwaitingKanitApproval && kanitBanner}
+        {!isAwaitingKanitApproval && isPastSchedule && canCarryOver && (
+          <div className="bg-[#FEFDEA] border border-[#E0A200]/30 rounded-lg px-4 py-3 flex items-start gap-2.5 mb-4">
+            <span className="text-sm flex-shrink-0">⏰</span>
+            <p className="text-xs text-[#B27202] leading-relaxed">
+              Jadwal latihan ini sudah lewat (Hari {baseSchedule?.fromDay}–{effectiveToDay}). Kamu masih bisa mengumpulkan sebagai <span className="font-semibold">latihan susulan</span>.
             </p>
-            <button onClick={() => navigate(-1)} className="mt-4 text-sm font-semibold text-[#023DFF] hover:underline">← Kembali</button>
           </div>
-        ) : isAlreadyDone ? (
+        )}
+        <div className={isAwaitingKanitApproval ? 'opacity-50 pointer-events-none select-none' : ''}>
+        {isAlreadyDone ? (
           /* Result screen */
           <div className="space-y-4">
-            <div className={`rounded-xl border p-5 ${passedResult ? 'bg-[#F0FDF4] border-[#16A34A]/20' : 'bg-[#FEF2F2] border-[#DC2626]/20'}`}>
-              <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${passedResult ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}`}>
-                  {passedResult ? (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8l3 3 6-6" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3L3 11" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className={`text-sm font-bold ${passedResult ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
-                    {passedResult ? 'Lulus — semua item selesai' : 'Tidak lulus — ada item yang belum dicentang'}
-                  </p>
-                  <p className={`text-xs mt-1 ${passedResult ? 'text-[#15803D]/70' : 'text-[#B91C1C]/70'}`}>
-                    {passedResult ? 'Checklist hari ini berhasil kamu selesaikan.' : 'Checklist ini akan dinilai berdasarkan item yang sudah dicentang.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
-              <div className="px-5 py-4 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[#0F1729]">{dailyTask.name}</p>
-                  <p className="text-xs text-[#65758B] mt-0.5">{submittedCheckedIds.size}/{dailyTask.items.length} item dikerjakan</p>
-                </div>
-                <Link
-                  to={`/fl/milestones/${id}`}
-                  className="flex-shrink-0 h-[30px] px-2 rounded-lg inline-flex items-center gap-1 text-sm font-semibold text-[#023DFF] hover:bg-[#E5F2FF] transition-colors"
-                >
-                  Baca Materi
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                {dailyTask.items.map(item => {
-                  const isChecked = submittedCheckedIds.has(item.id)
-                  return (
-                    <div key={item.id} className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${isChecked ? 'bg-[#023DFF] border-[#023DFF]' : 'border-[#CBD5E1]'}`}>
-                        {isChecked && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                      </div>
-                      <p className="text-sm leading-snug text-[#0F1729]">{item.text}</p>
+            {allowsRepeatSameDay ? (
+              <>
+                <div className="rounded-xl border p-5 bg-[#F1F5F9] border-[#E1E7EF]">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#E1E7EF] text-lg">⏳</div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#0F1729]">
+                        {totalPassedSessions}/{expectedRepeatCount} latihan berhasil disubmit.
+                      </p>
+                      {totalPendingReviewSessions > 0 && (
+                        <p className="text-xs mt-1 text-[#65758B]">{totalPendingReviewSessions} latihan menunggu penilaian kanit</p>
+                      )}
+                      <Link
+                        to={`/fl/milestones/${id}`}
+                        state={{ openHistory: true }}
+                        className="text-xs text-[#023DFF] font-medium hover:underline mt-1.5 inline-block"
+                      >
+                        Lihat Riwayat →
+                      </Link>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
+                  </div>
+                </div>
+
+                {canSubmitAnotherSession ? (
+                  <button
+                    onClick={startAnotherSession}
+                    className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
+                  >
+                    Submit Lagi
+                  </button>
+                ) : (
+                  <p className="text-xs text-[#15803D] font-medium text-center">Target {expectedRepeatCount} latihan sudah tercapai.</p>
+                )}
+              </>
+            ) : (
+              <>
+                {isSinglePendingReview ? (
+                  <div className="rounded-xl border p-5 bg-[#F1F5F9] border-[#E1E7EF]">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#E1E7EF] text-lg">⏳</div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-[#0F1729]">Latihan berhasil disubmit.</p>
+                        <p className="text-xs mt-1 text-[#65758B]">Menunggu penilaian kanit</p>
+                        <Link
+                          to={`/fl/milestones/${id}`}
+                        state={{ openHistory: true }}
+                          className="text-xs text-[#023DFF] font-medium hover:underline mt-1.5 inline-block"
+                        >
+                          Lihat Riwayat →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`rounded-xl border p-5 ${passedResult ? 'bg-[#F0FDF4] border-[#16A34A]/20' : 'bg-[#FEF2F2] border-[#DC2626]/20'}`}>
+                    <div className="flex items-start gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${passedResult ? 'bg-[#16A34A]' : 'bg-[#DC2626]'}`}>
+                        {passedResult ? (
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8l3 3 6-6" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3L3 11" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`text-sm font-bold ${passedResult ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
+                          {passedResult
+                            ? (submittedCheckedIds.size === dailyTask.items.length ? 'Lulus — semua item selesai' : 'Lulus — target checklist terpenuhi')
+                            : 'Tidak lulus — belum memenuhi target checklist'}
+                        </p>
+                        <p className={`text-xs mt-1 ${passedResult ? 'text-[#15803D]/70' : 'text-[#B91C1C]/70'}`}>
+                          {passedResult
+                            ? 'Checklist hari ini berhasil kamu selesaikan.'
+                            : `Item tercentang: ${submittedCheckedIds.size}/${dailyTask.items.length} (minimal ${requiredCount} item).`}
+                        </p>
+                        <Link
+                          to={`/fl/milestones/${id}`}
+                        state={{ openHistory: true }}
+                          className={`text-xs font-medium hover:underline mt-1.5 inline-block ${passedResult ? 'text-[#15803D]' : 'text-[#023DFF]'}`}
+                        >
+                          Lihat Riwayat →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
+                  <div className="px-5 py-4 bg-[#F8FAFC] border-b border-[#E1E7EF] flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-[#0F1729]">{dailyTask.name}</p>
+                      <p className="text-xs text-[#65758B] mt-0.5">{submittedCheckedIds.size}/{dailyTask.items.length} item dikerjakan</p>
+                    </div>
+                    <Link
+                      to={`/fl/milestones/${id}`}
+                      className="flex-shrink-0 h-[30px] px-2 rounded-lg inline-flex items-center gap-1 text-sm font-semibold text-[#023DFF] hover:bg-[#E5F2FF] transition-colors"
+                    >
+                      Baca Materi
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Link>
+                  </div>
+                  <div className="px-5 py-4 space-y-3">
+                    {dailyTask.items.map(item => {
+                      const isChecked = submittedCheckedIds.has(item.id)
+                      return (
+                        <div key={item.id} className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${isChecked ? 'bg-[#023DFF] border-[#023DFF]' : 'border-[#CBD5E1]'}`}>
+                            {isChecked && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                          </div>
+                          <p className="text-sm leading-snug text-[#0F1729]">{item.text}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           /* Checklist form */
@@ -348,11 +495,18 @@ export default function FLSubmitTask() {
                 </label>
                 <textarea
                   value={singleRefleksi}
-                  onChange={e => setSingleRefleksi(e.target.value)}
+                  onChange={e => { setSingleRefleksi(e.target.value); if (singleRefleksiError) setSingleRefleksiError(false) }}
                   placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
                   rows={3}
-                  className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
+                  className={`w-full border rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none transition-colors resize-none leading-relaxed ${
+                    singleRefleksiError
+                      ? 'border-[#DC2626] focus:border-[#DC2626] bg-[#FEF2F2]'
+                      : 'border-[#CBD5E1] focus:border-[#023DFF]'
+                  }`}
                 />
+                {singleRefleksiError && (
+                  <p className="text-xs text-[#DC2626] mt-1">Refleksi wajib diisi sebelum submit.</p>
+                )}
               </div>
               <div className="flex gap-2">
                 <button
@@ -367,12 +521,7 @@ export default function FLSubmitTask() {
                 </button>
                 <button
                   onClick={handleSingleSubmit}
-                  disabled={!singleRefleksi.trim()}
-                  className={`flex-1 h-10 font-semibold text-sm rounded-lg transition-colors ${
-                    singleRefleksi.trim()
-                      ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
-                      : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
-                  }`}
+                  className="flex-1 h-10 font-semibold text-sm rounded-lg transition-colors bg-[#023DFF] hover:bg-[#001CDB] text-white"
                 >
                   Submit
                 </button>
@@ -380,6 +529,7 @@ export default function FLSubmitTask() {
             </div>
           </div>
         )}
+        </div>
       </div>
     )
   }
@@ -388,106 +538,148 @@ export default function FLSubmitTask() {
   // OFFLOADING — open form, dynamic box numbers
   // ════════════════════════════════════════════════════════════
   if (isOffloading) {
-    const totalSubmitted = offloadConfirmations.length
+    const offloadTarget = offloadItem?.target ?? 1
+    // Confirmations the kanit rejected don't count toward the target — remedial resubmission needed.
+    const validOffloadConfirmations = offloadConfirmations.filter(c => c.kanitPassed !== false)
+    const offloadReviewedPassed = offloadConfirmations.filter(c => c.kanitPassed === true).length
+    const offloadCurrentCount = validOffloadConfirmations.length
+    const offloadDone = offloadReviewedPassed >= offloadTarget
+    const offloadAwaitingReview = !offloadDone && offloadCurrentCount >= offloadTarget
+    const offloadInProgress = offloadCurrentCount > 0 && !offloadDone && !offloadAwaitingReview
+    const offloadHasUnreviewed = offloadCurrentCount > offloadReviewedPassed
     const canSubmit = boxList.some(b => b.trim()) && offloadRefleksi.trim()
 
     return (
       <div className="p-4 md:p-8 max-w-xl">
         {header}
 
-        {/* Success toast */}
-        {offloadJustSubmitted !== null && (
-          <div className="rounded-xl bg-[#F0FDF4] border border-[#16A34A]/20 px-4 py-3 flex items-center gap-3 mb-4">
-            <div className="w-7 h-7 rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2.5 6l2.5 2.5L9.5 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <p className="text-sm font-semibold text-[#15803D]">Sesi {offloadJustSubmitted} berhasil disubmit.</p>
-          </div>
-        )}
+        {isAwaitingKanitApproval && kanitBanner}
 
-        {/* Form */}
-        <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 space-y-4">
-          {/* Progress badge */}
-          <span className={`inline-flex items-center h-5 px-2 rounded-full text-[10px] font-bold border ${
-            totalSubmitted >= (offloadItem?.target ?? 1)
+        <div className={isAwaitingKanitApproval ? 'opacity-50 pointer-events-none select-none' : ''}>
+          <span className={`inline-flex items-center h-5 px-2 mb-3 rounded-full text-[10px] font-bold border ${
+            offloadDone
               ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
-              : totalSubmitted > 0
+              : offloadCurrentCount > 0
                 ? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
                 : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
           }`}>
-            Target: {totalSubmitted}/{offloadItem?.target ?? 1} latihan
+            Target: {offloadCurrentCount}/{offloadTarget} latihan
           </span>
 
-          {/* Nomor Box */}
-          <div>
-            <label className="block text-xs font-semibold text-[#0F1729] mb-2">
-              Nomor Box <span className="text-[#DC2626]">*</span>
-            </label>
-            <div className="space-y-2">
-              {boxList.map((box, idx) => (
-                <div key={idx} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={box}
-                    onChange={e => {
-                      const next = [...boxList]
-                      next[idx] = e.target.value
-                      setBoxList(next)
-                    }}
-                    placeholder={`Box ${idx + 1}`}
-                    className="flex-1 border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
-                  />
-                  {idx > 0 && (
-                    <button
-                      onClick={() => setBoxList(prev => prev.filter((_, i) => i !== idx))}
-                      className="w-9 h-9 flex-shrink-0 rounded-lg border border-[#E1E7EF] flex items-center justify-center text-[#94A3B8] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                        <path d="M2 3.5h10M5.5 3.5V2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M11 3.5l-.7 7.7a1 1 0 0 1-1 .8H4.7a1 1 0 0 1-1-.8L3 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  )}
+          {offloadCurrentCount > 0 && (
+            <div className={`rounded-xl border p-5 mb-4 ${offloadDone ? 'bg-[#F0FDF4] border-[#16A34A]/20' : 'bg-[#F1F5F9] border-[#E1E7EF]'}`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${offloadDone ? 'bg-[#16A34A]' : 'bg-[#E1E7EF] text-lg'}`}>
+                  {offloadDone ? (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8l3 3 6-6" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  ) : '⏳'}
                 </div>
-              ))}
+                <div className="flex-1">
+                  <p className={`text-sm font-bold ${offloadDone ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
+                    {offloadCurrentCount}/{offloadTarget} latihan berhasil disubmit.
+                  </p>
+                  {!offloadDone && offloadHasUnreviewed && (
+                    <p className="text-xs mt-1 text-[#65758B]">{offloadCurrentCount - offloadReviewedPassed} latihan menunggu penilaian kanit</p>
+                  )}
+                  <Link
+                    to={`/fl/milestones/${milestone.id}`}
+                    state={{ openHistory: true }}
+                    className={`text-xs font-medium hover:underline mt-1.5 inline-block ${offloadDone ? 'text-[#15803D]' : 'text-[#023DFF]'}`}
+                  >
+                    Lihat Riwayat →
+                  </Link>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => setBoxList(prev => [...prev, ''])}
-              className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#023DFF] hover:text-[#001CDB] transition-colors"
+          )}
+
+          {offloadDone || offloadAwaitingReview ? (
+            <Link
+              to={`/fl/milestones/${milestone.id}`}
+                    state={{ openHistory: true }}
+              className="w-full h-10 flex items-center justify-center bg-white border border-[#E1E7EF] hover:bg-[#F8FAFC] text-[#0F1729] font-semibold text-sm rounded-lg transition-colors"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              Tambah nomor box
+              Lihat Riwayat →
+            </Link>
+          ) : offloadInProgress && !showOffloadForm ? (
+            <button
+              onClick={() => setShowOffloadForm(true)}
+              className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
+            >
+              Submit Lagi
             </button>
-          </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 space-y-4">
+              {/* Nomor Box */}
+              <div>
+                <label className="block text-xs font-semibold text-[#0F1729] mb-2">
+                  Nomor Box <span className="text-[#DC2626]">*</span>
+                </label>
+                <div className="space-y-2">
+                  {boxList.map((box, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={box}
+                        onChange={e => {
+                          const next = [...boxList]
+                          next[idx] = e.target.value
+                          setBoxList(next)
+                        }}
+                        placeholder={`Box ${idx + 1}`}
+                        className="flex-1 border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+                      />
+                      {idx > 0 && (
+                        <button
+                          onClick={() => setBoxList(prev => prev.filter((_, i) => i !== idx))}
+                          className="w-9 h-9 flex-shrink-0 rounded-lg border border-[#E1E7EF] flex items-center justify-center text-[#94A3B8] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M2 3.5h10M5.5 3.5V2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M11 3.5l-.7 7.7a1 1 0 0 1-1 .8H4.7a1 1 0 0 1-1-.8L3 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setBoxList(prev => [...prev, ''])}
+                  className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#023DFF] hover:text-[#001CDB] transition-colors"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Tambah nomor box
+                </button>
+              </div>
 
-          {/* Refleksi */}
-          <div>
-            <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
-              Refleksi <span className="text-[#DC2626]">*</span>
-            </label>
-            <textarea
-              value={offloadRefleksi}
-              onChange={e => setOffloadRefleksi(e.target.value)}
-              placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
-              rows={3}
-              className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
-            />
-          </div>
+              {/* Refleksi */}
+              <div>
+                <label className="block text-xs font-semibold text-[#0F1729] mb-1.5">
+                  Refleksi <span className="text-[#DC2626]">*</span>
+                </label>
+                <textarea
+                  value={offloadRefleksi}
+                  onChange={e => setOffloadRefleksi(e.target.value)}
+                  placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
+                  rows={3}
+                  className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
+                />
+              </div>
 
-          <button
-            onClick={handleOffloadingSubmit}
-            disabled={!canSubmit}
-            className={`w-full h-10 font-bold text-sm rounded-lg transition-colors ${
-              canSubmit
-                ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
-                : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
-            }`}
-          >
-            Submit
-          </button>
+              <button
+                onClick={handleOffloadingSubmit}
+                disabled={!canSubmit}
+                className={`w-full h-10 font-bold text-sm rounded-lg transition-colors ${
+                  canSubmit
+                    ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
+                    : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
+                }`}
+              >
+                Submit
+              </button>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -499,6 +691,8 @@ export default function FLSubmitTask() {
   return (
     <div className="p-4 md:p-8 max-w-2xl">
       {header}
+
+      {isAwaitingKanitApproval && kanitBanner}
 
       {isAllDone && (
         <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl px-4 py-3 flex items-center gap-3 mb-4">
@@ -526,13 +720,15 @@ export default function FLSubmitTask() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">
+      <div className={`bg-white rounded-xl border border-[#E1E7EF] overflow-hidden${isAwaitingKanitApproval ? ' opacity-50 pointer-events-none select-none' : ''}`}>
         {milestone.checklistItems.map((item, idx) => {
           const target      = item.target ?? 1
-          const baseCount   = itemConfirmationCounts[item.id] ?? 0
-          const currentCount= justSubmitted[item.id] ?? baseCount
-          const done        = currentCount >= target
-          const inProgress  = currentCount > 0 && !done
+          const currentCount= itemConfirmationCounts[item.id] ?? 0
+          const reviewedCount = getItemConfirmations(currentUser!.id, milestone.id, item.id).filter(c => c.kanitPassed === true).length
+          const done        = reviewedCount >= target
+          const awaitingReview = !done && currentCount >= target
+          const inProgress  = currentCount > 0 && !done && !awaitingReview
+          const hasUnreviewedSubmission = currentCount > reviewedCount
           const isExpanded  = expandedId === item.id
 
           return (
@@ -554,7 +750,7 @@ export default function FLSubmitTask() {
                 <div className="flex-1 min-w-0">
                   <span className={`inline-flex items-center h-4 px-2 mb-0.5 rounded-full text-[10px] font-bold border ${
                     done       ? 'bg-[#F0FDF4] border-[#16A34A] text-[#15803D]'
-                    : inProgress? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
+                    : (inProgress || awaitingReview) ? 'bg-[#FEFDEA] border-[#E0A200] text-[#B27202]'
                     : 'bg-[#F8FAFC] border-[#E1E7EF] text-[#94A3B8]'
                   }`}>
                     Target: {currentCount}/{target} latihan
@@ -577,20 +773,26 @@ export default function FLSubmitTask() {
 
                   {currentCount > 0 && (
                     <div className={`rounded-xl px-4 py-3 flex items-start gap-3 border ${
-                      done ? 'bg-[#F0FDF4] border-[#16A34A]/20' : 'bg-[#EFF6FF] border-[#023DFF]/20'
+                      done ? 'bg-[#F0FDF4] border-[#16A34A]/20' : 'bg-[#F1F5F9] border-[#E1E7EF]'
                     }`}>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${done ? 'bg-[#16A34A]' : 'bg-[#023DFF]'}`}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                          <path d="M2 5l2 2.5L8 2.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${done ? 'bg-[#16A34A]' : 'bg-[#E1E7EF] text-[11px]'}`}>
+                        {done ? (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M2 5l2 2.5L8 2.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : '⏳'}
                       </div>
                       <div className="flex-1">
-                        <p className={`text-sm font-semibold ${done ? 'text-[#15803D]' : 'text-[#1E40AF]'}`}>
-                          {`Latihan ${currentCount} dari ${target} berhasil disubmit.`}
+                        <p className={`text-sm font-semibold ${done ? 'text-[#15803D]' : 'text-[#0F1729]'}`}>
+                          {`${currentCount}/${target} latihan berhasil disubmit.`}
                         </p>
+                        {!done && hasUnreviewedSubmission && (
+                          <p className="text-xs text-[#65758B] mt-0.5">{currentCount - reviewedCount} latihan menunggu penilaian kanit</p>
+                        )}
                         {!done && (
                           <Link
-                            to={`/fl/checklist/module/${milestone.id}`}
+                            to={`/fl/milestones/${milestone.id}`}
+                    state={{ openHistory: true }}
                             className="text-xs text-[#023DFF] font-medium hover:underline mt-0.5 inline-block"
                           >
                             Lihat Riwayat →
@@ -602,12 +804,14 @@ export default function FLSubmitTask() {
 
                   {done ? (
                     <Link
-                      to={`/fl/checklist/module/${milestone.id}`}
+                      to={`/fl/milestones/${milestone.id}`}
+                    state={{ openHistory: true }}
                       className="w-full h-10 flex items-center justify-center bg-white border border-[#E1E7EF] hover:bg-[#F8FAFC] text-[#0F1729] font-semibold text-sm rounded-lg transition-colors"
                     >
                       Lihat Riwayat →
                     </Link>
-                  ) : inProgress && !showFormFor[item.id] ? (
+                  ) : awaitingReview ? null
+                  : inProgress && !showFormFor[item.id] ? (
                     <button
                       onClick={() => setShowFormFor(prev => ({ ...prev, [item.id]: true }))}
                       className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
@@ -624,10 +828,20 @@ export default function FLSubmitTask() {
                           <input
                             type="text"
                             value={nomorSbgMap[item.id] ?? ''}
-                            onChange={e => setNomorSbgMap(prev => ({ ...prev, [item.id]: e.target.value }))}
+                            onChange={e => {
+                              setNomorSbgMap(prev => ({ ...prev, [item.id]: e.target.value }))
+                              setMultiErrors(prev => prev[item.id]?.sbg ? { ...prev, [item.id]: { ...prev[item.id], sbg: false } } : prev)
+                            }}
                             placeholder="Contoh: SBG-2026-00123"
-                            className="w-full border border-[#CBD5E1] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors"
+                            className={`w-full border rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none transition-colors ${
+                              multiErrors[item.id]?.sbg
+                                ? 'border-[#DC2626] focus:border-[#DC2626] bg-[#FEF2F2]'
+                                : 'border-[#CBD5E1] focus:border-[#023DFF]'
+                            }`}
                           />
+                          {multiErrors[item.id]?.sbg && (
+                            <p className="text-xs text-[#DC2626] mt-1">Nomor SBG wajib diisi sebelum submit.</p>
+                          )}
                         </div>
                       )}
                       <div>
@@ -636,20 +850,25 @@ export default function FLSubmitTask() {
                         </label>
                         <textarea
                           value={refleksi[item.id] ?? ''}
-                          onChange={e => setRefleksi(prev => ({ ...prev, [item.id]: e.target.value }))}
+                          onChange={e => {
+                            setRefleksi(prev => ({ ...prev, [item.id]: e.target.value }))
+                            setMultiErrors(prev => prev[item.id]?.refleksi ? { ...prev, [item.id]: { ...prev[item.id], refleksi: false } } : prev)
+                          }}
                           placeholder="Apa yang berjalan dengan baik atau yang perlu diperbaiki?"
                           rows={3}
-                          className="w-full border border-[#CBD5E1] rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none focus:border-[#023DFF] transition-colors resize-none leading-relaxed"
+                          className={`w-full border rounded-lg px-4 py-3 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none transition-colors resize-none leading-relaxed ${
+                            multiErrors[item.id]?.refleksi
+                              ? 'border-[#DC2626] focus:border-[#DC2626] bg-[#FEF2F2]'
+                              : 'border-[#CBD5E1] focus:border-[#023DFF]'
+                          }`}
                         />
+                        {multiErrors[item.id]?.refleksi && (
+                          <p className="text-xs text-[#DC2626] mt-1">Refleksi wajib diisi sebelum submit.</p>
+                        )}
                       </div>
                       <button
                         onClick={() => handleMultiSubmit(item.id)}
-                        disabled={!refleksi[item.id]?.trim() || (needsSbg && !nomorSbgMap[item.id]?.trim())}
-                        className={`w-full h-10 font-bold text-sm rounded-lg transition-colors ${
-                          refleksi[item.id]?.trim() && (!needsSbg || nomorSbgMap[item.id]?.trim())
-                            ? 'bg-[#023DFF] hover:bg-[#001CDB] text-white'
-                            : 'bg-[#E1E7EF] text-[#94A3B8] cursor-not-allowed'
-                        }`}
+                        className="w-full h-10 font-bold text-sm rounded-lg transition-colors bg-[#023DFF] hover:bg-[#001CDB] text-white"
                       >
                         Submit
                       </button>

@@ -39,7 +39,7 @@ export function FLSidebar() {
   const { currentUser, logout } = useApp()
   const profile = currentUser?.profile as FLProfile | undefined
   const day = profile?.currentDay ?? 1
-  const dayProgress = Math.round((day / 14) * 100)
+  const dayProgress = Math.round((Math.min(day, 13) / 13) * 100)
 
   return (
     <aside className="w-[220px] flex-shrink-0 bg-[#0F1729] flex flex-col sticky top-0 h-screen">
@@ -71,11 +71,11 @@ export function FLSidebar() {
       <nav className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto">
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/fl/dashboard" label="Beranda" icon={<IconHome />} />
-        <NavItem to="/fl/milestones" label="Materi Belajar" icon={<IconBook />} />
+        <NavItem to="/fl/milestones" label="Modul Belajar" icon={<IconBook />} />
         <NavItem to="/fl/checklist" label="Checklist" icon={<IconChecklist />} />
         <NavItem to="/fl/scores" label="Nilai Saya" icon={<IconChart />} />
 
-        <NavItem to="/fl/assessment" label="Assessment" icon={<IconGrad />} />
+        <NavItem to="/fl/assessment" label="Ujian Akhir" icon={<IconGrad />} />
       </nav>
 
       {/* User */}
@@ -123,8 +123,8 @@ export function KanitSidebar() {
       <nav className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto">
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/kanit/dashboard" label="Dashboard" icon={<IconHome />} />
-        <NavItem to="/kanit/review-progress" label="Review Progress OJT" icon={<IconChecklist />} />
-        <NavItem to="/kanit/results" label="Hasil Akhir OJT" icon={<IconChart />} />
+        <NavItem to="/kanit/review-progress" label="Review" icon={<IconChecklist />} />
+        <NavItem to="/kanit/results" label="Hasil Akhir" icon={<IconChart />} />
       </nav>
 
       {/* User */}

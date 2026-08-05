@@ -75,7 +75,10 @@ ALTER TABLE final_evaluations   DISABLE ROW LEVEL SECURITY;
 ALTER TABLE level2_unlocks      DISABLE ROW LEVEL SECURITY;
 
 -- ── 3. Auth users (password: demo1234) ────────────────────
--- Creates 5 demo accounts: 4 OJT Frontliner + 1 Kepala Unit
+-- Creates 6 demo accounts: 5 OJT Frontliner + 1 Kepala Unit
+-- NOTE: emails below use @ojt.demo, but Login.tsx's demo buttons currently
+-- submit @pandaigadai.com addresses — check which domain your live Supabase
+-- project's auth.users table actually has before relying on this list as-is.
 
 DO $$
 DECLARE
@@ -88,6 +91,8 @@ BEGIN
       ('sari@ojt.demo',  '{"userId":"fl-002"}'::jsonb),
       ('budi@ojt.demo',  '{"userId":"fl-003"}'::jsonb),
       ('dewi@ojt.demo',  '{"userId":"fl-004"}'::jsonb),
+      ('rizky@pandaigadai.com', '{"userId":"fl-005"}'::jsonb),
+      ('melati@pandaigadai.com', '{"userId":"fl-006"}'::jsonb),
       ('kanit@ojt.demo', '{"userId":"kanit-001"}'::jsonb)
     ) AS t(email, meta)
   ) LOOP
@@ -121,10 +126,11 @@ $$;
 
 -- ── Done ───────────────────────────────────────────────────
 -- Accounts created:
---   andi@ojt.demo   / demo1234  →  Andi Pratama (OJT, Hari 7)
---   sari@ojt.demo   / demo1234  →  Sari Dewi Lestari (OJT, Hari 8)
---   budi@ojt.demo   / demo1234  →  Budi Santoso (OJT, Hari 14)
---   dewi@ojt.demo   / demo1234  →  Dewi Rahmawati (OJT, Hari 14)
---   kanit@ojt.demo  / demo1234  →  Kepala Unit (Kanit)
+--   andi@ojt.demo    / demo1234  →  Andi Pratama (OJT, Hari 7)
+--   sari@ojt.demo    / demo1234  →  Sari Dewi Lestari (OJT, Hari 8)
+--   budi@ojt.demo    / demo1234  →  Budi Santoso (OJT, Hari 13)
+--   dewi@ojt.demo    / demo1234  →  Dewi Rahmawati (OJT, Hari 13)
+--   rizky@pandaigadai.com / demo1234  →  Rizky Ramadhan (OJT, Hari 10)
+--   kanit@ojt.demo   / demo1234  →  Kepala Unit (Kanit)
 --
 -- Data is seeded automatically on first login via the app.

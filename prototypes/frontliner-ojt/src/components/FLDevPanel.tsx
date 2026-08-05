@@ -3,13 +3,14 @@ import { useApp } from '../context/AppContext'
 import type { FLProfile } from '../types'
 
 const QUICK_DAYS = [
+  { day: 0,  label: 'H-1', note: 'Belum mulai (sebelum start date)' },
   { day: 1,  label: 'D1',  note: 'Closing & Grooming mulai' },
   { day: 3,  label: 'D3',  note: 'Closing hari terakhir' },
   { day: 4,  label: 'D4',  note: 'Opening mulai' },
-  { day: 7,  label: 'D7',  note: 'Akhir Minggu 1' },
+  { day: 7,  label: 'D7',  note: 'Akhir Minggu 1 (break)' },
   { day: 8,  label: 'D8',  note: 'Minggu 2 mulai' },
-  { day: 13, label: 'D13', note: 'Pelayanan hari terakhir' },
-  { day: 14, label: 'D14', note: 'Assessment' },
+  { day: 13, label: 'D13', note: 'Pelayanan hari terakhir + Ujian Akhir' },
+  { day: 14, label: 'D14', note: 'Tidak ada aktivitas (buffer)' },
 ]
 
 export default function FLDevPanel() {
@@ -22,7 +23,7 @@ export default function FLDevPanel() {
 
   const profile = currentUser.profile as FLProfile
   const day = profile.currentDay
-  const week = day <= 7 ? 'Minggu 1' : day <= 13 ? 'Minggu 2' : 'Assessment'
+  const week = day < 1 ? 'Belum Mulai' : !(profile.hasStarted ?? true) ? 'Siap Mulai' : day <= 7 ? 'Minggu 1' : day <= 13 ? 'Minggu 2' : 'Selesai'
 
   async function handleReset() {
     if (!confirm('Reset checklist & progress untuk akun ini? Hari tetap di angka yang sudah diset. Tidak bisa dibatalkan.')) return
@@ -57,7 +58,7 @@ export default function FLDevPanel() {
             <div className="flex items-center gap-3 mb-1">
               <button
                 onClick={() => setCurrentDay(day - 1)}
-                disabled={day <= 1}
+                disabled={day <= 0}
                 className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-20 flex items-center justify-center text-lg font-bold transition-colors"
               >
                 −

@@ -4,6 +4,12 @@ import { useApp } from '../../context/AppContext'
 import { ASSESSMENT_QUESTIONS, MASTERY_MATERIALS } from '../../data/mockData'
 import type { FLProfile, Assessment } from '../../types'
 
+function formatAssessmentUnlockDate(startDate: string): string {
+  const d = new Date(startDate)
+  d.setDate(d.getDate() + 12)
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
 export default function FLAssessment() {
   const { currentUser, submitAssessment, getFlAssessment } = useApp()
   const profile = currentUser!.profile as FLProfile
@@ -65,7 +71,11 @@ export default function FLAssessment() {
       id: `assess-${currentUser!.id}`,
       flId: currentUser!.id,
       day: profile.currentDay,
-      date: '2026-07-14',
+      date: (() => {
+        const d = new Date(profile.startDate)
+        d.setDate(d.getDate() + profile.currentDay - 1)
+        return d.toISOString().slice(0, 10)
+      })(),
       masteryChecks,
       answers,
       status: 'selesai',
@@ -79,14 +89,13 @@ export default function FLAssessment() {
   const masteredCount = masteryChecks.filter(m => m.mastered).length
   const answeredCount = Object.keys(mcqAnswers).length
 
-  if (profile.currentDay < 14) {
+  if (profile.currentDay < 13) {
     return (
       <div className="p-8 flex items-center justify-center min-h-96">
         <div className="text-center max-w-sm">
           <div className="w-20 h-20 bg-[#F1F5F9] rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4">🔒</div>
-          <h2 className="text-xl font-bold text-[#0F1729]">Assessment Belum Tersedia</h2>
-          <p className="text-[#65758B] text-sm mt-2">Assessment akhir OJT baru bisa dikerjakan di hari ke-14.</p>
-          <p className="text-[#023DFF] font-semibold text-sm mt-1">Kamu sekarang di Hari {profile.currentDay} dari 14.</p>
+          <h2 className="text-xl font-bold text-[#0F1729]">Ujian Akhir Belum Tersedia</h2>
+          <p className="text-[#65758B] text-sm mt-2">Ujian akan dibuka pada {formatAssessmentUnlockDate(profile.startDate)}</p>
         </div>
       </div>
     )
@@ -95,15 +104,16 @@ export default function FLAssessment() {
   if (step === 'done' || existing) {
     const assessment = existing ?? { masteryChecks, answers: ASSESSMENT_QUESTIONS.map(q => ({ questionId: q.id, question: q.question, answer: '' })), status: 'selesai' as const, mcqScore: 0 }
 
-    const score = assessment.mcqScore ?? ASSESSMENT_QUESTIONS.reduce((count, q) => {
+    const mcqCorrect = ASSESSMENT_QUESTIONS.reduce((count, q) => {
       const ans = assessment.answers.find(a => a.questionId === q.id)
       return count + (ans?.answer === q.options[q.correctIndex] ? 1 : 0)
-    }, 0) / ASSESSMENT_QUESTIONS.length * 100
+    }, 0)
+    const score = assessment.mcqScore ?? (mcqCorrect / ASSESSMENT_QUESTIONS.length * 100)
 
     return (
       <div className="p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#0F1729]">Assessment Akhir OJT</h1>
+          <h1 className="text-2xl font-bold text-[#0F1729]">Ujian Akhir OJT</h1>
           <p className="text-[#65758B] text-sm mt-1">Penilaian akhir program OJT kamu</p>
         </div>
 
@@ -111,39 +121,23 @@ export default function FLAssessment() {
           <div className="bg-gradient-to-br from-[#023DFF] to-[#1A55FF] rounded-xl p-6 text-white">
             <div className="text-4xl mb-3">🎉</div>
             <h2 className="text-xl font-bold mb-1">Selamat, kamu sudah selesai!</h2>
-            <p className="text-blue-100 text-sm mb-5">Assessment Akhir OJT berhasil dikumpulkan dan nilai sudah dihitung otomatis.</p>
-            <div className="flex items-center gap-4">
-              <div className="bg-white/15 rounded-xl px-6 py-3 text-center">
+            <p className="text-blue-100 text-sm mb-5">Ujian akhir berhasil disubmit dan nilai sudah tersedia.</p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-white/15 rounded-xl px-4 py-3 text-center">
                 <p className="text-4xl font-black">{Math.round(score)}</p>
-                <p className="text-xs text-blue-100 mt-0.5">nilai</p>
+                <p className="text-xs text-blue-100 mt-0.5">Nilai Akhir</p>
               </div>
-              <div className="flex-1" />
-              <Link
-                to="/fl/assessment/review"
-                className="flex items-center gap-2 bg-white text-[#023DFF] font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-colors flex-shrink-0"
-              >
-                Lihat Jawaban →
-              </Link>
+              <div className="bg-white/15 rounded-xl px-4 py-3 text-center">
+                <p className="text-4xl font-black">{mcqCorrect}/{ASSESSMENT_QUESTIONS.length}</p>
+                <p className="text-xs text-blue-100 mt-0.5">Jawaban Benar</p>
+              </div>
             </div>
-          </div>
-
-          <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-xl">✅</span>
-            <p className="font-semibold text-sm text-[#15803D]">Assessment selesai — nilai dihitung otomatis dari jawaban kamu.</p>
-          </div>
-
-          <div className="bg-white rounded-xl border border-[#E1E7EF] p-5">
-            <h3 className="font-semibold text-[#0F1729] mb-4">Pernyataan Penguasaan Materi</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {assessment.masteryChecks.map(m => (
-                <div key={m.materialId} className={`flex items-center gap-2.5 p-2.5 rounded-lg ${m.mastered ? 'bg-[#F0FDF4]' : 'bg-[#F8FAFC]'}`}>
-                  <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center ${m.mastered ? 'bg-[#16A34A]' : 'bg-[#CBD5E1]'}`}>
-                    {m.mastered && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  </div>
-                  <p className="text-sm text-[#0F1729]">{m.material}</p>
-                </div>
-              ))}
-            </div>
+            <Link
+              to="/fl/assessment/review"
+              className="w-full flex items-center justify-center gap-2 bg-white text-[#023DFF] font-semibold text-sm h-9 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              Lihat Jawaban →
+            </Link>
           </div>
         </div>
       </div>
@@ -154,7 +148,7 @@ export default function FLAssessment() {
     return (
       <div className="p-4 md:p-8 pb-24">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[#0F1729]">Assessment Akhir OJT</h1>
+          <h1 className="text-2xl font-bold text-[#0F1729]">Ujian Akhir OJT</h1>
         </div>
 
         <div className="space-y-4">
@@ -171,7 +165,7 @@ export default function FLAssessment() {
               <div className="flex items-start gap-3">
                 <div className="w-7 h-7 bg-[#E5F2FF] rounded-full flex items-center justify-center font-bold text-[#023DFF] text-xs flex-shrink-0 mt-0.5">2</div>
                 <div>
-                  <p className="font-semibold text-[#0F1729] text-sm">Soal Assessment</p>
+                  <p className="font-semibold text-[#0F1729] text-sm">Soal Ujian Akhir</p>
                   <p className="text-xs text-[#65758B] mt-0.5">{ASSESSMENT_QUESTIONS.length} soal pilihan ganda · bobot 30% nilai akhir</p>
                 </div>
               </div>
@@ -182,7 +176,7 @@ export default function FLAssessment() {
             <p className="text-sm font-semibold text-[#023DFF] mb-2">💡 Tips mengerjakan</p>
             <ul className="space-y-1 text-xs text-[#001CDB]">
               <li>• Jawab dengan jujur sesuai yang kamu pelajari selama OJT</li>
-              <li>• Skor assessment ini akan masuk ke penilaian akhir OJT kamu</li>
+              <li>• Skor ujian akhir ini akan masuk ke penilaian akhir OJT kamu</li>
             </ul>
           </div>
 
@@ -263,7 +257,7 @@ export default function FLAssessment() {
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-[#0F1729]">Langkah 2: Soal Assessment</h1>
+            <h1 className="text-2xl font-bold text-[#0F1729]">Langkah 2: Soal Ujian Akhir</h1>
             <p className="text-[#65758B] text-sm mt-0.5">Jawab semua pertanyaan berikut</p>
           </div>
         </div>
@@ -346,7 +340,7 @@ function DStepper({ currentStep }: { currentStep: 1 | 2 }) {
       <StepperBubble
         state={currentStep === 2 ? 'active' : 'inactive'}
         num={2}
-        label="Soal Assessment"
+        label="Soal Ujian Akhir"
       />
     </div>
   )

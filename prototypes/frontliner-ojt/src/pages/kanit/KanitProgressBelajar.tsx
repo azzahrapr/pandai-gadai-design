@@ -158,7 +158,7 @@ export default function KanitProgressBelajar() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-[#0F1729]">{selectedFl!.name}</h1>
-                <p className="text-sm text-[#65758B]">{profile.branch} · Hari {profile.currentDay}/14 · {profile.id.toUpperCase()}</p>
+                <p className="text-sm text-[#65758B]">{profile.branch} · Hari {profile.currentDay}/13 · {profile.id.toUpperCase()}</p>
               </div>
             </div>
 

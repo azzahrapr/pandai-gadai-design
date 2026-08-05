@@ -119,11 +119,11 @@ export default function KanitFinalEval() {
               <div className="bg-[#F8FAFC] rounded-xl p-4 text-center">
                 <p className="text-2xl font-black text-[#023DFF]">{scores.dailyProgressScore ?? '—'}</p>
                 <p className="text-xs text-[#65758B] mt-0.5">Checklist</p>
-                <p className="text-[10px] text-[#94A3B8]">{checklists.length}/14 hari</p>
+                <p className="text-[10px] text-[#94A3B8]">{checklists.length}/13 hari</p>
               </div>
               <div className="bg-[#F8FAFC] rounded-xl p-4 text-center">
                 <p className="text-2xl font-black text-[#023DFF]">{scores.assessmentScore ?? '—'}</p>
-                <p className="text-xs text-[#65758B] mt-0.5">Assessment</p>
+                <p className="text-xs text-[#65758B] mt-0.5">Ujian Akhir</p>
                 <p className="text-[10px] text-[#94A3B8]">{mcqCorrect}/{ASSESSMENT_QUESTIONS.length} soal benar</p>
               </div>
               <div className="bg-[#F8FAFC] rounded-xl p-4 text-center">
@@ -137,7 +137,7 @@ export default function KanitFinalEval() {
                 <p className={`text-4xl font-black ${scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{scores.totalScore}</p>
                 <div>
                   <p className={`font-bold text-sm ${scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>Nilai Akhir OJT</p>
-                  <p className="text-xs text-[#65758B]">60% checklist + 40% assessment</p>
+                  <p className="text-xs text-[#65758B]">60% checklist + 40% ujian akhir</p>
                 </div>
               </div>
             )}
@@ -221,7 +221,7 @@ export default function KanitFinalEval() {
               </div>
               <div>
                 <p className="font-semibold text-sm text-[#0F1729]">{flUser.name}</p>
-                <p className="text-xs text-[#65758B]">Hari {flProfile.currentDay}/14 · {flProfile.position}</p>
+                <p className="text-xs text-[#65758B]">Hari {flProfile.currentDay}/13 · {flProfile.position}</p>
               </div>
             </div>
             <div className="space-y-2 text-sm border-t border-[#E1E7EF] pt-4">
@@ -230,7 +230,7 @@ export default function KanitFinalEval() {
                 <span className="font-semibold">{scores.dailyProgressScore ?? '—'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#65758B]">Assessment</span>
+                <span className="text-[#65758B]">Ujian Akhir</span>
                 <span className="font-semibold">{scores.assessmentScore ?? '—'}</span>
               </div>
               <div className="flex justify-between">

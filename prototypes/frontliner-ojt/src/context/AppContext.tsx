@@ -48,6 +48,7 @@ interface AppContextType {
   clearSession: () => void
   saveQuizResult: (milestoneId: string, score: number, answers: Record<string, number>) => void
   setCurrentDay: (day: number) => void
+  startProgram: () => void
   extensionRequests: ExtensionRequest[]
   requestExtension: (milestoneId: string, type: ExtensionType) => void
   respondExtension: (requestId: string, status: 'approved' | 'rejected', kanitNote?: string) => void
@@ -327,6 +328,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const row = rows.find((r: { fl_id: string }) => r.fl_id === prev.id)
       if (!row) return prev
       const mockProfile = MOCK_USERS.find(u => u.id === prev.id)?.profile as FLProfile
+      const prevProfile = prev.profile as FLProfile
       // Merge DB milestone IDs with mockData, filter to currently-valid milestone IDs only
       const validIds = new Set(MILESTONES.map(m => m.id))
       const mergeIds = (...arrays: (string[] | undefined | null)[]) =>
@@ -335,11 +337,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...prev,
         profile: {
           ...mockProfile,
-          currentDay: mockProfile.currentDay,
+          // Dev-panel-set values are client-only (never written to the DB) — preserve
+          // them across realtime fl_profiles refreshes instead of reverting to mockData.
+          currentDay: prevProfile.currentDay,
+          hasStarted: prevProfile.hasStarted ?? mockProfile.hasStarted,
           activeMilestoneIds: mergeIds(row.active_milestone_ids, mockProfile.activeMilestoneIds),
           completedMilestoneIds: (mockProfile.completedMilestoneIds ?? []).filter(id => validIds.has(id)),
           quizScores: row.quiz_scores ?? {},
           quizAnswers: row.quiz_answers ?? {},
+          quizAttempts: row.quiz_attempts ?? {},
         },
       }
     })
@@ -392,7 +398,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if ((fpRes.data?.length ?? 0) === 0) {
       const flSeed = MOCK_USERS.filter(u => u.role === 'fl').map(u => {
         const p = u.profile as FLProfile
-        return { fl_id: u.id, current_day: p.currentDay, active_milestone_ids: p.activeMilestoneIds, completed_milestone_ids: p.completedMilestoneIds ?? [], quiz_scores: p.quizScores ?? {}, quiz_answers: p.quizAnswers ?? {} }
+        return { fl_id: u.id, current_day: p.currentDay, active_milestone_ids: p.activeMilestoneIds, completed_milestone_ids: p.completedMilestoneIds ?? [], quiz_scores: p.quizScores ?? {}, quiz_answers: p.quizAnswers ?? {}, quiz_attempts: p.quizAttempts ?? {} }
       })
       await supabase.from('fl_profiles').upsert(flSeed, { onConflict: 'fl_id' })
       const fp2 = await supabase.from('fl_profiles').select('*')
@@ -429,6 +435,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setChecklists(prev => prev.filter(c => c.flId !== flId))
     setExtensionRequests(prev => prev.filter(r => r.flId !== flId))
     setActiveSession(null)
+    setTaskConfirmations(prev => {
+      const next = prev.filter(c => c.flId !== flId)
+      localStorage.setItem('task-confirmations', JSON.stringify(next))
+      return next
+    })
+    setLevel2Unlocks(prev => {
+      const { [flId]: _removed, ...rest } = prev
+      return rest
+    })
+    // Clear any leftover in-progress drafts for this user (checklist & session forms)
+    const draftPrefixes = [`checklist-draft-${flId}-`, `session-draft-${flId}-`]
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key && draftPrefixes.some(p => key.startsWith(p))) {
+        localStorage.removeItem(key)
+      }
+    }
     setCurrentUser(prev => {
       if (!prev || prev.role !== 'fl') return prev
       return {
@@ -440,6 +463,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           completedMilestoneIds: [],
           quizScores: {},
           quizAnswers: {},
+          quizAttempts: {},
         },
       }
     })
@@ -503,10 +527,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   function setCurrentDay(day: number) {
-    const clamped = Math.max(1, Math.min(14, day))
+    // 0 = pre-Day-1 ("H-1" and earlier) — the program hasn't started yet.
+    const clamped = Math.max(0, Math.min(14, day))
     setCurrentUser(prev => {
       if (!prev || prev.role !== 'fl') return prev
       return { ...prev, profile: { ...prev.profile as FLProfile, currentDay: clamped } }
+    })
+  }
+
+  function startProgram() {
+    setCurrentUser(prev => {
+      if (!prev || prev.role !== 'fl') return prev
+      return { ...prev, profile: { ...prev.profile as FLProfile, hasStarted: true } }
     })
   }
 
@@ -551,11 +583,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const profile = currentUser.profile as FLProfile
     const newScores = { ...(profile.quizScores ?? {}), [milestoneId]: score }
     const newAnswers = { ...(profile.quizAnswers ?? {}), [milestoneId]: answers }
+    const newAttempts = { ...(profile.quizAttempts ?? {}), [milestoneId]: (profile.quizAttempts?.[milestoneId] ?? 0) + 1 }
     setCurrentUser(prev => {
       if (!prev) return prev
-      return { ...prev, profile: { ...prev.profile as FLProfile, quizScores: newScores, quizAnswers: newAnswers } }
+      return { ...prev, profile: { ...prev.profile as FLProfile, quizScores: newScores, quizAnswers: newAnswers, quizAttempts: newAttempts } }
     })
-    supabase.from('fl_profiles').update({ quiz_scores: newScores, quiz_answers: newAnswers }).eq('fl_id', currentUser.id).then()
+    supabase.from('fl_profiles').update({ quiz_scores: newScores, quiz_answers: newAnswers, quiz_attempts: newAttempts }).eq('fl_id', currentUser.id).then()
   }
 
   // ── Data mutations (optimistic + background write) ───────
@@ -730,7 +763,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser, isLoading, checklists, penaksiranRecords, assessments, finalEvaluations, level2Unlocks,
       login, logout, resetData, resetUserProgress, submitChecklist, scoreChecklist, scoreChecklistTasks,
       addPenaksiran, scorePenaksiran, submitAssessment, submitFinalEvaluation, unlockLevel2,
-      activeSession, startMilestone, startSession, clearSession, saveQuizResult, setCurrentDay,
+      activeSession, startMilestone, startSession, clearSession, saveQuizResult, setCurrentDay, startProgram,
       extensionRequests, requestExtension, respondExtension,
       getFlUsers, getUserById, getFlChecklists, getFlPenaksiran,
       getFlAssessment, getFlFinalEvaluation, getFlScoreBreakdown, getTodayChecklist,

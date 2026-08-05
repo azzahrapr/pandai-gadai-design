@@ -10,8 +10,8 @@ export default function FLAssessmentReview() {
     return (
       <div className="p-8 flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-[#65758B]">Assessment belum dikerjakan.</p>
-          <Link to="/fl/assessment" className="text-[#023DFF] text-sm mt-2 inline-block">← Kembali ke Assessment</Link>
+          <p className="text-[#65758B]">Ujian akhir belum dikerjakan.</p>
+          <Link to="/fl/assessment" className="text-[#023DFF] text-sm mt-2 inline-block">← Kembali ke Ujian Akhir</Link>
         </div>
       </div>
     )
@@ -26,12 +26,12 @@ export default function FLAssessmentReview() {
   return (
     <div className="p-8">
       <div className="flex items-center gap-4 mb-2">
-        <Link to="/fl/assessment" className="text-sm text-[#65758B] hover:text-[#023DFF] transition-colors">← Assessment</Link>
+        <Link to="/fl/assessment" className="text-sm text-[#65758B] hover:text-[#023DFF] transition-colors">← Ujian Akhir</Link>
       </div>
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#0F1729]">Review Jawaban</h1>
-          <p className="text-[#65758B] text-sm mt-1">Assessment Akhir OJT</p>
+          <p className="text-[#65758B] text-sm mt-1">Ujian Akhir OJT</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl px-4 py-2 text-center">
@@ -44,6 +44,22 @@ export default function FLAssessmentReview() {
           </div>
         </div>
       </div>
+
+      {assessment.masteryChecks.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#E1E7EF] p-5 mb-6 max-w-3xl">
+          <h3 className="font-semibold text-[#0F1729] mb-4">Pernyataan Penguasaan Materi</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {assessment.masteryChecks.map(m => (
+              <div key={m.materialId} className={`flex items-center gap-2.5 p-2.5 rounded-lg ${m.mastered ? 'bg-[#F0FDF4]' : 'bg-[#F8FAFC]'}`}>
+                <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center ${m.mastered ? 'bg-[#16A34A]' : 'bg-[#CBD5E1]'}`}>
+                  {m.mastered && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                </div>
+                <p className="text-sm text-[#0F1729]">{m.material}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4 max-w-3xl">
         {ASSESSMENT_QUESTIONS.map((q, idx) => {

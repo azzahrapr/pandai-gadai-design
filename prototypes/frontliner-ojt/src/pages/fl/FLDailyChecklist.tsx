@@ -6,8 +6,8 @@ import type { FLProfile, DailyChecklist } from '../../types'
 
 const BASE_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':     { fromDay: 1,  toDay: 3  },
-  'opening-cabang':    { fromDay: 4,  toDay: 7  },
-  'personal-grooming': { fromDay: 1,  toDay: 14 },
+  'opening-cabang':    { fromDay: 4,  toDay: 6  },
+  'personal-grooming': { fromDay: 1,  toDay: 13 },
   'pelayanan-nasabah': { fromDay: 8,  toDay: 13 },
   'customer-service-wa': { fromDay: 8, toDay: 13 },
 }
@@ -75,7 +75,7 @@ export default function FLDailyChecklist() {
 
   function handleSubmit() {
     if (!milestoneId || !task) return
-    const passed = checkedIds.size === task.items.length
+    const passed = checkedIds.size >= (task.minRequired ?? task.items.length)
     const now = new Date().toISOString()
     const checklist: DailyChecklist = {
       id: `cl-daily-${currentUser!.id}-d${currentDay}-${milestoneId}`,
@@ -109,10 +109,16 @@ export default function FLDailyChecklist() {
     )
   }
 
+  // A checklist passes once minRequired items are checked — defaults to all items when unset.
+  const requiredCount = task.minRequired ?? task.items.length
+
   // Determine pass/fail for already-submitted state
   const passedResult = justSubmitted
     ? justSubmittedPassed
     : todayChecklist?.passed
+  const isScored = !justSubmitted && todayChecklist?.status === 'scored'
+  // Incomplete checklists auto-fail — no kanit review needed to know that.
+  const isPendingReview = !!passedResult && !isScored
 
   const isAlreadyDone = submittedToday || justSubmitted
 
@@ -147,37 +153,51 @@ export default function FLDailyChecklist() {
       ) : isAlreadyDone ? (
         /* ── Result screen ── */
         <div className="space-y-4">
-          <div className={`rounded-xl border p-5 ${
-            passedResult
-              ? 'bg-[#F0FDF4] border-[#16A34A]/20'
-              : 'bg-[#FEF2F2] border-[#DC2626]/20'
-          }`}>
-            <div className="flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                passedResult ? 'bg-[#16A34A]' : 'bg-[#DC2626]'
-              }`}>
-                {passedResult ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3.5 8l3 3 6-6" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 3l8 8M11 3L3 11" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-                  </svg>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className={`text-sm font-bold ${passedResult ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
-                  {passedResult ? 'Lulus — semua item selesai' : 'Tidak lulus — ada item yang belum dicentang'}
-                </p>
-                <p className={`text-xs mt-1 ${passedResult ? 'text-[#15803D]/70' : 'text-[#B91C1C]/70'}`}>
-                  {passedResult
-                    ? 'Checklist hari ini berhasil kamu selesaikan.'
-                    : 'Checklist ini akan dinilai berdasarkan item yang sudah dicentang.'}
-                </p>
+          {isPendingReview ? (
+            <div className="rounded-xl border p-5 bg-[#FEFDEA] border-[#E0A200]/30">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#E0A200] text-lg">⏳</div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-[#B27202]">Menunggu penilaian kanit</p>
+                  <p className="text-xs mt-1 text-[#92400E]/80">Kanit akan mereview checklist ini dan menentukan hasil akhirnya.</p>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className={`rounded-xl border p-5 ${
+              passedResult
+                ? 'bg-[#F0FDF4] border-[#16A34A]/20'
+                : 'bg-[#FEF2F2] border-[#DC2626]/20'
+            }`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  passedResult ? 'bg-[#16A34A]' : 'bg-[#DC2626]'
+                }`}>
+                  {passedResult ? (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M3.5 8l3 3 6-6" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 3l8 8M11 3L3 11" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className={`text-sm font-bold ${passedResult ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
+                    {passedResult
+                      ? (submittedCheckedIds.size === task.items.length ? 'Lulus — semua item selesai' : 'Lulus — target checklist terpenuhi')
+                      : 'Tidak lulus — belum memenuhi target checklist'}
+                  </p>
+                  <p className={`text-xs mt-1 ${passedResult ? 'text-[#15803D]/70' : 'text-[#B91C1C]/70'}`}>
+                    {passedResult
+                      ? 'Checklist hari ini berhasil kamu selesaikan.'
+                      : `Item tercentang: ${submittedCheckedIds.size}/${task.items.length} (minimal ${requiredCount} item).`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Submitted items */}
           <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-hidden">

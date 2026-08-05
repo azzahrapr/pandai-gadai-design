@@ -86,8 +86,8 @@ export default function KanitResults() {
 
           {/* Score breakdown — 2 component cards + total score card */}
           <div className="grid grid-cols-3 gap-3">
-            <ScoreCard label="Checklist" weight="60%" score={scores.dailyProgressScore} note={`rata-rata dari ${scores.daysScored}/14 hari`} isActive={selectedCard === 'daily'} onClick={() => setSelectedCard('daily')} />
-            <ScoreCard label="Assessment" weight="40%" score={scores.assessmentScore} note={assessment ? `${mcqCorrect}/${ASSESSMENT_QUESTIONS.length} jawaban benar` : 'Belum tersedia'} isActive={selectedCard === 'assessment'} onClick={() => setSelectedCard('assessment')} />
+            <ScoreCard label="Checklist" weight="60%" score={scores.dailyProgressScore} note={`rata-rata dari ${scores.daysScored}/13 hari`} isActive={selectedCard === 'daily'} onClick={() => setSelectedCard('daily')} />
+            <ScoreCard label="Ujian Akhir" weight="40%" score={scores.assessmentScore} note={assessment ? `${mcqCorrect}/${ASSESSMENT_QUESTIONS.length} jawaban benar` : 'Belum tersedia'} isActive={selectedCard === 'assessment'} onClick={() => setSelectedCard('assessment')} />
             {scores.totalScore !== null ? (
               <div className={`rounded-xl border px-4 py-4 ${scores.passed ? 'bg-[#F0FDF4] border-[#16A34A]/30' : 'bg-[#FEF2F2] border-[#DC2626]/20'}`}>
                 <p className={`text-xs font-semibold mb-3 ${scores.passed ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>Nilai Akhir</p>
@@ -123,9 +123,9 @@ export default function KanitResults() {
 
               {selectedCard === 'assessment' && (
                 <div className="p-5">
-                  <h3 className="font-semibold text-[#0F1729] text-sm mb-4">Assessment Akhir OJT</h3>
+                  <h3 className="font-semibold text-[#0F1729] text-sm mb-4">Ujian Akhir OJT</h3>
                   {!assessment ? (
-                    <p className="text-sm text-[#94A3B8] text-center py-6">Belum ada data assessment</p>
+                    <p className="text-sm text-[#94A3B8] text-center py-6">Belum ada data ujian akhir</p>
                   ) : (
                     <div className="space-y-4">
                       <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl p-4 flex items-center gap-4">
@@ -189,7 +189,7 @@ function TaskDayMatrix({ checklists }: { checklists: DailyChecklist[] }) {
   if (!hasPerTaskScores) {
     return (
       <div className="grid grid-cols-7 gap-1.5">
-        {Array.from({ length: 14 }, (_, i) => {
+        {Array.from({ length: 13 }, (_, i) => {
           const day = i + 1
           const cl = checklists.find(c => c.day === day)
           const s = cl?.kanitScore ?? null
@@ -205,7 +205,7 @@ function TaskDayMatrix({ checklists }: { checklists: DailyChecklist[] }) {
     )
   }
 
-  const allDays = Array.from({ length: 14 }, (_, i) => i + 1)
+  const allDays = Array.from({ length: 13 }, (_, i) => i + 1)
 
   return (
     <div>

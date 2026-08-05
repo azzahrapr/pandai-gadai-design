@@ -5,7 +5,7 @@ import type { FLProfile } from '../../types'
 
 const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang': { fromDay: 1, toDay: 3 },
-  'opening-cabang': { fromDay: 4, toDay: 7 },
+  'opening-cabang': { fromDay: 4, toDay: 6 },
 }
 const OC_IDS = new Set(Object.keys(DAILY_SCHEDULE))
 

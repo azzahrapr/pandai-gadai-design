@@ -6,8 +6,8 @@ import type { FLProfile, DailyChecklist } from '../../types'
 
 const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':      { fromDay: 1,  toDay: 3  },
-  'opening-cabang':     { fromDay: 4,  toDay: 7  },
-  'personal-grooming':  { fromDay: 1,  toDay: 14 },
+  'opening-cabang':     { fromDay: 4,  toDay: 6  },
+  'personal-grooming':  { fromDay: 1,  toDay: 13 },
   'pelayanan-nasabah':  { fromDay: 8,  toDay: 13 },
   'customer-service-wa':{ fromDay: 8,  toDay: 13 },
 }
@@ -87,7 +87,7 @@ export default function FLChecklist() {
   const dailyMilestoneIds = Object.keys(DAILY_SCHEDULE)
   const isWeek1 = currentDay <= 7
   const isWeek2 = currentDay >= 8 && currentDay <= 13
-  const isAssessmentDay = currentDay === 14
+  const isAssessmentDay = currentDay === 13
 
   const week1Modules = MILESTONES.filter(m => m.type === 'minggu1' && !dailyMilestoneIds.includes(m.id))
   const week2Modules = MILESTONES.filter(m => m.type === 'minggu2' && !dailyMilestoneIds.includes(m.id))
@@ -472,11 +472,11 @@ export default function FLChecklist() {
             <div className="bg-white rounded-xl border border-[#E1E7EF] p-10 mb-6 flex flex-col items-center text-center gap-3">
               <div className="w-12 h-12 rounded-full bg-[#F0FDF4] flex items-center justify-center text-xl">🎓</div>
               <div>
-                <p className="font-semibold text-[#0F1729]">Hari Assessment</p>
-                <p className="text-sm text-[#65758B] mt-1 max-w-xs">Semua checklist sudah selesai. Kerjakan assessment akhir OJT.</p>
+                <p className="font-semibold text-[#0F1729]">Hari Ujian Akhir</p>
+                <p className="text-sm text-[#65758B] mt-1 max-w-xs">Semua checklist sudah selesai. Kerjakan ujian akhir OJT.</p>
               </div>
               <Link to="/fl/assessment" className="h-9 px-4 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg flex items-center transition-colors">
-                Mulai Assessment →
+                Mulai Ujian Akhir →
               </Link>
             </div>
           )}

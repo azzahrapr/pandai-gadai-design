@@ -17,15 +17,26 @@ export interface LearningMaterial {
   slideUrl?: string
 }
 
-export interface ChecklistItem {
+// Shared by ChecklistItem and Milestone — see `getEffectiveTarget()` in mockData.ts.
+// `target`/`targetForPass` are the min. submission attempts and the min. of those
+// attempts that must individually pass for the whole thing to count as "Lulus".
+// `level2Target`/`level2TargetForPass` are ADDED on top only for a Level 1 item that
+// a kanit has approved for carry-over into Level 2 — untouched otherwise.
+export interface TargetSpec {
+  target?: number
+  targetForPass?: number
+  level2Target?: number
+  level2TargetForPass?: number
+}
+
+export interface ChecklistItem extends TargetSpec {
   id: string
   text: string
   category: string
   description?: string
-  target?: number
 }
 
-export interface Milestone {
+export interface Milestone extends TargetSpec {
   id: string
   name: string
   shortName: string
@@ -38,6 +49,10 @@ export interface Milestone {
   checklistItems: ChecklistItem[]
   quiz?: QuizQuestion[]
   submissionType?: 'session' | 'individual'
+  // Personal Grooming only: must be done fully every day, no catch-up possible — never
+  // shows "Terlambat"/kanit-approval, its Lulus/Tidak Lulus verdict is decided purely by
+  // the day-13 program-end fallback like every other module.
+  noRemedial?: boolean
 }
 
 export interface TaskConfirmation {
@@ -50,6 +65,9 @@ export interface TaskConfirmation {
   nomorBox?: string[]
   catatan?: string
   kanitNote?: string
+  kanitReviewedAt?: string
+  // true = lulus, false = tidak lulus (remedial required), undefined = belum dinilai
+  kanitPassed?: boolean
   submittedAt: string
   day: number
 }
@@ -178,10 +196,23 @@ export interface FLProfile {
   startDate: string
   currentDay: number
   kanitId: string
+  courseId: string
+  // Whether the learner has clicked past the pre-Day-1 "Mulai" gate. Missing/undefined
+  // on legacy profiles means already-started (backward compatible for existing FLs).
+  hasStarted?: boolean
   activeMilestoneIds: string[]
   completedMilestoneIds?: string[]
   quizScores?: Record<string, number>
   quizAnswers?: Record<string, Record<string, number>>
+  quizAttempts?: Record<string, number>
+}
+
+// A course wraps an entire training program (its own modules/tasks/quizzes) —
+// today there's only "On the Job Training", but the model supports a learner
+// being enrolled in more than one (e.g. a future Kanit training course).
+export interface Course {
+  id: string
+  name: string
 }
 
 export interface KanitProfile {
@@ -198,7 +229,7 @@ export interface AppUser {
   profile: FLProfile | KanitProfile
 }
 
-export type FLNotificationType = 'feedback_latihan' | 'persetujuan_kanit' | 'final_assessment'
+export type FLNotificationType = 'feedback_latihan' | 'persetujuan_kanit' | 'final_assessment' | 'quiz_unlocked'
 
 export interface FLNotification {
   id: string
