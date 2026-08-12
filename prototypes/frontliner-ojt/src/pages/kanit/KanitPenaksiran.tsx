@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import type { KanitProfile, FLProfile } from '../../types'
 
@@ -7,7 +8,13 @@ export default function KanitPenaksiran() {
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
 
-  const [selectedFlId, setSelectedFlId] = useState<string>(flUsers[0]?.id ?? '')
+  const [searchParams] = useSearchParams()
+  const [selectedFlId, setSelectedFlId] = useState<string>(() => {
+    const fromUrl = searchParams.get('flId')
+    if (fromUrl && flUsers.some(u => u.id === fromUrl)) return fromUrl
+    const withPending = flUsers.find(u => getFlPenaksiran(u.id).some(r => r.intoolsValue === undefined))
+    return withPending?.id ?? flUsers[0]?.id ?? ''
+  })
   const [scoringId, setScoringId] = useState<string | null>(null)
   const [intoolsValue, setIntoolsValue] = useState<string>('')
   const [score, setScore] = useState<string>('')
@@ -45,8 +52,8 @@ export default function KanitPenaksiran() {
       </div>
 
       {/* FL tab selector */}
-      <div className="border-b border-[#E1E7EF] mb-6">
-        <div className="flex gap-1">
+      <div className="border-b border-[#E1E7EF] mb-6 overflow-x-auto">
+        <div className="flex gap-1 min-w-max">
           {flUsers.map(fl => {
             const pend = getFlPenaksiran(fl.id).filter(r => r.intoolsValue === undefined).length
             const isActive = selectedFlId === fl.id
@@ -54,7 +61,7 @@ export default function KanitPenaksiran() {
               <button
                 key={fl.id}
                 onClick={() => { setSelectedFlId(fl.id); setScoringId(null) }}
-                className={`relative flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 -mb-[1px] transition-all ${
+                className={`relative flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-semibold border-b-2 -mb-[1px] transition-all whitespace-nowrap ${
                   isActive ? 'border-[#023DFF] text-[#023DFF]' : 'border-transparent text-[#65758B] hover:text-[#0F1729]'
                 }`}
               >
@@ -71,7 +78,7 @@ export default function KanitPenaksiran() {
       {selectedFl && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* Left 2/3 */}
-          <div className="col-span-2 space-y-4">
+          <div className="md:col-span-2 space-y-4">
             {/* Pending */}
             {pending.length > 0 ? (
               <div>
@@ -186,8 +193,8 @@ export default function KanitPenaksiran() {
                   <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
                   <p className="text-sm font-semibold text-[#0F1729]">Sudah Diverifikasi ({scored.length})</p>
                 </div>
-                <div className="bg-white rounded-xl border border-[#E1E7EF]">
-                  <table className="w-full">
+                <div className="bg-white rounded-xl border border-[#E1E7EF] overflow-x-auto">
+                  <table className="w-full min-w-[560px]">
                     <thead>
                       <tr className="border-b border-[#E1E7EF]">
                         <th className="text-xs font-semibold text-[#65758B] uppercase tracking-wide py-3 px-5 text-left">Barang</th>

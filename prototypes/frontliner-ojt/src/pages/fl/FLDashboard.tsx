@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { useTour } from '../../context/TourContext'
 import { MILESTONES, DAILY_TASKS, getEffectiveTarget } from '../../data/mockData'
 import type { FLProfile } from '../../types'
-import { NilaiAkhirCard } from '../../components/NilaiAkhirCard'
+import { StatusKelulusanCard } from '../../components/StatusKelulusanCard'
 
 const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':    { fromDay: 1,  toDay: 3  },
@@ -336,14 +336,15 @@ export default function FLDashboard() {
       )}
       {day === 13 && existingAssessment && (() => {
         const finalScores = getFlScoreBreakdown(currentUser!.id)
-        const finalEval = getFlFinalEvaluation(currentUser!.id)
-        if (finalScores.totalScore === null) return null
+        // Same rule as FLScores.tsx/KanitResults.tsx: don't reveal the gate until the
+        // rapot akhir is actually filled in — fail-fast can otherwise flag "Tidak Lulus"
+        // here off of just one component, before the kanit has even weighed in.
+        if (!getFlFinalEvaluation(currentUser!.id)) return null
         return (
           <div className="mb-6">
-            <NilaiAkhirCard
-              score={finalScores.totalScore}
-              finalEval={finalEval}
-              action={{ label: 'Lihat Nilai Akhir', to: '/fl/scores' }}
+            <StatusKelulusanCard
+              passed={finalScores.passed}
+              action={{ label: 'Lihat Nilai Saya', to: '/fl/scores' }}
             />
           </div>
         )

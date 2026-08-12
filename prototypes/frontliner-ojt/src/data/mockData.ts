@@ -1,5 +1,12 @@
 import type { Milestone, DailyChecklist, PenaksiranRecord, Assessment, AppUser, TaskConfirmation, FLNotification, Course, TargetSpec } from '../types'
 
+// Penilaian model (2026-08-10) — the minimum passing grade (KKM) for each of the 2
+// numeric-score components. Evaluasi Akhir (kanit) has no numeric KKM of its own — its
+// pass/fail is just whichever recommendation the kanit picks. See ScoreBreakdown in
+// types/index.ts and getFlScoreBreakdown() in AppContext.tsx for the actual gate logic.
+export const KKM_LATIHAN = 75
+export const KKM_UJIAN_AKHIR = 75
+
 // Resolves a Milestone's or ChecklistItem's effective attempt targets. `carriedOver`
 // (kanit approved this item's carry-over from Level 1 into Level 2) adds the item's
 // level2Target/level2TargetForPass on top of its base target/targetForPass — untouched
@@ -867,11 +874,13 @@ export const MILESTONES: Milestone[] = [
     description: 'Teknik penaksiran gadget dan perangkat elektronik: HP, tablet, laptop, game console, kamera',
     unlockDay: 8,
     estimatedMinutes: 45,
-    // This module is session-type (not per-item "individual"), so its target lives here at
-    // the milestone level — an aggregate of every device type's own target/pass count below
-    // (the per-item target/targetForPass on each checklistItem is reference-only for now).
-    target: 25,
-    targetForPass: 11,
+    // Per-item "individual" (2026-08-05) — each device type below is its own independently
+    // tracked task via TaskConfirmation, submitted through the dedicated discounter form
+    // (FLPenaksiranConfirm.tsx: Tipe Item search + Potongan Nilai defect checklist) rather
+    // than the generic essay/checklist submission every other session-type module uses.
+    // The per-item target/targetForPass already summed to 25/11 before this switch — that
+    // was intentional, this data just wasn't wired up to individual-type code yet.
+    submissionType: 'individual',
     materials: [
       {
         id: 'pe-m1',
@@ -965,24 +974,35 @@ export const MILESTONES: Milestone[] = [
   },
   {
     id: 'penaksiran-emas',
-    name: 'Penaksiran Emas LM Press',
+    name: 'Penaksiran Emas',
     shortName: 'Taksir Emas',
     type: 'minggu2',
     order: 13,
-    description: 'Teknik penaksiran emas batang LM Press sesuai prosedur standar',
+    description: 'Teknik penaksiran emas — Perhiasan dan Logam Mulia (LM Press) — sesuai prosedur standar',
     unlockDay: 8,
     estimatedMinutes: 45,
-    target: 2,
-    targetForPass: 1,
+    // Per-item "individual" (2026-08-12) — same switch as Penaksiran Elektronik/BPKB,
+    // submitted through its own dedicated form (FLPenaksiranEmasConfirm.tsx: Pilih Jenis
+    // Emas — Perhiasan or Logam Mulia, each with its own field set — + Refleksi) rather
+    // than the generic essay/checklist submission. Only one checklistItem here (pem-1,
+    // same shape as BPKB's single pbk-1), so the milestone-level target/targetForPass
+    // that used to live here is redundant with that item's own target/targetForPass below
+    // — removed, matching the BPKB precedent.
+    submissionType: 'individual',
     materials: [
       {
         id: 'pem-m1',
-        title: 'Penaksiran LM Press',
-        content: `## Penaksiran Emas Batang LM Press\n\n### Apa itu LM Press?\nLM Press (Logam Mulia Press) adalah emas batang yang diproduksi oleh Antam dalam berbagai ukuran (1g–1000g).\n\n### Langkah Penaksiran:\n1. **Verifikasi keaslian** — Cek hologram dan QR code sertifikat Antam\n2. **Periksa kondisi fisik** — Pastikan tidak ada goresan dalam atau tanda pemalsuan\n3. **Verifikasi berat** — Timbang untuk memastikan sesuai keterangan sertifikat\n4. **Cek harga spot** — Lihat harga LM Press hari ini di Intools\n5. **Hitung nilai taksiran** — Berat × harga spot × persentase sesuai ketentuan\n6. **Input ke Intools** — Kategori Emas, subkategori LM Press\n\n### Catatan Penting:\n- LM Press tanpa sertifikat memerlukan prosedur tambahan\n- Konfirmasi ke Kanit untuk LM Press > 100 gram`,
+        title: 'Penaksiran Logam Mulia (LM Press)',
+        content: `## Penaksiran Emas Batang LM Press\n\n### Apa itu LM Press?\nLM Press (Logam Mulia Press) adalah emas batang yang diproduksi oleh Antam dalam berbagai ukuran (0.5g–1000g), dijual per keping dalam denominasi standar.\n\n### Langkah Penaksiran:\n1. **Verifikasi keaslian** — Cek hologram dan QR code sertifikat Antam\n2. **Periksa kondisi fisik** — Pastikan tidak ada goresan dalam atau tanda pemalsuan\n3. **Verifikasi denominasi & jumlah keping** — Cocokkan dengan keterangan sertifikat tiap keping\n4. **Cek harga spot** — Lihat harga LM Press hari ini di Intools\n5. **Hitung nilai taksiran** — Denominasi × jumlah keping × harga spot × persentase sesuai ketentuan\n6. **Input ke Intools** — Kategori Emas, subkategori Logam Mulia\n\n### Catatan Penting:\n- LM Press tanpa sertifikat memerlukan prosedur tambahan\n- Konfirmasi ke Kanit untuk total berat > 100 gram`,
+      },
+      {
+        id: 'pem-m2',
+        title: 'Penaksiran Perhiasan',
+        content: `## Penaksiran Perhiasan Emas\n\n### Jenis Perhiasan Umum:\nCincin, kalung, gelang, anting, liontin — masing-masing ditaksir berdasarkan kadar dan berat, bukan denominasi tetap seperti LM Press.\n\n### Langkah Penaksiran:\n1. **Identifikasi jenis perhiasan** — Cincin, kalung, gelang, dll.\n2. **Uji kadar emas** — Gunakan jarum uji/cairan asam nitrat atau alat uji kadar untuk menentukan karat (mis. 24K, 18K, 17K)\n3. **Timbang berat bersih** — Pisahkan berat batu/aksesori non-emas jika ada dari berat total\n4. **Cek harga spot per kadar** — Lihat harga hari ini di Intools sesuai kadar yang terverifikasi\n5. **Hitung nilai taksiran** — Berat × harga spot per kadar × persentase sesuai ketentuan\n6. **Input ke Intools** — Kategori Emas, subkategori Perhiasan, catat jenis, kadar, dan berat\n\n### Catatan Penting:\n- Kadar yang tidak sesuai klaim nasabah harus dikonfirmasi ulang sebelum nilai difinalisasi\n- Perhiasan dengan batu permata: berat batu TIDAK dihitung sebagai berat emas`,
       },
     ],
     checklistItems: [
-      { id: 'pem-1', text: 'Penaksiran LM Press sesuai prosedur standar', category: 'Penaksiran', target: 2, targetForPass: 1 },
+      { id: 'pem-1', text: 'Penaksiran Emas sesuai prosedur standar', category: 'Penaksiran', target: 2, targetForPass: 1 },
     ],
     quiz: [
       {
@@ -1003,6 +1023,12 @@ export const MILESTONES: Milestone[] = [
         options: ['10 gram', '50 gram', '100 gram', 'Semua berat wajib konfirmasi'],
         correctIndex: 2,
       },
+      {
+        id: 'pem-q4',
+        question: 'Untuk penaksiran perhiasan, apa yang membedakannya dari LM Press dalam menentukan nilai?',
+        options: ['Perhiasan ditaksir berdasarkan kadar (karat) dan berat, bukan denominasi tetap', 'Perhiasan tidak bisa ditaksir sama sekali', 'Perhiasan selalu bernilai lebih tinggi dari LM Press', 'Perhiasan tidak perlu diuji kadar'],
+        correctIndex: 0,
+      },
     ],
   },
   {
@@ -1014,8 +1040,13 @@ export const MILESTONES: Milestone[] = [
     description: 'Teknik penaksiran kendaraan bermotor berdasarkan dokumen BPKB Instant',
     unlockDay: 8,
     estimatedMinutes: 45,
-    target: 3,
-    targetForPass: 1,
+    // Per-item "individual" (2026-08-05) — same switch as Penaksiran Elektronik, submitted
+    // through its own dedicated discounter form (FLPenaksiranBpkbConfirm.tsx: Cek Nomor
+    // Rangka + Tipe Item + Kelengkapan & Info Akses + Pengecekan Luar) rather than the
+    // generic essay/checklist submission. Only one checklistItem here (pbk-1, unlike
+    // Elektronik's 11 device types), so the milestone-level target/targetForPass above
+    // is redundant with that item's own target/targetForPass below — removed.
+    submissionType: 'individual',
     materials: [
       {
         id: 'pbk-m1',
@@ -1181,7 +1212,7 @@ export const MOCK_USERS: AppUser[] = [
         'pelayanan-nasabah-transaksi': { 'pnt-q1': 0, 'pnt-q2': 1 },
         'customer-service-wa': { 'csw-q1': 0, 'csw-q2': 1, 'csw-q3': 2 },
         'penaksiran-elektronik': { 'pe-q1': 0, 'pe-q2': 0, 'pe-q3': 0 },
-        'penaksiran-emas': { 'pem-q1': 0, 'pem-q2': 1, 'pem-q3': 2 },
+        'penaksiran-emas': { 'pem-q1': 0, 'pem-q2': 1, 'pem-q3': 2, 'pem-q4': 0 },
         'penaksiran-bpkb': { 'pbk-q1': 0, 'pbk-q2': 1, 'pbk-q3': 2 },
       },
       quizAttempts: {
@@ -1964,7 +1995,7 @@ export const INITIAL_ASSESSMENTS: Assessment[] = [
     ],
     status: 'selesai',
     submittedAt: '2026-07-06T18:30:00',
-    mcqScore: 73,
+    mcqScore: 79,
   },
 ]
 
@@ -1978,6 +2009,12 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
     nomorSbg: 'SBG-2026-00098',
     catatan: 'Prosesnya berjalan lancar. Nasabah puas dengan pelayanan.',
     kanitNote: 'Input Intools dan Kopra sudah benar. Pastikan SBG selalu dicetak sebelum menyerahkan barang ke nasabah.',
+    // Backfilled true (2026-08-06) — already has kanit feedback above, meaning it was
+    // actually reviewed already; kanitPassed just never existed as a field until the new
+    // Kanit review-confirmation UI was built. Without this, it'd wrongly resurface as
+    // freshly "pending" the moment that UI reads raw confirmations.
+    kanitPassed: true,
+    kanitReviewedAt: '2026-07-26T09:35:00',
     submittedAt: '2026-07-26T09:30:00',
     day: 2,
   },
@@ -1990,6 +2027,10 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
     nomorSbg: 'SBG-2026-00112',
     catatan: 'Ada sedikit kebingungan saat memilih opsi cicil vs perpanjangan.',
     kanitNote: 'Pemahaman alur perpanjangan perlu diperkuat. Coba ulangi materi sebelum latihan berikutnya.',
+    // Backfilled false (2026-08-06) — the note reads as "needs remedial," not a pass; see
+    // sa-1's comment above for why this backfill exists at all.
+    kanitPassed: false,
+    kanitReviewedAt: '2026-07-26T14:05:00',
     submittedAt: '2026-07-26T14:00:00',
     day: 2,
   },
@@ -2024,6 +2065,92 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
   { id: 'mock-tc-fl001-ps8-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-8', itemText: 'Packing & Penyimpanan Camera', nomorSbg: 'SBG-2026-00185', catatan: 'Aksesori kamera sudah terkemas bersama.', submittedAt: '2026-07-28T13:30:00', day: 5 },
   { id: 'mock-tc-fl001-ps9-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-9', itemText: 'Packing & Penyimpanan Dokumen BPKB', catatan: 'Disimpan di map bersih, label info lengkap.', submittedAt: '2026-07-28T14:00:00', day: 5 },
   { id: 'mock-tc-fl001-ps9-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-9', itemText: 'Packing & Penyimpanan Dokumen BPKB', catatan: 'Lemari terkunci sudah digunakan untuk penyimpanan.', kanitNote: 'Dokumen tersimpan rapi. Modul packing selesai!', submittedAt: '2026-07-28T15:00:00', day: 5 },
+
+  // Pending-review demo cases (2026-08-06) — kanitPassed intentionally left unset so
+  // these surface in Kanit's "Menunggu Review" list via KanitReviewConfirmation.tsx.
+  // Andi (fl-001) — SOP Administrasi Transaksi (essay-type): multiple pending submissions
+  // across two different latihan (checklistItems), to exercise the module→latihan→sesi
+  // grouping — Tebus Elektronik (sa-3) has 3 pending sessions, Gadai Baru Elektronik
+  // (sa-1) has 1.
+  {
+    id: 'mock-tc-fl001-sa3-pending',
+    flId: 'fl-001',
+    milestoneId: 'sop-administrasi',
+    itemId: 'sa-3',
+    itemText: 'Tebus Elektronik',
+    nomorSbg: 'SBG-2026-00220',
+    catatan: 'Nasabah menebus HP-nya. Saya cek dulu total pelunasan di Kopra sebelum proses, lalu serahkan barang setelah pembayaran lunas.',
+    submittedAt: '2026-07-29T10:00:00',
+    day: 6,
+  },
+  {
+    id: 'mock-tc-fl001-sa3-pending-2',
+    flId: 'fl-001',
+    milestoneId: 'sop-administrasi',
+    itemId: 'sa-3',
+    itemText: 'Tebus Elektronik',
+    nomorSbg: 'SBG-2026-00231',
+    catatan: 'Nasabah menebus laptopnya sebelum jatuh tempo. Saya konfirmasi ulang total pelunasan ke nasabah sebelum proses di Kopra.',
+    submittedAt: '2026-07-29T14:20:00',
+    day: 6,
+  },
+  {
+    id: 'mock-tc-fl001-sa3-pending-3',
+    flId: 'fl-001',
+    milestoneId: 'sop-administrasi',
+    itemId: 'sa-3',
+    itemText: 'Tebus Elektronik',
+    nomorSbg: 'SBG-2026-00248',
+    catatan: 'Transaksi tebus kedua hari ini, sudah lebih cepat karena hafal alur Intools + Kopra.',
+    submittedAt: '2026-07-30T09:10:00',
+    day: 7,
+  },
+  {
+    id: 'mock-tc-fl001-sa1-pending',
+    flId: 'fl-001',
+    milestoneId: 'sop-administrasi',
+    itemId: 'sa-1',
+    itemText: 'Gadai Baru Elektronik',
+    nomorSbg: 'SBG-2026-00250',
+    catatan: 'Input data nasabah dan barang (HP) di Intools, proses pencairan di Kopra, cetak SBG dan serahkan ke nasabah.',
+    submittedAt: '2026-07-30T11:45:00',
+    day: 7,
+  },
+  // Sari (fl-002) — Penaksiran Elektronik discounter submission awaiting review.
+  {
+    id: 'mock-tc-fl002-pe1-pending',
+    flId: 'fl-002',
+    milestoneId: 'penaksiran-elektronik',
+    itemId: 'pe-1',
+    itemText: 'Handphone – Android',
+    catatan: 'Tipe Item: SAMSUNG GALAXY A54 8 / 256 GB 2023\nPotongan Nilai: LCD Minus: Ringan, Baterai Gembung\nRefleksi: Kondisi LCD ada baret halus, baterai agak menggembung tapi masih berfungsi normal.',
+    submittedAt: '2026-08-04T11:00:00',
+    day: 8,
+  },
+  // Sari (fl-002) — Penaksiran BPKB discounter submission awaiting review.
+  {
+    id: 'mock-tc-fl002-pbk1-pending',
+    flId: 'fl-002',
+    milestoneId: 'penaksiran-bpkb',
+    itemId: 'pbk-1',
+    itemText: 'Penaksiran BPKB Instant sesuai prosedur standar',
+    catatan: 'Tipe Item: HONDA VARIO 160 2021 (Basis Nilai: Rp 14.500.000)\nKepemilikan: Diri Sendiri\nDokumen: STNK B1234XYZ (berlaku s/d 2027-03-10), Mesin JM123456, BPKB K-9988776, Rangka MH1JM1234K123456\nPengecekan Luar: Warna Hitam, Plat B 1234 XYZ\nRefleksi: Semua dokumen lengkap dan sesuai, kondisi motor masih bagus.',
+    submittedAt: '2026-08-04T13:30:00',
+    day: 8,
+  },
+  // Sari (fl-002) — Penaksiran Emas discounter submission awaiting review. Perhiasan
+  // branch chosen (rather than Logam Mulia) so the 3 pending penaksiran demo cases above
+  // collectively exercise both branches of every discounter form's own type-picker.
+  {
+    id: 'mock-tc-fl002-pem1-pending',
+    flId: 'fl-002',
+    milestoneId: 'penaksiran-emas',
+    itemId: 'pem-1',
+    itemText: 'Penaksiran Emas sesuai prosedur standar',
+    catatan: 'Tipe Item: Perhiasan\nJenis Perhiasan: Cincin\nKadar: 18K (75%)\nBerat: 5.2 gram\nRefleksi: Kadar diverifikasi dengan jarum uji, hasil sesuai klaim nasabah. Berat ditimbang dua kali untuk memastikan akurasi.',
+    submittedAt: '2026-08-04T15:00:00',
+    day: 8,
+  },
 ]
 
 export const MOCK_NOTIFICATIONS: FLNotification[] = [

@@ -123,8 +123,8 @@ export function KanitSidebar() {
       <nav className="flex-1 px-2 py-1 space-y-0.5 overflow-y-auto">
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/kanit/dashboard" label="Dashboard" icon={<IconHome />} />
-        <NavItem to="/kanit/review-progress" label="Review" icon={<IconChecklist />} />
-        <NavItem to="/kanit/results" label="Hasil Akhir" icon={<IconChart />} />
+        <NavItem to="/kanit/review-progress" label="Review Progress" icon={<IconChecklist />} />
+        <NavItem to="/kanit/results" label="Nilai Akhir" icon={<IconChart />} />
       </nav>
 
       {/* User */}

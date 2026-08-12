@@ -178,14 +178,21 @@ export interface FinalEvaluation {
   recommendation: 'lulus' | 'tidak_lulus'
 }
 
+// Penilaian model (2026-08-10 rework): no more single weighted "Nilai Akhir" score.
+// 3 independent components — Latihan, Ujian Akhir, Evaluasi Akhir (kanit) — each with its
+// own KKM (see KKM_LATIHAN/KKM_UJIAN_AKHIR in mockData.ts). The OJT is Tidak Lulus the
+// moment ANY known component is below its KKM; Lulus only once all 3 are known and all
+// clear their KKM. `passed` encodes exactly that gate — see getFlScoreBreakdown().
 export interface ScoreBreakdown {
-  dailyProgressScore: number | null
-  assessmentScore: number | null
-  penaksiranScore: number | null
-  totalScore: number | null
-  passed: boolean | null
+  dailyProgressScore: number | null   // Latihan component (0-100)
+  assessmentScore: number | null      // Ujian Akhir component (0-100)
+  penaksiranScore: number | null      // legacy Penaksiran Emas intools-accuracy score — display-only, not part of the pass/fail gate
   daysScored: number
   penaksiranCount: number
+  latihanPassed: boolean | null       // null = not yet scored
+  ujianPassed: boolean | null         // null = not yet taken/scored
+  evaluasiPassed: boolean | null      // null = kanit hasn't filled Evaluasi Akhir yet
+  passed: boolean | null              // overall gate — false if any known component failed, true if all 3 known & passed, null while still undecided
 }
 
 export interface FLProfile {

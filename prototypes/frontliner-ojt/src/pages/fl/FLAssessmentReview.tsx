@@ -2,16 +2,24 @@ import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { ASSESSMENT_QUESTIONS } from '../../data/mockData'
 
-export default function FLAssessmentReview() {
-  const { currentUser, getFlAssessment } = useApp()
-  const assessment = getFlAssessment(currentUser!.id)
+// Shared by FL's own review page (below) and KanitAssessmentReview.tsx — a kanit needs to
+// see the exact same per-question breakdown for the peserta they're reviewing, just scoped
+// to that peserta's flId instead of currentUser, and with its own back-link/subtitle.
+export function AssessmentReviewView({ flId, backTo, backLabel, subtitle }: {
+  flId: string
+  backTo: string
+  backLabel: string
+  subtitle: string
+}) {
+  const { getFlAssessment } = useApp()
+  const assessment = getFlAssessment(flId)
 
   if (!assessment) {
     return (
       <div className="p-8 flex items-center justify-center min-h-96">
         <div className="text-center">
           <p className="text-[#65758B]">Ujian akhir belum dikerjakan.</p>
-          <Link to="/fl/assessment" className="text-[#023DFF] text-sm mt-2 inline-block">← Kembali ke Ujian Akhir</Link>
+          <Link to={backTo} className="text-[#023DFF] text-sm mt-2 inline-block">{backLabel}</Link>
         </div>
       </div>
     )
@@ -26,12 +34,12 @@ export default function FLAssessmentReview() {
   return (
     <div className="p-8">
       <div className="flex items-center gap-4 mb-2">
-        <Link to="/fl/assessment" className="text-sm text-[#65758B] hover:text-[#023DFF] transition-colors">← Ujian Akhir</Link>
+        <Link to={backTo} className="text-sm text-[#65758B] hover:text-[#023DFF] transition-colors">{backLabel}</Link>
       </div>
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#0F1729]">Review Jawaban</h1>
-          <p className="text-[#65758B] text-sm mt-1">Ujian Akhir OJT</p>
+          <p className="text-[#65758B] text-sm mt-1">{subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl px-4 py-2 text-center">
@@ -106,5 +114,17 @@ export default function FLAssessmentReview() {
         })}
       </div>
     </div>
+  )
+}
+
+export default function FLAssessmentReview() {
+  const { currentUser } = useApp()
+  return (
+    <AssessmentReviewView
+      flId={currentUser!.id}
+      backTo="/fl/assessment"
+      backLabel="← Ujian Akhir"
+      subtitle="Ujian Akhir OJT"
+    />
   )
 }

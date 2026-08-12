@@ -38,6 +38,16 @@ export default function FLSubmitTask() {
   const milestone = MILESTONES.find(m => m.id === id)
   const dailyTask  = DAILY_TASKS.find(t => t.id === id)
   const isIndividual = milestone?.submissionType === 'individual'
+  // Penaksiran Elektronik/BPKB/Emas's per-item submission is a dedicated full-page
+  // discounter form (Elektronik: Tipe Item search + Potongan Nilai defect checklist. BPKB:
+  // Cek Nomor Rangka + Tipe Item + Kelengkapan & Info Akses + Pengecekan Luar. Emas: Pilih
+  // Jenis Emas — Perhiasan or Logam Mulia, each with its own field set) — too big for this
+  // page's inline expand-to-form accordion, unlike every other individual-type milestone's
+  // simple Refleksi/Nomor SBG form.
+  const penaksiranFormRoute = id === 'penaksiran-elektronik' ? 'penaksiran-confirm'
+    : id === 'penaksiran-bpkb' ? 'penaksiran-bpkb-confirm'
+    : id === 'penaksiran-emas' ? 'penaksiran-emas-confirm'
+    : null
   const baseSchedule = id ? BASE_SCHEDULE[id] : null
 
   // ── Single-submission state ─────────────────────────────────
@@ -811,7 +821,14 @@ export default function FLSubmitTask() {
                       Lihat Riwayat →
                     </Link>
                   ) : awaitingReview ? null
-                  : inProgress && !showFormFor[item.id] ? (
+                  : penaksiranFormRoute ? (
+                    <Link
+                      to={`/fl/${penaksiranFormRoute}/${milestone.id}/${item.id}`}
+                      className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"
+                    >
+                      Isi Form Penaksiran →
+                    </Link>
+                  ) : inProgress && !showFormFor[item.id] ? (
                     <button
                       onClick={() => setShowFormFor(prev => ({ ...prev, [item.id]: true }))}
                       className="w-full h-10 flex items-center justify-center gap-1.5 bg-[#023DFF] hover:bg-[#001CDB] text-white font-semibold text-sm rounded-lg transition-colors"

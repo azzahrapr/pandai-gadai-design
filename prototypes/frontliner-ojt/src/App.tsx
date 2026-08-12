@@ -17,6 +17,9 @@ import FLNotifications from './pages/fl/FLNotifications'
 import FLProfile from './pages/fl/FLProfile'
 import FLModuleHistory from './pages/fl/FLModuleHistory'
 import FLPenaksiranSim from './pages/fl/FLPenaksiranSim'
+import FLPenaksiranConfirm from './pages/fl/FLPenaksiranConfirm'
+import FLPenaksiranBpkbConfirm from './pages/fl/FLPenaksiranBpkbConfirm'
+import FLPenaksiranEmasConfirm from './pages/fl/FLPenaksiranEmasConfirm'
 import FLPenaksiran from './pages/fl/FLPenaksiran'
 import FLAssessment from './pages/fl/FLAssessment'
 import FLAssessmentReview from './pages/fl/FLAssessmentReview'
@@ -26,9 +29,12 @@ import KanitDashboard from './pages/kanit/KanitDashboard'
 import KanitChecklistDetail from './pages/kanit/KanitChecklistDetail'
 import KanitPenaksiran from './pages/kanit/KanitPenaksiran'
 import KanitResults from './pages/kanit/KanitResults'
+import KanitAssessmentReview from './pages/kanit/KanitAssessmentReview'
 import KanitFinalEval from './pages/kanit/KanitFinalEval'
 import KanitReviewProgress from './pages/kanit/KanitReviewProgress'
+import KanitReviewLatihan from './pages/kanit/KanitReviewLatihan'
 import KanitTaskHistory from './pages/kanit/KanitTaskHistory'
+import KanitProfile from './pages/kanit/KanitProfile'
 
 export default function App() {
   return (
@@ -50,6 +56,9 @@ export default function App() {
             <Route path="checklist/sesi/:milestoneId" element={<FLChecklistSession />} />
             <Route path="checklist/task/:taskId" element={<FLTaskDetail />} />
             <Route path="confirm/:milestoneId/:itemId" element={<FLTaskConfirm />} />
+            <Route path="penaksiran-confirm/:milestoneId/:itemId" element={<FLPenaksiranConfirm />} />
+            <Route path="penaksiran-bpkb-confirm/:milestoneId/:itemId" element={<FLPenaksiranBpkbConfirm />} />
+            <Route path="penaksiran-emas-confirm/:milestoneId/:itemId" element={<FLPenaksiranEmasConfirm />} />
             <Route path="checklist/module/:milestoneId" element={<FLModuleHistory />} />
             <Route path="checklist/penaksiran-sim/:milestoneId" element={<FLPenaksiranSim />} />
             <Route path="checklist/:checklistId" element={<FLChecklistDetail />} />
@@ -62,11 +71,14 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<KanitDashboard />} />
             <Route path="review-progress" element={<KanitReviewProgress />} />
+            <Route path="review-latihan/:flId/:moduleKey" element={<KanitReviewLatihan />} />
             <Route path="review/:checklistId" element={<KanitChecklistDetail />} />
             <Route path="task-history/:flId/:taskKey" element={<KanitTaskHistory />} />
             <Route path="penaksiran" element={<KanitPenaksiran />} />
             <Route path="results" element={<KanitResults />} />
+            <Route path="assessment-review/:flId" element={<KanitAssessmentReview />} />
             <Route path="final-eval/:flId" element={<KanitFinalEval />} />
+            <Route path="profile" element={<KanitProfile />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

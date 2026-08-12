@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode } fro
 import { supabase } from '../lib/supabase'
 import type { AppUser, DailyChecklist, PenaksiranRecord, Assessment, FinalEvaluation, ScoreBreakdown, FLProfile, ExtensionRequest, ExtensionType, TaskConfirmation, FLNotification } from '../types'
 import { MOCK_TASK_CONFIRMATIONS, MOCK_NOTIFICATIONS } from '../data/mockData'
-import { MOCK_USERS, MILESTONES, INITIAL_CHECKLISTS, INITIAL_PENAKSIRAN, INITIAL_ASSESSMENTS } from '../data/mockData'
+import { MOCK_USERS, MILESTONES, INITIAL_CHECKLISTS, INITIAL_PENAKSIRAN, INITIAL_ASSESSMENTS, KKM_LATIHAN, KKM_UJIAN_AKHIR } from '../data/mockData'
 
 export interface ModuleDecision {
   action: 'carry-over' | 'close'
@@ -63,6 +63,7 @@ interface AppContextType {
   taskConfirmations: TaskConfirmation[]
   submitTaskConfirmation: (confirmation: TaskConfirmation) => void
   getItemConfirmations: (flId: string, milestoneId: string, itemId: string) => TaskConfirmation[]
+  reviewTaskConfirmation: (confirmationId: string, passed: boolean, kanitNote: string) => void
   notifications: FLNotification[]
   unreadNotificationCount: number
   markNotificationRead: (id: string) => void
@@ -696,6 +697,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return taskConfirmations.filter(c => c.flId === flId && c.milestoneId === milestoneId && c.itemId === itemId)
   }
 
+  function reviewTaskConfirmation(confirmationId: string, passed: boolean, kanitNote: string) {
+    const now = new Date().toISOString()
+    setTaskConfirmations(prev => {
+      const next = prev.map(c => c.id === confirmationId ? { ...c, kanitPassed: passed, kanitNote, kanitReviewedAt: now } : c)
+      localStorage.setItem('task-confirmations', JSON.stringify(next))
+      return next
+    })
+  }
+
   const [notificationsAll, setNotificationsAll] = useState<FLNotification[]>(MOCK_NOTIFICATIONS)
 
   const notifications = notificationsAll.filter(n => n.flId === currentUser?.id)
@@ -748,14 +758,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ? Math.round(penaksiran.reduce((sum, r) => sum + (r.kanitScore ?? 0), 0) / penaksiran.length)
       : null
 
-    let totalScore: number | null = null
-    let passed: boolean | null = null
-    if (dailyProgressScore !== null && assessmentScore !== null) {
-      totalScore = Math.round(dailyProgressScore * 0.6 + assessmentScore * 0.4)
-      passed = totalScore >= 75
-    }
+    const finalEval = finalEvaluations.find(e => e.flId === flId)
 
-    return { dailyProgressScore, assessmentScore, penaksiranScore, totalScore, passed, daysScored, penaksiranCount: penaksiran.length }
+    // 3-component gate (2026-08-10 rework) — no more single weighted total. Tidak Lulus
+    // the moment ANY known component dips below its own KKM (fail-fast, even before the
+    // other components are decided); Lulus only once all 3 are known and all clear KKM.
+    const latihanPassed = dailyProgressScore !== null ? dailyProgressScore >= KKM_LATIHAN : null
+    const ujianPassed = assessmentScore !== null ? assessmentScore >= KKM_UJIAN_AKHIR : null
+    const evaluasiPassed = finalEval ? finalEval.recommendation === 'lulus' : null
+    const anyFailed = latihanPassed === false || ujianPassed === false || evaluasiPassed === false
+    const allIn = latihanPassed !== null && ujianPassed !== null && evaluasiPassed !== null
+    const passed = anyFailed ? false : allIn ? true : null
+
+    return {
+      dailyProgressScore, assessmentScore, penaksiranScore, daysScored, penaksiranCount: penaksiran.length,
+      latihanPassed, ujianPassed, evaluasiPassed, passed,
+    }
   }
 
   return (
@@ -767,7 +785,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       extensionRequests, requestExtension, respondExtension,
       getFlUsers, getUserById, getFlChecklists, getFlPenaksiran,
       getFlAssessment, getFlFinalEvaluation, getFlScoreBreakdown, getTodayChecklist,
-      taskConfirmations, submitTaskConfirmation, getItemConfirmations,
+      taskConfirmations, submitTaskConfirmation, getItemConfirmations, reviewTaskConfirmation,
       notifications, unreadNotificationCount, markNotificationRead, markAllNotificationsRead,
     }}>
       {children}

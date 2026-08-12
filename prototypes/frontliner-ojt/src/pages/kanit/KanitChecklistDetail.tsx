@@ -11,7 +11,7 @@ export default function KanitChecklistDetail() {
 
   if (!cl) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-96">
+      <div className="p-4 md:p-8 flex items-center justify-center min-h-96">
         <div className="text-center">
           <p className="text-4xl mb-4">🔍</p>
           <p className="text-[#65758B]">Checklist tidak ditemukan</p>
@@ -38,7 +38,7 @@ export default function KanitChecklistDetail() {
   const taskScored = cl.tasks?.some(t => t.kanitScore !== undefined)
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-[#65758B] mb-6">
         <button onClick={() => navigate(-1)} className="hover:text-[#023DFF] transition-colors flex items-center gap-1.5">
@@ -50,7 +50,7 @@ export default function KanitChecklistDetail() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 flex-wrap">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold flex-shrink-0 ${
           overallScore !== undefined
             ? overallScore >= 85 ? 'bg-[#F0FDF4] text-[#15803D]'

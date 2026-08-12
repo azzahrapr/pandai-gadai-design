@@ -151,7 +151,7 @@ export default function FLMilestones() {
           <span className="text-xs text-[#65758B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">Hari 1–7</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[...minggu1].sort((a, b) => {
+          {[...minggu1].filter(m => !carriedOverFor(m.id)).sort((a, b) => {
             const isFailedA = isModuleFailed(a.id, false)
             const isFailedB = isModuleFailed(b.id, false)
             const isLateA = !isFailedA && !isMilestoneCompleted(a.id) && needsKanitApproval && !a.noRemedial
@@ -181,24 +181,26 @@ export default function FLMilestones() {
             <p className="text-sm text-[#B27202]">Materi Level 2 akan terbuka di hari ke-8.</p>
           </div>
         )}
-        {level2Unlocked && level2Unlocks[currentUser!.id] && (
-          <div className="bg-[#F0FDF4] border border-[#16A34A]/20 rounded-xl p-4 mb-4 flex items-center gap-3">
-            <span className="text-lg">🔓</span>
-            <p className="text-sm text-[#15803D]">Kanit sudah menentukan tindak lanjut untuk modul Level 1 yang terlambat.</p>
-          </div>
-        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[...minggu2].sort((a, b) => {
-            const locked = !level2Unlocked
-            return getStatusPriority(a.id, locked, false, isModuleFailed(a.id, locked)) - getStatusPriority(b.id, locked, false, isModuleFailed(b.id, locked))
-          }).map(m => {
-            const isActive = profile.activeMilestoneIds.includes(m.id)
-            const isLocked = !level2Unlocked
-            const isCompleted = isMilestoneCompleted(m.id)
-            const progress = getMilestoneProgress(m.id)
-            const isFailed = isModuleFailed(m.id, isLocked)
-            return <MilestoneCard key={m.id} milestone={m} isActive={isActive} isLocked={isLocked} isCompleted={isCompleted} isFailed={isFailed} progress={progress} quizScore={profile.quizScores?.[m.id]} quizAttempts={profile.quizAttempts?.[m.id] ?? 0} />
-          })}
+          {(() => {
+            // Carried-over Level 1 modules effectively become Level 2 modules — their
+            // startDate/deadline now follow Level 2's window — so their card moves here
+            // instead of staying in the Level 1 grid above (see KanitReviewProgress.tsx
+            // for the Kanit-side equivalent of this same move).
+            const carriedOverL1 = minggu1.filter(m => profile.activeMilestoneIds.includes(m.id) && carriedOverFor(m.id))
+            const level2All = [...carriedOverL1, ...[...minggu2].sort((a, b) => {
+              const locked = !level2Unlocked
+              return getStatusPriority(a.id, locked, false, isModuleFailed(a.id, locked)) - getStatusPriority(b.id, locked, false, isModuleFailed(b.id, locked))
+            })]
+            return level2All.map(m => {
+              const isActive = profile.activeMilestoneIds.includes(m.id)
+              const isLocked = !level2Unlocked
+              const isCompleted = isMilestoneCompleted(m.id)
+              const progress = getMilestoneProgress(m.id)
+              const isFailed = isModuleFailed(m.id, isLocked)
+              return <MilestoneCard key={m.id} milestone={m} isActive={isActive} isLocked={isLocked} isCompleted={isCompleted} isFailed={isFailed} progress={progress} quizScore={profile.quizScores?.[m.id]} quizAttempts={profile.quizAttempts?.[m.id] ?? 0} />
+            })
+          })()}
         </div>
       </section>
     </div>
