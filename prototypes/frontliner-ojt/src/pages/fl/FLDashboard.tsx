@@ -6,10 +6,14 @@ import { MILESTONES, DAILY_TASKS, getEffectiveTarget } from '../../data/mockData
 import type { FLProfile } from '../../types'
 import { StatusKelulusanCard } from '../../components/StatusKelulusanCard'
 
+// personal-grooming (L1) clamped to days 1-6 and personal-grooming-l2 added at days
+// 8-13 (2026-08-12) — was one entry spanning 1-13, now split into 2 independent
+// milestones (see MILESTONES in mockData.ts for the full rationale).
 const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':    { fromDay: 1,  toDay: 3  },
   'opening-cabang':   { fromDay: 4,  toDay: 6  },
-  'personal-grooming':{ fromDay: 1,  toDay: 13 },
+  'personal-grooming':{ fromDay: 1,  toDay: 6  },
+  'personal-grooming-l2': { fromDay: 8, toDay: 13 },
   'pelayanan-nasabah':{ fromDay: 8,  toDay: 13 },
   'pelayanan-nasabah-transaksi': { fromDay: 8, toDay: 13 },
   'customer-service-wa': { fromDay: 8, toDay: 13 },
@@ -38,11 +42,13 @@ export default function FLDashboard() {
     return level2Unlocks[currentUser!.id]?.moduleDecisions?.[milestoneId]?.action === 'carry-over'
   }
 
-  // Personal Grooming spans both weeks (day 1-13). Once Level 2 territory begins (day 8+),
-  // it carries over to the Level 2 list automatically — no kanit approval needed, unlike
-  // the Level 1 overdue/remedial flow — so the FL doesn't need to flip back to Level 1 for it.
+  // Personal Grooming used to span both weeks under one milestone id, carried into the
+  // Level 2 list via this special-case once day>=8. Split (2026-08-12) into 2 genuinely
+  // separate milestones — personal-grooming (minggu1) and personal-grooming-l2
+  // (minggu2) — so each module's own `type` is already correct on its own; this is now
+  // just an alias for `m.type`, kept only so the 4 call sites below don't need touching.
   function dailyListLevel(m: typeof MILESTONES[0]) {
-    return m.id === 'personal-grooming' && day >= 8 ? 'minggu2' : m.type
+    return m.type
   }
 
   // "Selesai" must mean fully resolved, latihan AND quiz both — a module with latihan
@@ -214,26 +220,39 @@ export default function FLDashboard() {
   // Kanit approval only decides the fate of individual late Level 1 modules (carry-over
   // vs closed/"Tidak Lulus"), not whether the FL can move on to Level 2 material.
   const l2Available = day >= 8
+  const isPastL1Deadline = day >= 7
+  // Same "any Level 1 module still late, kanit hasn't decided yet" condition
+  // FLMilestones.tsx's needsKanitApproval uses — drives the red "N modul melewati
+  // deadline" banner further down, and (below) which level card opens by default. A
+  // fresh FL landing on the dashboard should see that warning immediately, not have to
+  // swipe past an already-focused Level 2 card to discover it.
+  const activeMinggu1 = l1Milestones.filter(m => profile.activeMilestoneIds.includes(m.id))
+  const allLevel1Done = activeMinggu1.every(m => profile.completedMilestoneIds?.includes(m.id) ?? false)
+  const hasLateL1Modules = isPastL1Deadline && !allLevel1Done && !level2Unlocks[currentUser!.id]
 
   const completedDailyItems = todayDailyMilestones.filter(m => dailyCompletedIds.has(m.id))
 
   const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done' | 'upcoming'>('pending')
   const [l2Filter, setL2Filter] = useState<'all' | 'pending' | 'done' | 'upcoming'>('pending')
-  const [activeCard, setActiveCard] = useState<'level1' | 'level2'>(l2Available ? 'level2' : 'level1')
+  const [activeCard, setActiveCard] = useState<'level1' | 'level2'>(
+    hasLateL1Modules ? 'level1' : l2Available ? 'level2' : 'level1'
+  )
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const l2CardRef = useRef<HTMLDivElement>(null)
 
   // Auto-focus the Level 2 card whenever it becomes available — whether that's already
   // true on first load, or it flips true mid-session (e.g. kanit unlocks access, or the
-  // dev panel jumps the day forward) while the FL is still looking at Level 1.
+  // dev panel jumps the day forward) while the FL is still looking at Level 1. Skipped
+  // while hasLateL1Modules — a late-Level-1 case needs to actually be seen (and read)
+  // before the FL gets swept on to Level 2, not auto-scrolled past it.
   useEffect(() => {
-    if (l2Available) {
+    if (l2Available && !hasLateL1Modules) {
       setActiveCard('level2')
       if (scrollContainerRef.current && l2CardRef.current) {
         scrollContainerRef.current.scrollLeft = l2CardRef.current.offsetLeft - 16
       }
     }
-  }, [l2Available])
+  }, [l2Available, hasLateL1Modules])
 
   useEffect(() => {
     const el = scrollContainerRef.current
@@ -251,7 +270,6 @@ export default function FLDashboard() {
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
   }
   const l1DaysLeft = Math.max(0, 6 - day)
-  const isPastL1Deadline = day >= 7
   const l2DaysLeft = Math.max(0, 13 - day)
   const l1Deadline = fmtDeadline(profile.startDate, 5)
   const l2Deadline = fmtDeadline(profile.startDate, 12)
@@ -288,13 +306,14 @@ export default function FLDashboard() {
         return (p?.actual ?? 0) < (p?.expected ?? 1)
       })
     : []
-  const pgBreakDayProgress: Record<string, { actual: number; expected: number; actualReviewed: number }> = (day === 7) ? (() => {
-    const matchesPg = (cl: typeof allChecklists[number]) => cl.day >= 1 && cl.day <= 6 && cl.tasks?.some(t => t.taskId === 'personal-grooming')
-    const actual = submittedAllChecklists.filter(matchesPg).length
-    const actualReviewed = scoredAllChecklists.filter(matchesPg).length
-    return { 'personal-grooming': { actual, expected: 6, actualReviewed } }
-  })() : {}
-  const allModuleProgress = { ...weeklyProgress, ...dailyMilestoneProgress, ...pgBreakDayProgress }
+  // pgBreakDayProgress (the Day-7-only patch that evaluated personal-grooming's L1 half
+  // in isolation) was REMOVED 2026-08-12 — it existed only because personal-grooming's
+  // old toDay:13 excluded it from l1OnlyDailyIds (toDay<=6), so it never got the normal
+  // Day-7 evaluation every other daily module gets. Now that personal-grooming (L1) is
+  // its own milestone with toDay:6, l1OnlyDailyIds picks it up automatically and
+  // l1OverdueDailyMilestones below already handles it — same mechanism as
+  // closing-cabang/opening-cabang, no special-casing needed anymore.
+  const allModuleProgress = { ...weeklyProgress, ...dailyMilestoneProgress }
 
   return (
     <div className="p-4 md:p-8">
@@ -451,12 +470,11 @@ export default function FLDashboard() {
             const l1PendingWeekly = weeklyModules.filter(m => m.type === 'minggu1' && !isWeeklyDone(m) && !isWeeklyAwaitingReview(m))
             const l1AwaitingReviewWeekly = weeklyModules.filter(m => m.type === 'minggu1' && isWeeklyAwaitingReview(m))
             const l1DoneWeekly = weeklyModules.filter(m => m.type === 'minggu1' && isWeeklyDone(m))
-            const pgBreakDayMilestone = day === 7 ? MILESTONES.find(m => m.id === 'personal-grooming') : undefined
-            const pgProgress = pgBreakDayProgress['personal-grooming']
-            const pgBreakDayDone = pgProgress ? pgProgress.actualReviewed >= pgProgress.expected : false
-            const pgBreakDayAwaitingReview = pgProgress && !pgBreakDayDone
-              ? pgProgress.actual >= pgProgress.expected
-              : false
+            // pgBreakDayMilestone/pgProgress and its 3 injection points below were REMOVED
+            // 2026-08-12 — personal-grooming now has toDay:6 like every other L1 daily
+            // module (see allModuleProgress's comment above), so l1OverdueDailyMilestones
+            // already covers it on Day 7+ the same way it covers closing-cabang/opening-
+            // cabang, no bespoke Day-7-only patch needed anymore.
             const items: { m: (typeof MILESTONES)[0]; s: TaskStatus; isDaily: boolean }[] = [
               // Pending first
               ...l1RemainingDaily.filter(m => !dailyIncompleteIds.has(m.id)).map(m => ({ m, s: 'pending' as TaskStatus, isDaily: true })),
@@ -464,15 +482,12 @@ export default function FLDashboard() {
               // Overdue / gak lulus
               ...(isPastL1Deadline ? l1PendingWeekly.map(m => ({ m, s: 'overdue' as TaskStatus, isDaily: false })) : []),
               ...l1OverdueDailyMilestones.map(m => ({ m, s: 'overdue' as TaskStatus, isDaily: true })),
-              ...(pgBreakDayMilestone && !pgBreakDayDone && !pgBreakDayAwaitingReview ? [{ m: pgBreakDayMilestone, s: 'failed' as TaskStatus, isDaily: true }] : []),
               ...l1RemainingDaily.filter(m => dailyIncompleteIds.has(m.id)).map(m => ({ m, s: 'incomplete' as TaskStatus, isDaily: true })),
               // Menunggu penilaian kanit
               ...l1CompletedDaily.filter(m => dailyAwaitingReviewIds.has(m.id)).map(m => ({ m, s: 'awaiting_review' as TaskStatus, isDaily: true })),
-              ...(pgBreakDayMilestone && pgBreakDayAwaitingReview ? [{ m: pgBreakDayMilestone, s: 'awaiting_review' as TaskStatus, isDaily: true }] : []),
               ...l1AwaitingReviewWeekly.map(m => ({ m, s: 'awaiting_review' as TaskStatus, isDaily: false })),
               // Selesai last
               ...l1CompletedDaily.filter(m => dailyReviewedIds.has(m.id)).map(m => ({ m, s: 'done' as TaskStatus, isDaily: true })),
-              ...(pgBreakDayMilestone && pgBreakDayDone ? [{ m: pgBreakDayMilestone, s: 'done' as TaskStatus, isDaily: true }] : []),
               ...l1DoneWeekly.map(m => ({ m, s: 'done' as TaskStatus, isDaily: false })),
               // Akan Datang last — daily-schedule modules that haven't started yet, at any distance
               ...upcomingDailyMilestones.filter(m => m.type === 'minggu1').map(m => ({ m, s: 'upcoming' as TaskStatus, isDaily: true })),
@@ -591,25 +606,39 @@ export default function FLDashboard() {
 // Text-only onboarding would just be a wall of bullets — instead this launches an
 // interactive walkthrough (TourOverlay/TourContext) that navigates the FL through the
 // real dashboard/milestones UI, spotlighting the actual element being explained (level
-// progress, daily task cards, module status, module detail). Mandatory: no close/skip —
-// the only way past this card is to click through the tour to its last step.
+// progress, daily task cards, module status, module detail). Mandatory: no close/skip.
+// Was an inline dashboard card (2026-08-13: converted to a DS bottom sheet) — as a plain
+// card, the FL could still scroll past it and interact with the rest of the dashboard
+// without ever engaging it. A bottom sheet's full-screen backdrop actually blocks that:
+// nothing behind it is clickable until "Mulai Tur" is pressed. Deliberately has NO close/X
+// button anywhere — the DS Bottom Sheet anatomy (drag handle → title → body → action
+// button) doesn't include one to begin with — and the backdrop's onClick is likewise
+// omitted on purpose (every other bottom sheet in this app closes on backdrop click;
+// this one must not, or it'd be trivially skippable the same way the old card was).
 function OnboardingGuide() {
   const { start } = useTour()
   return (
-    <div className="relative mb-6 bg-[#EFF6FF] border border-[#BFDBFE] rounded-2xl p-5">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-lg">👋</span>
-        <p className="text-base font-bold text-[#0F1729]">Kenalan dulu sama cara kerja OJT, yuk!</p>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+      <div className="bg-white rounded-t-2xl w-full max-w-xl overflow-hidden">
+        <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
+          <div className="w-9 h-1 rounded-full bg-[#E1E7EF]" />
+        </div>
+        <div className="px-6 pt-3 pb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">👋</span>
+            <p className="text-base font-bold text-[#0F1729]">Kenalan dulu sama cara kerja OJT, yuk!</p>
+          </div>
+          <p className="text-xs text-[#65758B] mb-4 leading-relaxed">
+            Yuk lihat langsung di halamannya, biar makin paham soal progress belajar, tugas, dan modul yang perlu dikerjakan.
+          </p>
+          <button
+            onClick={start}
+            className="w-full h-11 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            Mulai Tur →
+          </button>
+        </div>
       </div>
-      <p className="text-xs text-[#65758B] mb-4 leading-relaxed">
-        Yuk lihat langsung di halamannya, biar makin paham soal progress belajar, tugas, dan modul yang perlu dikerjakan.
-      </p>
-      <button
-        onClick={start}
-        className="w-full h-9 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors"
-      >
-        Mulai Tur →
-      </button>
     </div>
   )
 }

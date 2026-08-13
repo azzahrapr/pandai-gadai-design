@@ -4,10 +4,14 @@ import { useApp } from '../../context/AppContext'
 import { MILESTONES } from '../../data/mockData'
 import type { FLProfile, DailyChecklist } from '../../types'
 
+// personal-grooming (L1) clamped to days 1-6 and personal-grooming-l2 added at days
+// 8-13 (2026-08-12) — was one entry spanning 1-13, now split into 2 independent
+// milestones (see MILESTONES in mockData.ts for the full rationale).
 const DAILY_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':      { fromDay: 1,  toDay: 3  },
   'opening-cabang':     { fromDay: 4,  toDay: 6  },
-  'personal-grooming':  { fromDay: 1,  toDay: 13 },
+  'personal-grooming':  { fromDay: 1,  toDay: 6  },
+  'personal-grooming-l2': { fromDay: 8, toDay: 13 },
   'pelayanan-nasabah':  { fromDay: 8,  toDay: 13 },
   'customer-service-wa':{ fromDay: 8,  toDay: 13 },
 }
@@ -17,6 +21,7 @@ const TASK_TO_MILESTONE: Record<string, string> = {
   'closing-cabang': 'closing-cabang',
   'opening-cabang': 'opening-cabang',
   'personal-grooming': 'personal-grooming',
+  'personal-grooming-l2': 'personal-grooming-l2',
   'pengenalan-produk': 'pengenalan-produk',
   'canvassing': 'canvassing',
   'cash-management': 'cash-management',

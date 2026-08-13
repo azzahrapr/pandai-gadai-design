@@ -15,6 +15,7 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'closing-cabang': ['closing-cabang'],
   'opening-cabang': ['opening-cabang'],
   'personal-grooming': ['personal-grooming'],
+  'personal-grooming-l2': ['personal-grooming-l2'],
   'pengenalan-produk': ['pengenalan-produk'],
   'canvassing': ['canvassing'],
   'cash-management': ['cash-management'],

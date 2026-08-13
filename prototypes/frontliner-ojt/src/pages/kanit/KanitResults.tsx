@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
-import { MILESTONES, getEffectiveTarget, ASSESSMENT_QUESTIONS, KKM_LATIHAN, KKM_UJIAN_AKHIR } from '../../data/mockData'
+import { MILESTONES, getEffectiveTarget, ASSESSMENT_QUESTIONS, KKM_LATIHAN, KKM_UJIAN_AKHIR, KKM_SIKAP_KERJA } from '../../data/mockData'
 import type { KanitProfile, FLProfile } from '../../types'
 import { StatusKelulusanCard } from '../../components/StatusKelulusanCard'
 
@@ -208,7 +208,7 @@ export default function KanitResults() {
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <ScoreCard label="Latihan" status={latihanRevealed ? componentStatus(scores.latihanPassed) : 'menunggu'} score={latihanRevealed ? scores.dailyProgressScore : null} note={latihanRevealed ? `Min. lulus ${KKM_LATIHAN}` : undefined} isActive={selectedCard === 'daily'} onClick={() => setSelectedCard('daily')} />
             <ScoreCard label="Ujian Akhir" status={componentStatus(scores.ujianPassed)} score={scores.assessmentScore} note={assessment ? `Min. lulus ${KKM_UJIAN_AKHIR}` : undefined} isActive={selectedCard === 'assessment'} onClick={() => setSelectedCard('assessment')} />
-            <ScoreCard label="Sikap Kerja" status={componentStatus(scores.evaluasiPassed)} score={null} note={finalEval ? 'Min. lulus' : undefined} isActive={selectedCard === 'evaluasi'} onClick={() => setSelectedCard('evaluasi')} />
+            <ScoreCard label="Sikap Kerja" status={componentStatus(scores.evaluasiPassed)} score={scores.sikapKerjaScore} note={finalEval ? `Min. lulus ${KKM_SIKAP_KERJA}` : undefined} isActive={selectedCard === 'evaluasi'} onClick={() => setSelectedCard('evaluasi')} />
           </div>
 
           {/* Detail panel */}
@@ -308,18 +308,16 @@ export default function KanitResults() {
                         {finalEval.softSkills.map(s => (
                           <div key={s.skill} className="flex items-center justify-between text-sm">
                             <span className="text-[#65758B]">{s.skill}</span>
-                            <span className="font-semibold text-[#0F1729]">{s.score}/5</span>
+                            <span className="font-semibold text-[#0F1729]">{s.score}/4</span>
                           </div>
                         ))}
                         <div className="flex items-center justify-between text-sm pt-1.5 mt-1.5 border-t border-[#F1F5F9]">
-                          <span className="text-[#65758B] font-semibold">Attitude & Kedisiplinan</span>
-                          <span className="font-semibold text-[#0F1729]">{finalEval.attitudeScore}/5</span>
+                          <span className="text-[#65758B] font-semibold">Attitude & Kesopanan</span>
+                          <span className="font-semibold text-[#0F1729]">{finalEval.attitudeScore}/4</span>
                         </div>
                         <div className="flex items-center justify-between text-sm pt-1.5 mt-1.5 border-t border-[#F1F5F9]">
                           <span className="text-[#0F1729] font-bold">Total Nilai</span>
-                          <span className="font-bold text-[#023DFF]">
-                            {((finalEval.softSkills.reduce((sum, s) => sum + s.score, 0) + finalEval.attitudeScore) / (finalEval.softSkills.length + 1)).toFixed(1)}/5
-                          </span>
+                          <span className="font-bold text-[#023DFF]">{scores.sikapKerjaScore ?? '—'}</span>
                         </div>
                       </div>
                     </div>

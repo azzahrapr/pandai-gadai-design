@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
+// Curated for the Kanit handover demo (2026-08-12) — Dewi and Rizky's own FL logins are
+// hidden here (not relevant to the 4 exploration flows below), but both still exist as
+// MOCK_USERS; Dewi specifically stays in kanit-001's roster for the Rapot Akhir case.
 const DEMO_ACCOUNTS = [
-  { email: 'andi@pandaigadai.com',  label: 'Andi Pratama',       role: 'OJT Frontliner · Hari 7' },
-  { email: 'sari@pandaigadai.com',  label: 'Sari Dewi Lestari',  role: 'OJT Frontliner · Hari 8' },
-  { email: 'budi@pandaigadai.com',  label: 'Budi Santoso',       role: 'OJT Frontliner · Hari 13' },
-  { email: 'dewi@pandaigadai.com',  label: 'Dewi Rahmawati',     role: 'OJT Frontliner · Hari 13' },
-  { email: 'rizky@pandaigadai.com', label: 'Rizky Ramadhan',     role: 'OJT Frontliner · Hari 10' },
-  { email: 'melati@pandaigadai.com', label: 'Melati Anjani',     role: 'OJT Frontliner · Belum Mulai (H-1)' },
+  { email: 'melati@pandaigadai.com', label: 'Melati Anjani',     role: 'OJT Frontliner · Hari 1 (Dashboard awal)' },
+  { email: 'andi@pandaigadai.com',  label: 'Andi Pratama',       role: 'OJT Frontliner · Hari 2 (Mendekati deadline)' },
+  { email: 'sari@pandaigadai.com',  label: 'Sari Dewi Lestari',  role: 'OJT Frontliner · Hari 8 (Modul terlambat)' },
+  { email: 'budi@pandaigadai.com',  label: 'Budi Santoso',       role: 'OJT Frontliner · Hari 13 (Ujian akhir)' },
   { email: 'kanit@pandaigadai.com', label: 'Kepala Unit',        role: 'Supervisor & Penilai' },
 ]
 

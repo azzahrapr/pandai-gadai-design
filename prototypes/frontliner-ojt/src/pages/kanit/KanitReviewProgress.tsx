@@ -21,6 +21,7 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'closing-cabang': ['closing-cabang'],
   'opening-cabang': ['opening-cabang'],
   'personal-grooming': ['personal-grooming'],
+  'personal-grooming-l2': ['personal-grooming-l2'],
   'pengenalan-produk': ['pengenalan-produk'],
   'canvassing': ['canvassing'],
   'cash-management': ['cash-management'],
@@ -48,6 +49,7 @@ export default function KanitReviewProgress() {
     scoreChecklist, scoreChecklistTasks,
     level2Unlocks, unlockLevel2,
     extensionRequests, respondExtension,
+    getFlScoreBreakdown, getFlFinalEvaluation,
   } = useApp()
   const profile = currentUser!.profile as KanitProfile
   const flUsers = getFlUsers().filter(u => profile.flIds.includes(u.id))
@@ -67,6 +69,15 @@ export default function KanitReviewProgress() {
 
   function hasPendingReview(flId: string): boolean {
     return getFlChecklists(flId).some(c => c.status === 'submitted') || getPendingConfirmationCount(flId) > 0
+  }
+
+  // "Ready for evaluasi" — same condition KanitResults.tsx uses to show its own "Isi
+  // Rapot Akhir" banner (Latihan & Ujian Akhir both scored). Mirrored here so this page
+  // can surface the same banner the moment there's nothing left to review/study — see
+  // its render site below for the full "nothing pending, nothing late" gate.
+  function readyForEvaluasi(flId: string): boolean {
+    const s = getFlScoreBreakdown(flId)
+    return s.dailyProgressScore !== null && s.assessmentScore !== null
   }
 
   const [searchParams] = useSearchParams()
@@ -385,6 +396,29 @@ export default function KanitReviewProgress() {
             </div>
           </div>
           <button onClick={() => setShowUnlockForm(true)} className="flex-shrink-0 h-9 px-4 bg-[#023DFF] hover:bg-[#001CDB] text-white text-sm font-semibold rounded-lg transition-colors">Ambil Tindakan →</button>
+        </div>
+      )}
+
+      {/* Isi Rapot Akhir banner — reused verbatim from KanitResults.tsx's own banner
+          (same copy, same style, same destination), surfaced here too and placed above
+          the tabs so it's the very first thing the kanit sees once there's genuinely
+          nothing left to review or study for this FL (no pending review, no late Level 1
+          modules awaiting a decision) but Rapot Akhir hasn't been filled in yet — e.g.
+          Dewi, who's fully done and just waiting on the kanit. Without this, the kanit
+          would land on two empty tabs with no clear next step. */}
+      {selectedFl && flProfile && readyForEvaluasi(selectedFlId) && !getFlFinalEvaluation(selectedFlId)
+        && !hasPendingReview(selectedFlId) && !needsLevel2Unlock(selectedFlId) && (
+        <div className="bg-[#023DFF] rounded-xl p-4 sm:p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-start gap-4 flex-1">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">📋</div>
+            <div className="flex-1">
+              <p className="font-bold text-white text-sm">Isi Rapot Akhir</p>
+              <p className="text-blue-100 text-xs mt-0.5">Lengkapi untuk menentukan kelulusan OJT, termasuk sikap & soft skills.</p>
+            </div>
+          </div>
+          <Link to={`/kanit/final-eval/${selectedFlId}`} className="flex-shrink-0 bg-white text-[#023DFF] font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-colors text-center">
+            Isi Rapot Akhir →
+          </Link>
         </div>
       )}
 

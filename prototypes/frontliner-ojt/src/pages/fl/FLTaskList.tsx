@@ -6,10 +6,14 @@ import type { FLProfile, TaskConfirmation, DailyChecklist } from '../../types'
 
 const SBG_MILESTONE_IDS = new Set(['sop-administrasi', 'packing-sealing'])
 
+// personal-grooming (L1) clamped to days 1-6 and personal-grooming-l2 added at days
+// 8-13 (2026-08-12) — was one entry spanning 1-13, now split into 2 independent
+// milestones (see MILESTONES in mockData.ts for the full rationale).
 const BASE_SCHEDULE: Record<string, { fromDay: number; toDay: number }> = {
   'closing-cabang':     { fromDay: 1,  toDay: 3  },
   'opening-cabang':     { fromDay: 4,  toDay: 6  },
-  'personal-grooming':  { fromDay: 1,  toDay: 13 },
+  'personal-grooming':  { fromDay: 1,  toDay: 6  },
+  'personal-grooming-l2': { fromDay: 8, toDay: 13 },
   'pelayanan-nasabah':  { fromDay: 8,  toDay: 13 },
   'customer-service-wa':{ fromDay: 8,  toDay: 13 },
 }
@@ -96,8 +100,10 @@ export default function FLSubmitTask() {
       ).length
     : 0
   const effectiveToDay = (baseSchedule?.toDay ?? 0) + approvedRedoCount
-  // personal-grooming has no carry-over; all other scheduled modules can be submitted past deadline
-  const canCarryOver = id !== 'personal-grooming'
+  // Neither Personal Grooming module has carry-over (must be done in full every day, no
+  // catch-up — see noRemedial on both in mockData.ts); all other scheduled modules can
+  // be submitted past deadline.
+  const canCarryOver = id !== 'personal-grooming' && id !== 'personal-grooming-l2'
   const isPastSchedule = !!baseSchedule && profile.currentDay > effectiveToDay
   const isActiveToday  = !baseSchedule
     || (profile.currentDay >= baseSchedule.fromDay && profile.currentDay <= effectiveToDay)

@@ -1,11 +1,29 @@
 import type { Milestone, DailyChecklist, PenaksiranRecord, Assessment, AppUser, TaskConfirmation, FLNotification, Course, TargetSpec } from '../types'
 
-// Penilaian model (2026-08-10) — the minimum passing grade (KKM) for each of the 2
-// numeric-score components. Evaluasi Akhir (kanit) has no numeric KKM of its own — its
-// pass/fail is just whichever recommendation the kanit picks. See ScoreBreakdown in
-// types/index.ts and getFlScoreBreakdown() in AppContext.tsx for the actual gate logic.
+// Penilaian model (2026-08-10) — the minimum passing grade (KKM) for each numeric-score
+// component. See ScoreBreakdown in types/index.ts and getFlScoreBreakdown() in
+// AppContext.tsx for the actual gate logic.
 export const KKM_LATIHAN = 75
 export const KKM_UJIAN_AKHIR = 75
+// Sikap Kerja's KKM (2026-08-12, corrected same day) — 0-100, same scale and same 75
+// threshold as KKM_LATIHAN/KKM_UJIAN_AKHIR. Score itself is derived from the official
+// curriculum spreadsheet's own formula: (sum of all 5 ratings [4 soft skills + Attitude,
+// each rated 1-4] / 20) * 100 — see ScoreBreakdown.sikapKerjaScore in types/index.ts and
+// getFlScoreBreakdown() in AppContext.tsx. Doesn't feed getFlScoreBreakdown()'s own
+// `evaluasiPassed` directly (that's still just the kanit's own Pernyataan Kelulusan
+// recommendation) — instead it gates whether the kanit is even ALLOWED to pick "Lulus"
+// there in the first place (see KanitFinalEval.tsx's lulusDisabled), so the two can never
+// end up contradicting each other.
+export const KKM_SIKAP_KERJA = 75
+
+// Materi placeholder (2026-08-12) — real slide content per module isn't ready yet, so
+// every material across every milestone falls back to this shared Google Slides
+// placeholder instead of its own written `content` (see SlideViewer's use of this in
+// FLMilestoneDetail.tsx: `material.slideUrl ?? PLACEHOLDER_SLIDE_URL`). The written
+// `content` text on each material is left untouched in the data below — it's just
+// shadowed by this fallback for now — so swapping in the real per-module slide later is
+// just setting that material's own `slideUrl`, no data loss to restore from.
+export const PLACEHOLDER_SLIDE_URL = 'https://docs.google.com/presentation/d/1VOTzFrxzbV7VbS-IzzIMuWPk-6edIe2FL5BaDSl74sc/embed'
 
 // Resolves a Milestone's or ChecklistItem's effective attempt targets. `carriedOver`
 // (kanit approved this item's carry-over from Level 1 into Level 2) adds the item's
@@ -66,6 +84,21 @@ export const DAILY_TASKS: DailyTaskDef[] = [
   },
   {
     id: 'personal-grooming',
+    name: 'Personal Grooming',
+    items: [
+      { id: 'pg-1', text: 'Seragam rapih dan bersih' },
+      { id: 'pg-2', text: 'Tata rias (wajah dan rambut) sesuai standar' },
+      { id: 'pg-3', text: 'Sepatu hitam tertutup' },
+      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)' },
+    ],
+    minRequired: 3,
+  },
+  // Level 2's own Personal Grooming (2026-08-12) — split off from the single
+  // day-1-13-spanning milestone above into a genuinely separate module, not a
+  // continuation. Same checklist form/items reused (same grooming standard, just
+  // tracked independently per level) — see the MILESTONES entry below for the target.
+  {
+    id: 'personal-grooming-l2',
     name: 'Personal Grooming',
     items: [
       { id: 'pg-1', text: 'Seragam rapih dan bersih' },
@@ -317,14 +350,69 @@ export const MILESTONES: Milestone[] = [
     description: 'Standar penampilan Frontliner: seragam, tata rias, aroma tubuh',
     unlockDay: 1,
     estimatedMinutes: 15,
-    // Spans both weeks already (12 days total, days 1-13 minus day 7) — must be done in
-    // full every day, no catch-up possible, so it never gets the "Terlambat" treatment.
-    target: 12,
-    targetForPass: 8,
+    // Level-1-only now (2026-08-12) — was a single milestone spanning both weeks (12
+    // days total, days 1-13 minus day 7); split into this L1-only version (target 6,
+    // days 1-6) plus a genuinely separate 'personal-grooming-l2' milestone below (also
+    // target 6, days 8-13) — not a continuation of this one, its own independent
+    // progress/quiz. Still noRemedial: must be done in full every day, no catch-up.
+    target: 6,
+    targetForPass: 4,
     noRemedial: true,
     materials: [
       {
         id: 'pg-m1',
+        title: 'Standar Penampilan Frontliner',
+        content: `## Standar Personal Grooming\n\n### Komponen Wajib:\n- **Seragam** — Rapih, bersih, tidak kusut atau bernoda\n- **Tata Rias** — Wajah dan rambut sesuai standar perusahaan\n- **Sepatu** — Hitam, tertutup, bersih\n- **Aroma** — Bersih, tidak bau badan\n\n### Tips Menjaga Standar:\n1. Siapkan seragam malam sebelumnya agar tidak terburu-buru\n2. Pastikan sepatu bersih sebelum berangkat\n3. Bawa perlengkapan grooming cadangan di tas\n4. Cek penampilan di cermin sebelum membuka cabang`,
+      },
+    ],
+    checklistItems: [
+      { id: 'pg-1', text: 'Seragam rapih dan bersih', category: 'Penampilan' },
+      { id: 'pg-2', text: 'Tata rias (wajah dan rambut) sesuai standar', category: 'Penampilan' },
+      { id: 'pg-3', text: 'Sepatu hitam tertutup', category: 'Penampilan' },
+      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)', category: 'Penampilan' },
+    ],
+    quiz: [
+      {
+        id: 'pg-q1',
+        question: 'Manakah yang TIDAK termasuk komponen wajib Personal Grooming?',
+        options: ['Seragam rapih dan bersih', 'Tata rias sesuai standar', 'Sepatu hitam tertutup', 'Membawa parfum bermerek tertentu'],
+        correctIndex: 3,
+      },
+      {
+        id: 'pg-q2',
+        question: 'Standar sepatu yang harus dipakai adalah...',
+        options: ['Hitam, tertutup', 'Putih, terbuka', 'Coklat, tertutup', 'Bebas asal rapi'],
+        correctIndex: 0,
+      },
+      {
+        id: 'pg-q3',
+        question: 'Tips apa yang disarankan agar tidak terburu-buru sebelum berangkat?',
+        options: ['Menyiapkan seragam malam sebelumnya', 'Datang lebih siang', 'Melewati sarapan', 'Menitipkan seragam ke teman'],
+        correctIndex: 0,
+      },
+    ],
+  },
+  // Level 2's own Personal Grooming (2026-08-12, see the L1 entry's comment above for
+  // why this is now a separate milestone rather than day-1-13 carry-over). Same
+  // materials/checklist/quiz content reused — same grooming standard, independent
+  // tracking. unlockDay:12 matches the other 6 Level 2 modules' quiz-unlock staggering
+  // (all restaggered from 8 to 12 the same day) — see Pelayanan Nasabah Visit's
+  // unlockDay comment for that mechanic.
+  {
+    id: 'personal-grooming-l2',
+    name: 'Personal Grooming',
+    shortName: 'Grooming',
+    type: 'minggu2',
+    order: 9,
+    description: 'Standar penampilan Frontliner: seragam, tata rias, aroma tubuh',
+    unlockDay: 12,
+    estimatedMinutes: 15,
+    target: 6,
+    targetForPass: 4,
+    noRemedial: true,
+    materials: [
+      {
+        id: 'pgl2-m1',
         title: 'Standar Penampilan Frontliner',
         content: `## Standar Personal Grooming\n\n### Komponen Wajib:\n- **Seragam** — Rapih, bersih, tidak kusut atau bernoda\n- **Tata Rias** — Wajah dan rambut sesuai standar perusahaan\n- **Sepatu** — Hitam, tertutup, bersih\n- **Aroma** — Bersih, tidak bau badan\n\n### Tips Menjaga Standar:\n1. Siapkan seragam malam sebelumnya agar tidak terburu-buru\n2. Pastikan sepatu bersih sebelum berangkat\n3. Bawa perlengkapan grooming cadangan di tas\n4. Cek penampilan di cermin sebelum membuka cabang`,
       },
@@ -363,7 +451,10 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 4,
     description: 'Kemampuan menjelaskan produk gadai, biaya, dan jenis transaksi kepada nasabah',
-    unlockDay: 2,
+    // Staggered 2026-08-12 (was 2) as part of a real Level-1 curriculum pacing fix — see
+    // the matching comment on Canvassing's unlockDay below for the full staggered
+    // schedule and why this changed from a same-day free-for-all to a real progression.
+    unlockDay: 3,
     estimatedMinutes: 30,
     target: 3,
     targetForPass: 1,
@@ -407,7 +498,16 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 5,
     description: 'Teknik canvassing aktif dan pelaporan menggunakan Avenza',
-    unlockDay: 1,
+    // Level 1 quiz-unlock staggering (2026-08-12) — was `unlockDay: 1` like almost every
+    // other Level 1 module, meaning every mini quiz opened on Day 1 with zero pacing.
+    // `unlockDay` only ever gates quiz availability (`quizUnlocked`/`quizStartDay` in
+    // FLDashboard.tsx/FLMilestoneDetail.tsx) — it never gates materi/latihan visibility,
+    // so this is a quiz-timing-only change, safe to apply platform-wide. New staggered
+    // schedule across the Level 1 week (closing-cabang + personal-grooming stay Day 1,
+    // opening-cabang stays Day 4 — both already had real pacing): Pengenalan Produk &
+    // Canvassing → Day 3, Cash Management → Day 4, SOP Administrasi → Day 5,
+    // Packing & Sealing + Offloading → Day 6.
+    unlockDay: 3,
     estimatedMinutes: 30,
     // Carries over into Level 2 if a kanit approves it — see level2Target/level2TargetForPass.
     target: 2,
@@ -458,7 +558,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 6,
     description: 'Administratif tarik-setor tunai, kas kecil, dan uang kelebihan nasabah',
-    unlockDay: 1,
+    unlockDay: 4,
     estimatedMinutes: 30,
     materials: [
       {
@@ -511,7 +611,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 7,
     description: 'Prosedur administratif transaksi Gadai Baru, Perpanjangan, Cicil, dan Tebus untuk Elektronik, BPKB, dan LM Press via Intools dan Kopra',
-    unlockDay: 1,
+    unlockDay: 5,
     estimatedMinutes: 45,
     materials: [
       {
@@ -600,7 +700,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 8,
     description: 'Teknik packing dan penyimpanan semua jenis barang gadai sesuai standar',
-    unlockDay: 1,
+    unlockDay: 6,
     estimatedMinutes: 30,
     materials: [
       {
@@ -703,7 +803,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu1',
     order: 9,
     description: 'Prosedur packing dan pelaporan barang offload',
-    unlockDay: 1,
+    unlockDay: 6,
     estimatedMinutes: 15,
     materials: [
       {
@@ -744,7 +844,13 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 10,
     description: 'Standar pelayanan tatap muka: sambutan dan edukasi aplikasi kepada nasabah',
-    unlockDay: 8,
+    // Level 2 quiz-unlock staggering (2026-08-12) — was `unlockDay: 8` for all 6 Level 2
+    // modules (same "every quiz opens simultaneously" issue the Level 1 modules had,
+    // fixed the same day — see Canvassing's unlockDay comment for the full mechanics:
+    // `unlockDay` only ever gates quiz availability, never materi/latihan visibility).
+    // All 6 Level 2 modules now unlock their quiz on Day 12 instead — Pelayanan Nasabah
+    // Visit/Transaksi, Customer Service via WA, Penaksiran Elektronik/Emas/BPKB.
+    unlockDay: 12,
     estimatedMinutes: 30,
     target: 6,
     targetForPass: 3,
@@ -792,7 +898,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 10,
     description: 'Penjelasan SBG/Resi dan penutupan interaksi transaksi nasabah',
-    unlockDay: 8,
+    unlockDay: 12,
     estimatedMinutes: 15,
     target: 6,
     targetForPass: 3,
@@ -829,7 +935,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 11,
     description: 'Komunikasi nasabah via WhatsApp: reminder jatuh tempo dan penanganan pertanyaan/komplain',
-    unlockDay: 8,
+    unlockDay: 12,
     estimatedMinutes: 30,
     target: 3,
     targetForPass: 1,
@@ -872,7 +978,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 12,
     description: 'Teknik penaksiran gadget dan perangkat elektronik: HP, tablet, laptop, game console, kamera',
-    unlockDay: 8,
+    unlockDay: 12,
     estimatedMinutes: 45,
     // Per-item "individual" (2026-08-05) — each device type below is its own independently
     // tracked task via TaskConfirmation, submitted through the dedicated discounter form
@@ -979,7 +1085,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 13,
     description: 'Teknik penaksiran emas — Perhiasan dan Logam Mulia (LM Press) — sesuai prosedur standar',
-    unlockDay: 8,
+    unlockDay: 12,
     estimatedMinutes: 45,
     // Per-item "individual" (2026-08-12) — same switch as Penaksiran Elektronik/BPKB,
     // submitted through its own dedicated form (FLPenaksiranEmasConfirm.tsx: Pilih Jenis
@@ -1038,7 +1144,7 @@ export const MILESTONES: Milestone[] = [
     type: 'minggu2',
     order: 14,
     description: 'Teknik penaksiran kendaraan bermotor berdasarkan dokumen BPKB Instant',
-    unlockDay: 8,
+    unlockDay: 12,
     estimatedMinutes: 45,
     // Per-item "individual" (2026-08-05) — same switch as Penaksiran Elektronik, submitted
     // through its own dedicated discounter form (FLPenaksiranBpkbConfirm.tsx: Cek Nomor
@@ -1098,11 +1204,17 @@ export const MOCK_USERS: AppUser[] = [
       branch: 'Cabang Sudirman',
       position: 'OJT Frontliner',
       startDate: '2026-07-24',
-      currentDay: 6,
+      // Day 2 (handover demo persona, 2026-08-12) — near-deadline on today's Canvassing
+      // checklist (not yet submitted) from the FL side, and SOP Administrasi has pending
+      // individual submissions awaiting Kanit review (see MOCK_TASK_CONFIRMATIONS below) —
+      // covers both "near deadline to submit" (FL view) and "pending review" (Kanit view)
+      // off the same account. Nothing completed yet — too early in the program for any
+      // module to have hit its pass target.
+      currentDay: 2,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      activeMilestoneIds: ['closing-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi'],
-      completedMilestoneIds: ['packing-sealing'],
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading'],
+      completedMilestoneIds: [],
     },
   },
   {
@@ -1122,12 +1234,32 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 8,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
-      completedMilestoneIds: ['personal-grooming', 'pengenalan-produk', 'canvassing'],
-      quizScores: { 'canvassing': 80 },
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
+      // Trimmed to exactly 3 late modules for the handover demo (2026-08-12) — was 6
+      // (closing-cabang, opening-cabang, cash-management, sop-administrasi,
+      // packing-sealing, offloading) all sitting "Terlambat" at once, which read as too
+      // cluttered a first carry-over example. opening-cabang/cash-management/offloading
+      // are now marked done (quiz scores added below to match); closing-cabang,
+      // sop-administrasi, and packing-sealing are left incomplete on purpose so exactly 3
+      // "Terlambat" cards remain for the Kanit's carry-over-approval demo.
+      completedMilestoneIds: ['personal-grooming', 'pengenalan-produk', 'canvassing', 'opening-cabang', 'cash-management', 'offloading'],
+      // personal-grooming/pengenalan-produk also backfilled with quiz scores here
+      // (2026-08-12) — both were already in completedMilestoneIds before this handover
+      // pass, but isMilestoneCompleted() requires a resolved quiz score too whenever a
+      // milestone has one; without it they silently still counted as incomplete despite
+      // the flag, which is what inflated the original "Terlambat" count past what
+      // completedMilestoneIds alone suggested. Same gap, fixed the same way as the 3
+      // newly-completed modules below.
+      quizScores: { 'personal-grooming': 100, 'pengenalan-produk': 100, 'canvassing': 80, 'opening-cabang': 100, 'cash-management': 100, 'offloading': 100 },
       quizAnswers: {
+        'personal-grooming': { 'pg-q1': 3, 'pg-q2': 0, 'pg-q3': 0 },
+        'pengenalan-produk': { 'pp-q1': 2, 'pp-q2': 0, 'pp-q3': 0 },
         'canvassing': { 'cv-q1': 1, 'cv-q2': 0, 'cv-q3': 2 },
+        'opening-cabang': { 'op-q1': 0, 'op-q2': 1, 'op-q3': 1 },
+        'cash-management': { 'cm-q1': 1, 'cm-q2': 1, 'cm-q3': 2 },
+        'offloading': { 'of-q1': 1, 'of-q2': 1, 'of-q3': 0 },
       },
+      quizAttempts: { 'personal-grooming': 1, 'pengenalan-produk': 1, 'opening-cabang': 1, 'cash-management': 1, 'offloading': 1 },
     },
   },
   {
@@ -1143,14 +1275,17 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 13,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
       // All of Level 1 (minggu1) is done, latihan AND mini quiz — Budi's Level 2 access
       // is unlocked. All in-progress/pending states live in Level 2 instead: customer-service-wa
       // (2/3 real latihan) and penaksiran-emas (0/1) are intentionally left out — his last day
-      // (13) still has real active/incomplete latihan there.
-      completedMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'penaksiran-elektronik', 'penaksiran-bpkb'],
+      // (13) still has real active/incomplete latihan there. personal-grooming-l2 added
+      // 2026-08-12 (the Level-2 split) — his 6 Day 8-13 sessions (re-tagged from the old
+      // single personal-grooming id) already meet its target on their own; the flag +
+      // quiz score below are just belt-and-suspenders consistency with the L1 entry.
+      completedMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'penaksiran-elektronik', 'penaksiran-bpkb'],
       quizScores: {
-        'closing-cabang': 100, 'opening-cabang': 100, 'personal-grooming': 100,
+        'closing-cabang': 100, 'opening-cabang': 100, 'personal-grooming': 100, 'personal-grooming-l2': 100,
         'pengenalan-produk': 100, 'canvassing': 100,
         'packing-sealing': 85, 'cash-management': 100, 'sop-administrasi': 67, 'offloading': 100,
       },
@@ -1158,6 +1293,7 @@ export const MOCK_USERS: AppUser[] = [
         'closing-cabang': { 'cc-q1': 0, 'cc-q2': 1, 'cc-q3': 2 },
         'opening-cabang': { 'op-q1': 0, 'op-q2': 1, 'op-q3': 1 },
         'personal-grooming': { 'pg-q1': 3, 'pg-q2': 0, 'pg-q3': 0 },
+        'personal-grooming-l2': { 'pg-q1': 3, 'pg-q2': 0, 'pg-q3': 0 },
         'pengenalan-produk': { 'pp-q1': 2, 'pp-q2': 0, 'pp-q3': 0 },
         'canvassing': { 'cv-q1': 1, 'cv-q2': 1, 'cv-q3': 2 },
         'packing-sealing': { 'ps-q1': 1, 'ps-q2': 0, 'ps-q3': 1, 'ps-q4': 3 },
@@ -1168,7 +1304,7 @@ export const MOCK_USERS: AppUser[] = [
       // Quiz allows 1 retry — sop-administrasi has used both attempts and stayed under 75
       // (permanently resolved as failed); everything else only needed its first try.
       quizAttempts: {
-        'closing-cabang': 1, 'opening-cabang': 1, 'personal-grooming': 1,
+        'closing-cabang': 1, 'opening-cabang': 1, 'personal-grooming': 1, 'personal-grooming-l2': 1,
         'pengenalan-produk': 1, 'canvassing': 1,
         'packing-sealing': 1, 'cash-management': 1, 'sop-administrasi': 2, 'offloading': 1,
       },
@@ -1187,12 +1323,13 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 13,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
-      completedMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
+      completedMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
       // Dewi has finished every module's latihan AND mini quiz — no "Aktif" cards should
       // remain in Modul Belajar, matching her "everything done, waiting on kanit" story.
+      // personal-grooming-l2 added 2026-08-12 (the Level-2 split) alongside the rest.
       quizScores: {
-        'closing-cabang': 100, 'opening-cabang': 100, 'personal-grooming': 100,
+        'closing-cabang': 100, 'opening-cabang': 100, 'personal-grooming': 100, 'personal-grooming-l2': 100,
         'pengenalan-produk': 100, 'canvassing': 75, 'cash-management': 100,
         'sop-administrasi': 100, 'packing-sealing': 100, 'offloading': 100,
         'pelayanan-nasabah': 100, 'pelayanan-nasabah-transaksi': 100, 'customer-service-wa': 100,
@@ -1202,6 +1339,7 @@ export const MOCK_USERS: AppUser[] = [
         'closing-cabang': { 'cc-q1': 0, 'cc-q2': 1, 'cc-q3': 2 },
         'opening-cabang': { 'op-q1': 0, 'op-q2': 1, 'op-q3': 1 },
         'personal-grooming': { 'pg-q1': 3, 'pg-q2': 0, 'pg-q3': 0 },
+        'personal-grooming-l2': { 'pg-q1': 3, 'pg-q2': 0, 'pg-q3': 0 },
         'pengenalan-produk': { 'pp-q1': 2, 'pp-q2': 0, 'pp-q3': 0 },
         'canvassing': { 'cv-q1': 1, 'cv-q2': 0, 'cv-q3': 2 },
         'cash-management': { 'cm-q1': 1, 'cm-q2': 1, 'cm-q3': 2 },
@@ -1216,7 +1354,7 @@ export const MOCK_USERS: AppUser[] = [
         'penaksiran-bpkb': { 'pbk-q1': 0, 'pbk-q2': 1, 'pbk-q3': 2 },
       },
       quizAttempts: {
-        'closing-cabang': 1, 'opening-cabang': 1, 'personal-grooming': 1,
+        'closing-cabang': 1, 'opening-cabang': 1, 'personal-grooming': 1, 'personal-grooming-l2': 1,
         'pengenalan-produk': 1, 'canvassing': 1, 'cash-management': 1,
         'sop-administrasi': 1, 'packing-sealing': 1, 'offloading': 1,
         'pelayanan-nasabah': 1, 'pelayanan-nasabah-transaksi': 1, 'customer-service-wa': 1,
@@ -1237,12 +1375,14 @@ export const MOCK_USERS: AppUser[] = [
       currentDay: 10,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa', 'penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'],
       // Level 1 (minggu1) is entirely clean — every module lulus, latihan AND mini quiz.
       // Level 2 is genuinely mid-flight on day 10: penaksiran-bpkb is the only L2 module
-      // fully done; pelayanan-nasabah and customer-service-wa are partway through their
-      // target; penaksiran-elektronik has one of two sessions in; penaksiran-emas hasn't
-      // been started at all yet.
+      // fully done; pelayanan-nasabah, customer-service-wa, and personal-grooming-l2
+      // (2/6, re-tagged 2026-08-12 from the old single personal-grooming id — see its
+      // Day 8/9 sessions in fl005Checklists) are partway through their target;
+      // penaksiran-elektronik has one of two sessions in; penaksiran-emas hasn't been
+      // started at all yet.
       completedMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'penaksiran-bpkb'],
       quizScores: {
         'closing-cabang': 100, 'opening-cabang': 100, 'personal-grooming': 100,
@@ -1279,13 +1419,16 @@ export const MOCK_USERS: AppUser[] = [
       name: 'Melati Anjani',
       branch: 'Cabang Sudirman',
       position: 'OJT Frontliner',
-      // H-1: "today" sits one day before this profile's OJT start date.
+      // Repurposed for the handover demo (2026-08-12) — was the "H-1, not yet enrolled"
+      // gate persona (currentDay: 0, hasStarted: false); that scenario isn't part of this
+      // handover's requested flows, so she's now the dedicated Day-1 dashboard account
+      // instead: just started, nothing submitted yet, sees the mandatory onboarding tour.
       startDate: '2026-08-04',
-      currentDay: 0,
+      currentDay: 1,
       kanitId: 'kanit-001',
       courseId: 'course-ojt',
-      hasStarted: false,
-      activeMilestoneIds: ['closing-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi'],
+      hasStarted: true,
+      activeMilestoneIds: ['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'canvassing', 'cash-management', 'sop-administrasi', 'packing-sealing', 'offloading'],
     },
   },
   {
@@ -1296,7 +1439,11 @@ export const MOCK_USERS: AppUser[] = [
       id: 'kanit-001',
       name: 'Hendra Wijaya',
       branch: 'Cabang Sudirman',
-      flIds: ['fl-001', 'fl-002', 'fl-003', 'fl-004', 'fl-005', 'fl-006'],
+      // Trimmed to exactly the 3 handover-demo cases (2026-08-12) — Andi (pending
+      // review), Sari (carry-over approval), Dewi (ready for Rapot Akhir). fl-003/005/006
+      // still exist as standalone FL logins for the separate "explore the OJT flow"
+      // accounts (see Login.tsx), they're just no longer in THIS kanit's roster.
+      flIds: ['fl-001', 'fl-002', 'fl-004'],
     },
   },
 ]
@@ -1307,79 +1454,28 @@ const OC_ITEMS_FULL = ['op-1', 'op-3', 'op-4', 'op-5', 'op-6', 'op-7', 'op-9', '
 const PN_ITEMS_FULL = ['pn-1', 'pn-2', 'pn-3', 'pn-4', 'pn-5', 'pn-6', 'pn-7']
 const PNT_ITEMS_FULL = ['pnt-1', 'pnt-2']
 
+// Trimmed for the Day-2 handover demo persona (2026-08-12, third pass 2026-08-13 — see
+// mock-tc-fl001-sa1-day1's comment below for the matching SOP Administrasi change).
+// Exact target state per explicit spec: Personal Grooming has 1 Day-1 submission
+// (already reviewed, Lulus-worthy score); Canvassing has 1 Day-2 submission, still
+// `status: 'submitted'` (pending review) — its OLD Day-1 scored session was removed so
+// Canvassing now has zero review history before today, matching "first-ever attempt,
+// awaiting review" rather than "already Lulus, quiz still pending."
 const fl001Checklists: DailyChecklist[] = [
   {
-    id: 'cl-fl001-1', day: 1, date: '2026-07-01', flId: 'fl-001',
+    id: 'cl-fl001-pg-1', day: 1, date: '2026-07-01', flId: 'fl-001',
     tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1'], reflection: 'Pertama kali canvassing, lumayan nervous. Baru bisa 3 prospek, belum berani masuk ke follow up.', submittedAt: '2026-07-01T13:00:00', kanitScore: 78 },
+      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Hari pertama OJT, pastikan penampilan rapi dan standar sejak awal.', submittedAt: '2026-07-01T07:30:00', kanitScore: 90 },
     ],
-    status: 'scored', submittedAt: '2026-07-01T17:30:00',
-    kanitScore: 78, kanitNote: 'Hari pertama sudah bagus. Prospek masih sedikit, tapi attitude bagus.', kanitScoredAt: '2026-07-01T18:00:00',
+    status: 'scored', submittedAt: '2026-07-01T07:30:00',
+    kanitScore: 90, kanitNote: 'Penampilan rapi dan sesuai standar. Pertahankan!', kanitScoredAt: '2026-07-01T08:00:00',
   },
   {
     id: 'cl-fl001-2', day: 2, date: '2026-07-02', flId: 'fl-001',
     tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: 'Berhasil 5 prospek hari ini. Sudah mulai lebih percaya diri menyapa calon nasabah.', submittedAt: '2026-07-02T13:00:00', kanitScore: 92 },
+      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: 'Coba lagi pagi ini sebelum jam sibuk, sudah pakai Avenza dari awal sampai akhir.', submittedAt: '2026-07-02T08:30:00' },
     ],
-    status: 'scored', submittedAt: '2026-07-02T17:15:00',
-    kanitScore: 92, kanitNote: 'Sudah mencapai target 5 prospek! Pertahankan.', kanitScoredAt: '2026-07-02T17:45:00',
-  },
-  {
-    id: 'cl-fl001-3', day: 3, date: '2026-07-03', flId: 'fl-001',
-    tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: 'Berhasil menghubungi 7 prospek hari ini, melebihi target.', submittedAt: '2026-07-03T13:00:00', kanitScore: 92 },
-    ],
-    status: 'scored', submittedAt: '2026-07-03T17:20:00',
-    kanitScore: 92, kanitNote: 'Canvassing aktif, 7 prospek melebihi target! Mulai rutinkan follow up.', kanitScoredAt: '2026-07-03T18:10:00',
-  },
-  {
-    id: 'cl-fl001-4', day: 4, date: '2026-07-04', flId: 'fl-001',
-    tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '6 prospek hari ini dan follow up 2 dari kemarin.', submittedAt: '2026-07-04T13:00:00', kanitScore: 87 },
-    ],
-    status: 'scored', submittedAt: '2026-07-04T17:00:00',
-    kanitScore: 87, kanitNote: 'Follow up mulai konsisten. Bagus!', kanitScoredAt: '2026-07-04T17:30:00',
-  },
-  {
-    id: 'cl-fl001-5', day: 5, date: '2026-07-05', flId: 'fl-001',
-    tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '7 prospek hari ini. Follow up 2 prospek kemarin, 1 konfirmasi mau datang besok.', submittedAt: '2026-07-05T13:00:00', kanitScore: 89 },
-    ],
-    status: 'scored', submittedAt: '2026-07-05T17:10:00',
-  },
-  {
-    id: 'cl-fl001-6', day: 6, date: '2026-07-06', flId: 'fl-001',
-    tasks: [
-      { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '8 prospek hari ini. Prospek yang kemarin konfirmasi jadi datang — langsung ditangani tim.', submittedAt: '2026-07-06T13:00:00', kanitScore: 91 },
-    ],
-    status: 'scored', submittedAt: '2026-07-06T17:00:00',
-  },
-  {
-    id: 'cl-fl001-oc-1', day: 1, date: '2026-07-01', flId: 'fl-001',
-    tasks: [
-      { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: ['op-1', 'op-2', 'op-3', 'op-4'], reflection: 'Opening hari pertama berjalan lancar. Sistem siap dan kas awal sudah terverifikasi.', submittedAt: '2026-07-01T09:00:00', kanitScore: 80 },
-      { taskId: 'closing-cabang', taskName: 'SOP Closing Cabang', completedItemIds: ['cc-1', 'cc-2', 'cc-3'], reflection: 'Rekap kas sudah selesai. Semua dokumen sudah diarsip dengan benar.', submittedAt: '2026-07-01T17:00:00', kanitScore: 78 },
-    ],
-    status: 'scored', submittedAt: '2026-07-01T17:30:00',
-    kanitScore: 79, kanitScoredAt: '2026-07-01T18:00:00',
-  },
-  {
-    id: 'cl-fl001-oc-2', day: 2, date: '2026-07-02', flId: 'fl-001',
-    tasks: [
-      { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: ['op-1', 'op-2', 'op-3', 'op-4'], reflection: 'Opening hari ini lebih cepat. Sudah terbiasa dengan urutan prosedurnya.', submittedAt: '2026-07-02T09:00:00', kanitScore: 83 },
-      { taskId: 'closing-cabang', taskName: 'SOP Closing Cabang', completedItemIds: ['cc-1', 'cc-2', 'cc-3'], reflection: 'Rekap kas lebih teliti. Ada 1 selisih kecil tapi berhasil dikoreksi.', submittedAt: '2026-07-02T17:00:00', kanitScore: 82 },
-    ],
-    status: 'scored', submittedAt: '2026-07-02T17:30:00',
-    kanitScore: 82, kanitScoredAt: '2026-07-02T18:00:00',
-  },
-  {
-    id: 'cl-fl001-oc-3', day: 3, date: '2026-07-03', flId: 'fl-001',
-    tasks: [
-      { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: ['op-1', 'op-2', 'op-3', 'op-4'], reflection: 'Semua checklist opening selesai tanpa kesalahan. Sudah lebih percaya diri.', submittedAt: '2026-07-03T09:00:00', kanitScore: 85 },
-      { taskId: 'closing-cabang', taskName: 'SOP Closing Cabang', completedItemIds: ['cc-1', 'cc-2', 'cc-3'], reflection: 'Penutupan berjalan baik. Laporan sudah lebih lengkap dan terstruktur.', submittedAt: '2026-07-03T17:00:00', kanitScore: 85 },
-    ],
-    status: 'scored', submittedAt: '2026-07-03T17:30:00',
-    kanitScore: 85, kanitScoredAt: '2026-07-03T18:00:00',
+    status: 'submitted', submittedAt: '2026-07-02T08:30:00',
   },
 ]
 
@@ -1532,7 +1628,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-8', day: 8, date: '2026-07-01', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening sudah sangat rutin. Tidak ada kendala, saldo awal langsung diverifikasi.', submittedAt: '2026-07-01T08:30:00', kanitScore: 88 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Grooming standar, hari ke-8 tetap terjaga.', submittedAt: '2026-07-01T08:00:00', kanitScore: 92 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Grooming standar, hari ke-8 tetap terjaga.', submittedAt: '2026-07-01T08:00:00', kanitScore: 92 },
       { taskId: 'customer-service-wa', taskName: 'Customer Service via WA', completedItemIds: ['csw-1', 'csw-2'], reflection: 'Pertama kali handle WA nasabah. Kirim reminder jatuh tempo ke 12 nasabah, 3 langsung konfirmasi perpanjangan.', submittedAt: '2026-07-01T11:00:00', kanitScore: 85 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '5 prospek hari ini, 2 follow up dari kemarin. Salah satu prospek minta jadwal kunjungan ke cabang.', submittedAt: '2026-07-01T13:00:00', kanitScore: 83 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Ada komplain soal antrian, berhasil diselesaikan dengan meminta nasabah menunggu di ruang nyaman.', submittedAt: '2026-07-01T16:00:00', kanitScore: 85 },
@@ -1546,7 +1642,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-9', day: 9, date: '2026-07-02', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening sesuai SOP. Ditemukan printer macet, langsung lapor dan ditangani teknisi.', submittedAt: '2026-07-02T08:30:00', kanitScore: 88 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Konsisten rapi setiap hari.', submittedAt: '2026-07-02T08:00:00', kanitScore: 92 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Konsisten rapi setiap hari.', submittedAt: '2026-07-02T08:00:00', kanitScore: 92 },
       { taskId: 'customer-service-wa', taskName: 'Customer Service via WA', completedItemIds: ['csw-1', 'csw-2'], reflection: 'Handle 2 komplain via WA dengan baik. Nasabah puas dan tidak eskalasi.', submittedAt: '2026-07-02T11:00:00', kanitScore: 88 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '6 prospek hari ini. Prospek yang kemarin dikonfirmasi jadi datang ke cabang.', submittedAt: '2026-07-02T13:00:00', kanitScore: 90 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Pelayanan lancar. Tidak ada komplain besar. Nasabah baru berhasil dilayani dari awal hingga selesai transaksi.', submittedAt: '2026-07-02T16:00:00', kanitScore: 87 },
@@ -1560,7 +1656,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-10', day: 10, date: '2026-07-03', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Semua berjalan normal. Saldo awal sesuai.', submittedAt: '2026-07-03T08:30:00', kanitScore: 90 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Grooming terjaga.', submittedAt: '2026-07-03T08:00:00', kanitScore: 90 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Grooming terjaga.', submittedAt: '2026-07-03T08:00:00', kanitScore: 90 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '7 prospek hari ini — rekor terbanyak. Follow up 3 dari kemarin, 2 berminat minggu depan.', submittedAt: '2026-07-03T13:00:00', kanitScore: 93 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Nasabah lama kembali gadai, senang bisa melayani dengan cepat karena sudah kenal prosedurnya.', submittedAt: '2026-07-03T16:00:00', kanitScore: 90 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Nasabah lama kembali gadai, senang bisa melayani dengan cepat karena sudah kenal prosedurnya.', submittedAt: '2026-07-03T16:00:00', kanitScore: 90 },
@@ -1573,7 +1669,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-11', day: 11, date: '2026-07-04', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening lancar, semua sistem normal.', submittedAt: '2026-07-04T08:30:00', kanitScore: 87 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Konsisten setiap hari tanpa pengecualian.', submittedAt: '2026-07-04T08:00:00', kanitScore: 92 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Konsisten setiap hari tanpa pengecualian.', submittedAt: '2026-07-04T08:00:00', kanitScore: 92 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '5 prospek hari ini. Fokus di follow up — 3 dari kemarin sudah dijawab, 1 berencana datang akhir pekan.', submittedAt: '2026-07-04T13:00:00', kanitScore: 85 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Pelayanan berjalan baik. Berhasil jelaskan produk perpanjangan kepada 2 nasabah yang baru pertama kali.', submittedAt: '2026-07-04T16:00:00', kanitScore: 85 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Pelayanan berjalan baik. Berhasil jelaskan produk perpanjangan kepada 2 nasabah yang baru pertama kali.', submittedAt: '2026-07-04T16:00:00', kanitScore: 85 },
@@ -1586,7 +1682,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-12', day: 12, date: '2026-07-05', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening sesuai SOP, tidak ada kendala.', submittedAt: '2026-07-05T08:30:00', kanitScore: 88 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: '12 hari berturut-turut grooming terpenuhi. Sudah jadi kebiasaan yang natural.', submittedAt: '2026-07-05T08:00:00', kanitScore: 95 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: '12 hari berturut-turut grooming terpenuhi. Sudah jadi kebiasaan yang natural.', submittedAt: '2026-07-05T08:00:00', kanitScore: 95 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '6 prospek baru dan follow up 2. Prospek akhir pekan kemarin jadi datang hari ini dan langsung transaksi!', submittedAt: '2026-07-05T13:00:00', kanitScore: 90 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Ramai hari ini, tapi berhasil tangani semua nasabah dengan baik. Tidak ada keluhan.', submittedAt: '2026-07-05T16:00:00', kanitScore: 87 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Ramai hari ini, tapi berhasil tangani semua nasabah dengan baik. Tidak ada keluhan.', submittedAt: '2026-07-05T16:00:00', kanitScore: 87 },
@@ -1599,7 +1695,7 @@ const fl003Checklists: DailyChecklist[] = [
     id: 'cl-fl003-13', day: 13, date: '2026-07-06', flId: 'fl-003',
     tasks: [
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening sempurna, semua item selesai sebelum jam buka.', submittedAt: '2026-07-06T08:30:00', kanitScore: 93 },
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Hari terakhir OJT, tetap konsisten.', submittedAt: '2026-07-06T08:00:00', kanitScore: 95 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: ['pg-1', 'pg-2', 'pg-3', 'pg-4'], reflection: 'Hari terakhir OJT, tetap konsisten.', submittedAt: '2026-07-06T08:00:00', kanitScore: 95 },
       { taskId: 'canvassing', taskName: 'Canvassing', completedItemIds: ['cv-1', 'cv-2'], reflection: '8 prospek hari ini — terbanyak selama OJT. Semangat tinggi di hari penentuan.', submittedAt: '2026-07-06T13:00:00', kanitScore: 95 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Melayani dengan percaya diri. Sudah bisa handle 2 nasabah sekaligus di jam sibuk.', submittedAt: '2026-07-06T16:00:00', kanitScore: 91 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Melayani dengan percaya diri. Sudah bisa handle 2 nasabah sekaligus di jam sibuk.', submittedAt: '2026-07-06T16:00:00', kanitScore: 91 },
@@ -1618,17 +1714,14 @@ const fl003PenaksiranChecklists: DailyChecklist[] = [
   { id: 'cl-fl003-pbk-2', day: 12, date: '2026-07-05', flId: 'fl-003', milestoneId: 'penaksiran-bpkb', milestoneName: 'Penaksiran BPKB', items: [{ itemId: 'pbk-1', completed: true }], status: 'scored', submittedAt: '2026-07-05T15:30:00', kanitScore: 92, kanitNote: 'BPKB penaksiran ke-2 lebih akurat. Siap mandiri.', kanitScoredAt: '2026-07-05T16:00:00' },
 ]
 
-const pendingChecklists: DailyChecklist[] = [
-  {
-    id: 'cl-fl002-7', day: 7, date: '2026-07-07', flId: 'fl-002',
-    tasks: [
-      { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: ['op-1', 'op-2', 'op-3'], reflection: 'Opening OK, tapi sistem sempat lambat loading ~5 menit. Akhirnya bisa masuk dan saldo diverifikasi.', submittedAt: '2026-07-07T08:45:00' },
-      { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: ['pn-1', 'pn-2', 'pn-3', 'pn-4'], reflection: 'Pelayanan berjalan baik. Belum ada situasi komplain hari ini, tapi sudah siap jika ada.', submittedAt: '2026-07-07T16:00:00' },
-      { taskId: 'closing-cabang', taskName: 'SOP Closing Cabang', completedItemIds: ['cc-1', 'cc-2', 'cc-3'], reflection: 'Closing selesai tepat waktu. Rekap kas sesuai, tidak ada selisih.', submittedAt: '2026-07-07T17:00:00' },
-    ],
-    status: 'submitted', submittedAt: '2026-07-07T17:00:00',
-  },
-]
+// cl-fl002-7 (Sari's Day-7 checklist) removed entirely (2026-08-13) — had already lost
+// its pelayanan-nasabah task (2026-08-12, zero-Level-2-progress pass) and opening-cabang
+// task (earlier 2026-08-13, already-Lulus-module cleanup), leaving only closing-cabang as
+// its sole task. Explicit ask: drop Closing Cabang from Sari's Kanit-side pending review
+// too, so the FL and Kanit sides fully agree there's zero latihan history for it — not
+// just "not pending," genuinely untouched. Her 3 "Terlambat" Level 1 modules
+// (closing-cabang, sop-administrasi, packing-sealing) now all read 0/x, consistently.
+const pendingChecklists: DailyChecklist[] = []
 
 const fl004EarlyScores = [78, 82, 85, 80, 88, 90, 86]
 const fl004DayScores = [84, 87, 92, 89, 91, 88]
@@ -1673,7 +1766,7 @@ const fl004Checklists: DailyChecklist[] = [
     return {
       id: `cl-fl004-${day}`, day, date, flId: 'fl-004',
       tasks: [
-        { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Grooming tetap terjaga.', submittedAt: `${date}T07:30:00`, kanitScore: 92 },
+        { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Grooming tetap terjaga.', submittedAt: `${date}T07:30:00`, kanitScore: 92 },
         { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening sesuai SOP, tidak ada kendala.', submittedAt: `${date}T08:30:00`, kanitScore: ts[0] },
         { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Pelayanan nasabah berjalan lancar dan profesional.', submittedAt: `${date}T16:00:00`, kanitScore: ts[1] },
         { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Pelayanan nasabah berjalan lancar dan profesional.', submittedAt: `${date}T16:00:00`, kanitScore: ts[1] },
@@ -1689,7 +1782,7 @@ const fl004Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl004-13', day: 13, date: '2026-07-06', flId: 'fl-004',
     tasks: [
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Hari terakhir OJT, tetap konsisten.', submittedAt: '2026-07-06T07:30:00', kanitScore: 95 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Hari terakhir OJT, tetap konsisten.', submittedAt: '2026-07-06T07:30:00', kanitScore: 95 },
       { taskId: 'opening-cabang', taskName: 'SOP Opening Cabang', completedItemIds: OC_ITEMS_FULL, reflection: 'Opening hari terakhir! Sudah sangat hafal semua prosedur tanpa perlu panduan.', submittedAt: '2026-07-06T08:00:00', kanitScore: 93 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Pelayanan terbaik sepanjang OJT. Bangga bisa menutup dengan performa penuh.', submittedAt: '2026-07-06T16:00:00', kanitScore: 95 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Pelayanan terbaik sepanjang OJT. Bangga bisa menutup dengan performa penuh.', submittedAt: '2026-07-06T16:00:00', kanitScore: 95 },
@@ -1749,7 +1842,7 @@ const fl005Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl005-8', day: 8, date: '2026-07-01', flId: 'fl-005',
     tasks: [
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Grooming tetap terjaga di Level 2.', submittedAt: '2026-07-01T07:30:00', kanitScore: 90 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Grooming tetap terjaga di Level 2.', submittedAt: '2026-07-01T07:30:00', kanitScore: 90 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Sambutan dan edukasi nasabah berjalan lancar.', submittedAt: '2026-07-01T16:00:00', kanitScore: 86 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Sambutan dan edukasi nasabah berjalan lancar.', submittedAt: '2026-07-01T16:00:00', kanitScore: 86 },
       { taskId: 'customer-service-wa', taskName: 'Customer Service via WA', completedItemIds: ['csw-1', 'csw-2'], reflection: 'Reminder jatuh tempo terkirim, 2 nasabah langsung konfirmasi perpanjangan.', submittedAt: '2026-07-01T11:00:00', kanitScore: 85 },
@@ -1760,7 +1853,7 @@ const fl005Checklists: DailyChecklist[] = [
   {
     id: 'cl-fl005-9', day: 9, date: '2026-07-02', flId: 'fl-005',
     tasks: [
-      { taskId: 'personal-grooming', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Konsisten rapi.', submittedAt: '2026-07-02T07:30:00', kanitScore: 90 },
+      { taskId: 'personal-grooming-l2', taskName: 'Personal Grooming', completedItemIds: PG_ITEMS_FULL, reflection: 'Konsisten rapi.', submittedAt: '2026-07-02T07:30:00', kanitScore: 90 },
       { taskId: 'pelayanan-nasabah', taskName: 'Pelayanan Nasabah Visit', completedItemIds: PN_ITEMS_FULL, reflection: 'Nasabah baru dilayani dari awal sampai selesai transaksi.', submittedAt: '2026-07-02T16:00:00', kanitScore: 88 },
       { taskId: 'pelayanan-nasabah-transaksi', taskName: 'Pelayanan Nasabah Transaksi', completedItemIds: PNT_ITEMS_FULL, reflection: 'Nasabah baru dilayani dari awal sampai selesai transaksi.', submittedAt: '2026-07-02T16:00:00', kanitScore: 88 },
     ],
@@ -2000,39 +2093,25 @@ export const INITIAL_ASSESSMENTS: Assessment[] = [
 ]
 
 export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
+  // fl-001 (Andi) — sa1-a/sa2-a (already-reviewed Gadai Baru/Perpanjangan sessions) and
+  // the entire ps1-a/b/c/d packing-sealing block were REMOVED on 2026-08-12 (second
+  // handover-demo pass) — Closing Cabang/Packing Sealing both read as fully untouched
+  // ("Belum dimulai"). Third pass (2026-08-13, exact spec): SOP Administrasi has 1 Day-1
+  // submission (already reviewed, Lulus-worthy — mock-tc-fl001-sa1-day1 below) PLUS 1
+  // Day-2 pending submission (mock-tc-fl001-sa1-pending) — 2 sessions total, not just 1.
   {
-    id: 'mock-tc-fl001-sa1-a',
+    id: 'mock-tc-fl001-sa1-day1',
     flId: 'fl-001',
     milestoneId: 'sop-administrasi',
     itemId: 'sa-1',
     itemText: 'Gadai Baru Elektronik',
-    nomorSbg: 'SBG-2026-00098',
-    catatan: 'Prosesnya berjalan lancar. Nasabah puas dengan pelayanan.',
+    nomorSbg: 'SBG-2026-00201',
+    catatan: 'Input data nasabah dan barang (HP) di Intools, proses pencairan di Kopra, cetak SBG dan serahkan ke nasabah.',
     kanitNote: 'Input Intools dan Kopra sudah benar. Pastikan SBG selalu dicetak sebelum menyerahkan barang ke nasabah.',
-    // Backfilled true (2026-08-06) — already has kanit feedback above, meaning it was
-    // actually reviewed already; kanitPassed just never existed as a field until the new
-    // Kanit review-confirmation UI was built. Without this, it'd wrongly resurface as
-    // freshly "pending" the moment that UI reads raw confirmations.
     kanitPassed: true,
-    kanitReviewedAt: '2026-07-26T09:35:00',
-    submittedAt: '2026-07-26T09:30:00',
-    day: 2,
-  },
-  {
-    id: 'mock-tc-fl001-sa2-a',
-    flId: 'fl-001',
-    milestoneId: 'sop-administrasi',
-    itemId: 'sa-2',
-    itemText: 'Perpanjangan / Cicil Elektronik',
-    nomorSbg: 'SBG-2026-00112',
-    catatan: 'Ada sedikit kebingungan saat memilih opsi cicil vs perpanjangan.',
-    kanitNote: 'Pemahaman alur perpanjangan perlu diperkuat. Coba ulangi materi sebelum latihan berikutnya.',
-    // Backfilled false (2026-08-06) — the note reads as "needs remedial," not a pass; see
-    // sa-1's comment above for why this backfill exists at all.
-    kanitPassed: false,
-    kanitReviewedAt: '2026-07-26T14:05:00',
-    submittedAt: '2026-07-26T14:00:00',
-    day: 2,
+    kanitReviewedAt: '2026-07-24T09:35:00',
+    submittedAt: '2026-07-24T09:30:00',
+    day: 1,
   },
   {
     id: 'mock-tc-fl003-ps1-a',
@@ -2046,65 +2125,13 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
     submittedAt: '2026-07-27T10:00:00',
     day: 3,
   },
-  // fl-001 (Andi) — packing-sealing, all items × 2 submissions
-  { id: 'mock-tc-fl001-ps1-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-1', itemText: 'Packing & Penyimpanan Handphone/Tablet', nomorSbg: 'SBG-2026-00141', catatan: 'Packing dengan box: label sudah ditempel di posisi yang benar.', kanitNote: 'Rapi dan sesuai prosedur.', submittedAt: '2026-07-25T09:15:00', day: 2 },
-  { id: 'mock-tc-fl001-ps1-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-1', itemText: 'Packing & Penyimpanan Handphone/Tablet', nomorSbg: 'SBG-2026-00142', catatan: 'Lebih cepat dari percobaan pertama.', submittedAt: '2026-07-25T10:30:00', day: 2 },
-  { id: 'mock-tc-fl001-ps1-c', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-1', itemText: 'Packing & Penyimpanan Handphone/Tablet', nomorSbg: 'SBG-2026-00143', catatan: 'Packing tanpa box: bubble wrap cukup, kantong plastik sudah di-seal.', submittedAt: '2026-07-25T11:00:00', day: 2 },
-  { id: 'mock-tc-fl001-ps1-d', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-1', itemText: 'Packing & Penyimpanan Handphone/Tablet', nomorSbg: 'SBG-2026-00144', catatan: 'Sudah lebih rapi dari sesi sebelumnya.', kanitNote: 'Pastikan bubble wrap menutupi semua sisi.', submittedAt: '2026-07-25T14:00:00', day: 2 },
-  { id: 'mock-tc-fl001-ps2-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-2', itemText: 'Packing & Penyimpanan Laptop', nomorSbg: 'SBG-2026-00155', catatan: 'Packing dengan box: charger ikut terpacking dan sudah dilabel.', submittedAt: '2026-07-26T09:00:00', day: 3 },
-  { id: 'mock-tc-fl001-ps2-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-2', itemText: 'Packing & Penyimpanan Laptop', nomorSbg: 'SBG-2026-00156', catatan: 'Box original digunakan, label terpasang sempurna.', submittedAt: '2026-07-26T10:15:00', day: 3 },
-  { id: 'mock-tc-fl001-ps2-c', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-2', itemText: 'Packing & Penyimpanan Laptop', nomorSbg: 'SBG-2026-00157', catatan: 'Packing tanpa box: bubble wrap tebal sudah digunakan, lapisan kardus ada.', submittedAt: '2026-07-26T11:30:00', day: 3 },
-  { id: 'mock-tc-fl001-ps2-d', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-2', itemText: 'Packing & Penyimpanan Laptop', nomorSbg: 'SBG-2026-00158', catatan: 'Sudah menggunakan standar packing yang benar.', submittedAt: '2026-07-26T14:30:00', day: 3 },
-  { id: 'mock-tc-fl001-ps5-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-5', itemText: 'Packing & Penyimpanan TV', nomorSbg: 'SBG-2026-00168', catatan: 'Pelindung sudut terpasang, FRAGILE sudah ditandai.', submittedAt: '2026-07-27T09:00:00', day: 4 },
-  { id: 'mock-tc-fl001-ps5-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-5', itemText: 'Packing & Penyimpanan TV', nomorSbg: 'SBG-2026-00169', catatan: 'Label dan penandaan FRAGILE sudah sesuai standar.', submittedAt: '2026-07-27T10:45:00', day: 4 },
-  { id: 'mock-tc-fl001-ps6-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-6', itemText: 'Packing & Penyimpanan Game Console', nomorSbg: 'SBG-2026-00170', catatan: 'Aksesori sudah ikut dikemas, label terpasang.', submittedAt: '2026-07-27T11:30:00', day: 4 },
-  { id: 'mock-tc-fl001-ps6-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-6', itemText: 'Packing & Penyimpanan Game Console', nomorSbg: 'SBG-2026-00171', catatan: 'Semua aksesori terkemas dengan aman.', kanitNote: 'Controller dan kabel sudah dimasukkan. Bagus!', submittedAt: '2026-07-27T14:00:00', day: 4 },
-  { id: 'mock-tc-fl001-ps7-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-7', itemText: 'Packing & Penyimpanan Smartwatch', nomorSbg: 'SBG-2026-00182', catatan: 'Padding cukup, label terpasang dengan benar.', submittedAt: '2026-07-28T09:00:00', day: 5 },
-  { id: 'mock-tc-fl001-ps7-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-7', itemText: 'Packing & Penyimpanan Smartwatch', nomorSbg: 'SBG-2026-00183', catatan: 'Kemasan kecil yang sesuai sudah digunakan.', submittedAt: '2026-07-28T10:00:00', day: 5 },
-  { id: 'mock-tc-fl001-ps8-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-8', itemText: 'Packing & Penyimpanan Camera', nomorSbg: 'SBG-2026-00184', catatan: 'FRAGILE ditandai, lensa sudah dilindungi.', submittedAt: '2026-07-28T11:00:00', day: 5 },
-  { id: 'mock-tc-fl001-ps8-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-8', itemText: 'Packing & Penyimpanan Camera', nomorSbg: 'SBG-2026-00185', catatan: 'Aksesori kamera sudah terkemas bersama.', submittedAt: '2026-07-28T13:30:00', day: 5 },
-  { id: 'mock-tc-fl001-ps9-a', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-9', itemText: 'Packing & Penyimpanan Dokumen BPKB', catatan: 'Disimpan di map bersih, label info lengkap.', submittedAt: '2026-07-28T14:00:00', day: 5 },
-  { id: 'mock-tc-fl001-ps9-b', flId: 'fl-001', milestoneId: 'packing-sealing', itemId: 'ps-9', itemText: 'Packing & Penyimpanan Dokumen BPKB', catatan: 'Lemari terkunci sudah digunakan untuk penyimpanan.', kanitNote: 'Dokumen tersimpan rapi. Modul packing selesai!', submittedAt: '2026-07-28T15:00:00', day: 5 },
 
-  // Pending-review demo cases (2026-08-06) — kanitPassed intentionally left unset so
-  // these surface in Kanit's "Menunggu Review" list via KanitReviewConfirmation.tsx.
-  // Andi (fl-001) — SOP Administrasi Transaksi (essay-type): multiple pending submissions
-  // across two different latihan (checklistItems), to exercise the module→latihan→sesi
-  // grouping — Tebus Elektronik (sa-3) has 3 pending sessions, Gadai Baru Elektronik
-  // (sa-1) has 1.
-  {
-    id: 'mock-tc-fl001-sa3-pending',
-    flId: 'fl-001',
-    milestoneId: 'sop-administrasi',
-    itemId: 'sa-3',
-    itemText: 'Tebus Elektronik',
-    nomorSbg: 'SBG-2026-00220',
-    catatan: 'Nasabah menebus HP-nya. Saya cek dulu total pelunasan di Kopra sebelum proses, lalu serahkan barang setelah pembayaran lunas.',
-    submittedAt: '2026-07-29T10:00:00',
-    day: 6,
-  },
-  {
-    id: 'mock-tc-fl001-sa3-pending-2',
-    flId: 'fl-001',
-    milestoneId: 'sop-administrasi',
-    itemId: 'sa-3',
-    itemText: 'Tebus Elektronik',
-    nomorSbg: 'SBG-2026-00231',
-    catatan: 'Nasabah menebus laptopnya sebelum jatuh tempo. Saya konfirmasi ulang total pelunasan ke nasabah sebelum proses di Kopra.',
-    submittedAt: '2026-07-29T14:20:00',
-    day: 6,
-  },
-  {
-    id: 'mock-tc-fl001-sa3-pending-3',
-    flId: 'fl-001',
-    milestoneId: 'sop-administrasi',
-    itemId: 'sa-3',
-    itemText: 'Tebus Elektronik',
-    nomorSbg: 'SBG-2026-00248',
-    catatan: 'Transaksi tebus kedua hari ini, sudah lebih cepat karena hafal alur Intools + Kopra.',
-    submittedAt: '2026-07-30T09:10:00',
-    day: 7,
-  },
+  // Andi's Day-2 pending SOP Administrasi session — kanitPassed intentionally left unset
+  // so this surfaces in Kanit's "Menunggu Review" list via KanitReviewConfirmation.tsx.
+  // Paired with mock-tc-fl001-sa1-day1 above (Day 1, already reviewed) and Canvassing's
+  // 1 pending session in fl001Checklists, Andi's total pending-review count is exactly 2
+  // (1 Canvassing + 1 SOP Administrasi), across exactly 2 modules with any progress at
+  // all (Personal Grooming's 1 Day-1 session is already resolved, not pending).
   {
     id: 'mock-tc-fl001-sa1-pending',
     flId: 'fl-001',
@@ -2113,21 +2140,28 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
     itemText: 'Gadai Baru Elektronik',
     nomorSbg: 'SBG-2026-00250',
     catatan: 'Input data nasabah dan barang (HP) di Intools, proses pencairan di Kopra, cetak SBG dan serahkan ke nasabah.',
-    submittedAt: '2026-07-30T11:45:00',
-    day: 7,
+    submittedAt: '2026-07-25T09:30:00',
+    day: 2,
   },
-  // Sari (fl-002) — Penaksiran Elektronik discounter submission awaiting review.
+  // Sari (fl-002) — 1 pending Penaksiran confirmation per module (Elektronik/Emas/BPKB),
+  // re-added 2026-08-13 (had been removed 2026-08-12 when she needed to show zero Level 2
+  // progress everywhere — that framing has since changed to "1 already submitted &
+  // pending review per Penaksiran module" instead). Together these still exercise both
+  // branches of every discounter form's own type-picker, same as before removal.
   {
     id: 'mock-tc-fl002-pe1-pending',
     flId: 'fl-002',
     milestoneId: 'penaksiran-elektronik',
     itemId: 'pe-1',
     itemText: 'Handphone – Android',
+    // Nomor SBG filled in (2026-08-13) — demo example of the new optional field on
+    // Penaksiran forms actually showing up on the Kanit's pending-review page (see
+    // ConfirmationReview's isPenaksiran branch in KanitReviewConfirmation.tsx).
+    nomorSbg: 'SBG-2026-00312',
     catatan: 'Tipe Item: SAMSUNG GALAXY A54 8 / 256 GB 2023\nPotongan Nilai: LCD Minus: Ringan, Baterai Gembung\nRefleksi: Kondisi LCD ada baret halus, baterai agak menggembung tapi masih berfungsi normal.',
     submittedAt: '2026-08-04T11:00:00',
     day: 8,
   },
-  // Sari (fl-002) — Penaksiran BPKB discounter submission awaiting review.
   {
     id: 'mock-tc-fl002-pbk1-pending',
     flId: 'fl-002',
@@ -2138,9 +2172,6 @@ export const MOCK_TASK_CONFIRMATIONS: TaskConfirmation[] = [
     submittedAt: '2026-08-04T13:30:00',
     day: 8,
   },
-  // Sari (fl-002) — Penaksiran Emas discounter submission awaiting review. Perhiasan
-  // branch chosen (rather than Logam Mulia) so the 3 pending penaksiran demo cases above
-  // collectively exercise both branches of every discounter form's own type-picker.
   {
     id: 'mock-tc-fl002-pem1-pending',
     flId: 'fl-002',

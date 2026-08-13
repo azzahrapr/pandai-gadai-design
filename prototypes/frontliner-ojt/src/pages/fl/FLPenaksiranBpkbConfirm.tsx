@@ -76,6 +76,11 @@ export default function FLPenaksiranBpkbConfirm() {
   const [nomorPlat, setNomorPlat] = useState('')
 
   const [refleksi, setRefleksi] = useState('')
+  // Optional — a Nomor SBG reference gives the kanit a way to cross-check this
+  // submission directly against the real Pandai Gadai system when reviewing, but doesn't
+  // block submission the way it does for SOP Administrasi/Packing (see FLTaskConfirm.tsx's
+  // required version).
+  const [nomorSbg, setNomorSbg] = useState('')
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [justSubmittedCount, setJustSubmittedCount] = useState<number | null>(null)
 
@@ -96,6 +101,7 @@ export default function FLPenaksiranBpkbConfirm() {
     setKepemilikan('Diri Sendiri'); setNomorStnk(''); setMasaBerlakuStnk(''); setNomorMesin(''); setNomorBpkb('')
     setWarnaKendaraan(''); setNomorPlat('')
     setRefleksi('')
+    setNomorSbg('')
     setSubmitAttempted(false)
   }
 
@@ -123,6 +129,7 @@ export default function FLPenaksiranBpkbConfirm() {
       milestoneId: milestone.id,
       itemId: item.id,
       itemText: item.text,
+      nomorSbg: nomorSbg.trim() || undefined,
       catatan: buildSummary(),
       submittedAt: now,
       day: profile.currentDay,
@@ -343,6 +350,21 @@ export default function FLPenaksiranBpkbConfirm() {
               <div><FieldLabel required>Warna Kendaraan</FieldLabel><input value={warnaKendaraan} onChange={e => setWarnaKendaraan(e.target.value)} placeholder="Hitam" className={`${inputCls} ${borderCls(submitAttempted && !warnaKendaraan.trim())}`} /></div>
               <div><FieldLabel required>Nomor Plat</FieldLabel><input value={nomorPlat} onChange={e => setNomorPlat(e.target.value)} placeholder="B 8823 SST" className={`${inputCls} ${borderCls(submitAttempted && !nomorPlat.trim())}`} /></div>
             </div>
+          </div>
+
+          {/* ── Nomor SBG (opsional) ── */}
+          <div className="bg-white rounded-2xl border border-[#E1E7EF] p-5">
+            <label className="text-xs font-semibold text-[#65758B] uppercase tracking-wide block mb-2">
+              Nomor SBG <span className="normal-case font-normal text-[#94A3B8]">(opsional)</span>
+            </label>
+            <input
+              type="text"
+              value={nomorSbg}
+              onChange={e => setNomorSbg(e.target.value)}
+              placeholder="Contoh: SBG-2026-00123"
+              className="w-full border border-[#CBD5E1] focus:border-[#023DFF] rounded-lg px-4 py-2.5 text-sm text-[#0F1729] placeholder:text-[#94A3B8] outline-none transition-colors"
+            />
+            <p className="text-xs text-[#94A3B8] mt-1.5">Tambahkan sebagai referensi apabila transaksi ini nyata dan sudah tercatat di Intools.</p>
           </div>
 
           {/* ── Refleksi ── */}

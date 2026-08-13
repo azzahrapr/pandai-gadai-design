@@ -484,6 +484,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFinalEvaluations([])
     setLevel2Unlocks({})
     setExtensionRequests([])
+    // TaskConfirmations aren't Supabase-backed at all (see their useState initializer
+    // below) — they live purely in this browser's localStorage, merged with
+    // MOCK_TASK_CONFIRMATIONS by id (stored ids always win, mock only fills in ids not
+    // already stored). That means the FIRST time anyone ever submits or reviews ANY task
+    // confirmation, the entire in-memory list — including every mock fixture present at
+    // that moment — gets snapshotted into localStorage, and every subsequent mockData.ts
+    // edit to an existing id becomes permanently invisible in that browser until this
+    // key is cleared. "Reset data" is the one button meant to fully restore the mock
+    // baseline, so it needs to clear this too, not just the Supabase-backed tables above.
+    localStorage.removeItem('task-confirmations')
+    setTaskConfirmations(MOCK_TASK_CONFIRMATIONS)
   }
 
   function startMilestone(milestoneId: string) {
@@ -759,10 +770,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       : null
 
     const finalEval = finalEvaluations.find(e => e.flId === flId)
+    // Curriculum spreadsheet's own formula: (sum of all 5 ratings [4 soft skills +
+    // Attitude, each 1-4] / 20) * 100 — 0-100, same scale as Latihan/Ujian Akhir.
+    const sikapKerjaScore = finalEval
+      ? Math.round(((finalEval.softSkills.reduce((sum, s) => sum + s.score, 0) + finalEval.attitudeScore) / 20) * 100)
+      : null
 
     // 3-component gate (2026-08-10 rework) — no more single weighted total. Tidak Lulus
     // the moment ANY known component dips below its own KKM (fail-fast, even before the
     // other components are decided); Lulus only once all 3 are known and all clear KKM.
+    // evaluasiPassed is still the kanit's own Pernyataan Kelulusan recommendation, not
+    // auto-derived from sikapKerjaScore — that score only gates whether "Lulus" is
+    // selectable in the first place (see KanitFinalEval.tsx's lulusDisabled).
     const latihanPassed = dailyProgressScore !== null ? dailyProgressScore >= KKM_LATIHAN : null
     const ujianPassed = assessmentScore !== null ? assessmentScore >= KKM_UJIAN_AKHIR : null
     const evaluasiPassed = finalEval ? finalEval.recommendation === 'lulus' : null
@@ -771,7 +790,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const passed = anyFailed ? false : allIn ? true : null
 
     return {
-      dailyProgressScore, assessmentScore, penaksiranScore, daysScored, penaksiranCount: penaksiran.length,
+      dailyProgressScore, assessmentScore, sikapKerjaScore, penaksiranScore, daysScored, penaksiranCount: penaksiran.length,
       latihanPassed, ujianPassed, evaluasiPassed, passed,
     }
   }

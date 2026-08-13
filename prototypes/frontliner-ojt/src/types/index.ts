@@ -186,6 +186,11 @@ export interface FinalEvaluation {
 export interface ScoreBreakdown {
   dailyProgressScore: number | null   // Latihan component (0-100)
   assessmentScore: number | null      // Ujian Akhir component (0-100)
+  // Sikap Kerja component (0-100), 2026-08-12 — (sum of all 5 ratings [4 soft skills +
+  // Attitude, each 1-4] / 20) * 100, matching the official curriculum spreadsheet's own
+  // formula exactly. Display/KKM-comparison only — evaluasiPassed below is still driven by
+  // the kanit's own Pernyataan Kelulusan recommendation, not auto-computed from this score.
+  sikapKerjaScore: number | null
   penaksiranScore: number | null      // legacy Penaksiran Emas intools-accuracy score — display-only, not part of the pass/fail gate
   daysScored: number
   penaksiranCount: number

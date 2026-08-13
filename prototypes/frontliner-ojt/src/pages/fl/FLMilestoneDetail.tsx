@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
-import { MILESTONES, DAILY_TASKS, getEffectiveTarget } from '../../data/mockData'
+import { MILESTONES, DAILY_TASKS, getEffectiveTarget, PLACEHOLDER_SLIDE_URL } from '../../data/mockData'
 import { useApp } from '../../context/AppContext'
 import type { FLProfile } from '../../types'
 
@@ -11,6 +11,7 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'closing-cabang': ['closing-cabang'],
   'opening-cabang': ['opening-cabang'],
   'personal-grooming': ['personal-grooming'],
+  'personal-grooming-l2': ['personal-grooming-l2'],
   'pengenalan-produk': ['pengenalan-produk'],
   'canvassing': ['canvassing'],
   'cash-management': ['cash-management'],
@@ -25,7 +26,7 @@ const MILESTONE_TASK_MAP: Record<string, string[]> = {
   'penaksiran-bpkb': ['penaksiran-bpkb'],
 }
 
-const DAILY_MILESTONE_IDS = new Set(['closing-cabang', 'opening-cabang', 'personal-grooming', 'pengenalan-produk', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa'])
+const DAILY_MILESTONE_IDS = new Set(['closing-cabang', 'opening-cabang', 'personal-grooming', 'personal-grooming-l2', 'pengenalan-produk', 'pelayanan-nasabah', 'pelayanan-nasabah-transaksi', 'customer-service-wa'])
 
 // "Target penyelesaian" tracks the pass target (Min. Attempt for Pass) — current is the
 // reviewed-and-passed count, not the raw submission count. The larger submission target
@@ -308,12 +309,15 @@ export default function FLMilestoneDetail() {
   )
   const submittedTodayPassed = submittedToday && allChecklists.some(c => c.day === profile.currentDay && matchesMilestone(c))
 
+  // personal-grooming (L1) clamped to days 1-6 and personal-grooming-l2 added at days
+  // 8-13 (2026-08-12) — was one entry spanning 1-13, now split into 2 independent
+  // milestones (see MILESTONES in mockData.ts for the full rationale).
   const MILESTONE_FROM_DAY: Record<string, number> = {
-    'closing-cabang': 1, 'opening-cabang': 4, 'personal-grooming': 1,
+    'closing-cabang': 1, 'opening-cabang': 4, 'personal-grooming': 1, 'personal-grooming-l2': 8,
     'pelayanan-nasabah': 8, 'pelayanan-nasabah-transaksi': 8, 'customer-service-wa': 8,
   }
   const MILESTONE_TO_DAY: Record<string, number> = {
-    'closing-cabang': 3, 'opening-cabang': 6, 'personal-grooming': 13,
+    'closing-cabang': 3, 'opening-cabang': 6, 'personal-grooming': 6, 'personal-grooming-l2': 13,
     'pelayanan-nasabah': 13, 'pelayanan-nasabah-transaksi': 13, 'customer-service-wa': 13,
   }
   const scheduleFromDay = MILESTONE_FROM_DAY[milestone.id] ?? 1
@@ -966,6 +970,10 @@ function SlideViewer({
   const isFirst = currentIdx === 0
   const isLast = currentIdx === total - 1
   const [isFullscreen, setIsFullscreen] = useState(false)
+  // Real per-module slide content isn't ready yet — every material falls back to the
+  // shared placeholder deck instead of its own written `content` until a real `slideUrl`
+  // is set on it (see PLACEHOLDER_SLIDE_URL's comment in mockData.ts).
+  const slideUrl = material.slideUrl ?? PLACEHOLDER_SLIDE_URL
 
   const toolbar = (
     <div className="relative z-10 bg-[#F1F5F9] border-b border-[#E1E7EF] px-2 py-1.5 flex items-center gap-1 flex-shrink-0">
@@ -1005,7 +1013,7 @@ function SlideViewer({
           <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M5 2.5l4 4.5-4 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
       )}
-      {material.slideUrl && (
+      {slideUrl && (
         <button
           type="button"
           onClick={() => setIsFullscreen(f => !f)}
@@ -1027,11 +1035,11 @@ function SlideViewer({
     </div>
   )
 
-  const slideContent = material.slideUrl ? (
+  const slideContent = slideUrl ? (
     <div className={isFullscreen ? 'flex-1 relative min-h-0' : 'relative w-full'} style={isFullscreen ? {} : { paddingBottom: '56.25%' }}>
       <iframe
-        key={material.slideUrl}
-        src={material.slideUrl}
+        key={slideUrl}
+        src={slideUrl}
         className="absolute inset-0 w-full h-full border-0"
         allowFullScreen
         allow="autoplay"

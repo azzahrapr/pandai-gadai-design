@@ -164,6 +164,17 @@ export function ConfirmationReview({ flId, milestoneId }: { flId: string; milest
                 <p className="text-sm font-semibold text-[#0F1729]">{tipeItem}</p>
               </div>
             )}
+            {/* Optional reference number — same field/purpose as the required Nomor SBG
+                on SOP Administrasi/Packing below, just optional here (see
+                FLPenaksiranConfirm/BpkbConfirm/EmasConfirm.tsx). This branch never
+                referenced c.nomorSbg before 2026-08-13, so it silently never showed even
+                when a discounter filled it in. */}
+            {c.nomorSbg && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[#65758B] mb-1">Nomor SBG</p>
+                <p className="text-sm font-semibold text-[#0F1729]">{c.nomorSbg}</p>
+              </div>
+            )}
             <div className="space-y-2">
               <div className="flex justify-end mb-1">
                 <p className="text-[11px] font-semibold text-[#65758B] uppercase tracking-wide">Memenuhi Standar</p>

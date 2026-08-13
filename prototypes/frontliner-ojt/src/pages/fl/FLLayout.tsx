@@ -2,7 +2,6 @@ import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { FLSidebar } from '../../components/Sidebar'
 import { FLBottomNav } from '../../components/BottomNav'
-import FLDevPanel from '../../components/FLDevPanel'
 import TourOverlay from '../../components/TourOverlay'
 import { TourProvider } from '../../context/TourContext'
 import type { FLProfile } from '../../types'
@@ -44,7 +43,6 @@ export default function FLLayout() {
         <main className="flex-1 min-w-0">
           {location.pathname === '/fl/profile' ? <Outlet /> : <Navigate to="/fl/profile" replace />}
         </main>
-        <FLDevPanel />
       </div>
     )
   }
@@ -57,7 +55,6 @@ export default function FLLayout() {
           <Outlet />
         </main>
         <div className="md:hidden"><FLBottomNav /></div>
-        <FLDevPanel />
         <TourOverlay />
       </div>
     </TourProvider>

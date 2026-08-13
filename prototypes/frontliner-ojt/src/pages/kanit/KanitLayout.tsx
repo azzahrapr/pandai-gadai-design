@@ -2,7 +2,6 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { KanitSidebar } from '../../components/Sidebar'
 import { KanitBottomNav } from '../../components/BottomNav'
-import KanitDevPanel from '../../components/KanitDevPanel'
 
 export default function KanitLayout() {
   const { currentUser, isLoading } = useApp()
@@ -38,7 +37,6 @@ export default function KanitLayout() {
         <Outlet />
       </main>
       <div className="md:hidden"><KanitBottomNav /></div>
-      <KanitDevPanel />
     </div>
   )
 }

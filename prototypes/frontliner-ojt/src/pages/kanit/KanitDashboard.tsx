@@ -74,7 +74,11 @@ export default function KanitDashboard() {
 
     let aksi: React.ReactNode
     if (pendingCount > 0 || flNeedsLevel2) {
-      const reviewTo = pendingCount > 0 ? `/kanit/review-progress?flId=${fl.id}` : `/kanit/review-progress?tab=progress`
+      // Always pass flId explicitly — a bare fallback link here used to let the
+      // destination page fall back to its own default-selection logic, which could land
+      // on a completely different FL than the row this button was actually on (same bug
+      // class as flNeedingReview/flNeedingLevel2 etc. above, just missed in this branch).
+      const reviewTo = pendingCount > 0 ? `/kanit/review-progress?flId=${fl.id}` : `/kanit/review-progress?tab=progress&flId=${fl.id}`
       aksi = (
         <Link to={reviewTo} className="text-xs h-7 px-3 bg-[#023DFF] text-white rounded-lg font-semibold hover:bg-[#001CDB] transition-all inline-flex items-center whitespace-nowrap">
           Perlu Direview
@@ -95,7 +99,7 @@ export default function KanitDashboard() {
       )
     }
 
-    return { fl, flProfile, level, doneModules, totalModules, pct, aksi }
+    return { fl, flProfile, level, doneModules, totalModules, pct, aksi, flNeedsLevel2 }
   })
 
   return (
@@ -166,7 +170,7 @@ export default function KanitDashboard() {
             </tr>
           </thead>
           <tbody>
-            {flRows.map(({ fl, flProfile, level, doneModules, totalModules, pct, aksi }) => (
+            {flRows.map(({ fl, flProfile, level, doneModules, totalModules, pct, aksi, flNeedsLevel2 }) => (
               <tr key={fl.id} className="border-b border-[#E1E7EF] last:border-0 hover:bg-[#F8FAFC] transition-colors">
                 <td className="py-4 px-4">
                   <p className="font-semibold text-[#0F1729] text-sm">{fl.name}</p>
@@ -174,7 +178,20 @@ export default function KanitDashboard() {
                 </td>
                 <td className="py-4 px-3">
                   <div className="flex flex-col gap-1">
-                    <span className={`text-xs font-semibold ${level === 2 ? 'text-[#023DFF]' : 'text-[#65758B]'}`}>Level {level}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-xs font-semibold ${level === 2 ? 'text-[#023DFF]' : 'text-[#65758B]'}`}>Level {level}</span>
+                      {/* This row's "Progress Belajar" column only ever reflects the
+                          CURRENT level's modules (Level 2 for Sari) — without this badge,
+                          a Level-1 module still stuck "Terlambat" is completely invisible
+                          here even though it's exactly why "Perlu Direview" shows up in
+                          Aksi. Same flNeedsLevel2 signal KanitReviewProgress.tsx's own
+                          late-modules banner and the Aksi button both already use. */}
+                      {flNeedsLevel2 && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#FEFDEA] border border-[#E0A200] text-[#B27202] whitespace-nowrap">
+                          ⚠️ Terlambat
+                        </span>
+                      )}
+                    </div>
                     <div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-[#65758B]">{doneModules}/{totalModules} modul selesai</span>
