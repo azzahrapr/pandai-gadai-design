@@ -30,8 +30,7 @@ const DAILY_MILESTONE_IDS = new Set(['closing-cabang', 'opening-cabang', 'person
 
 // "Target penyelesaian" tracks the pass target (Min. Attempt for Pass) — current is the
 // reviewed-and-passed count, not the raw submission count. The larger submission target
-// (Min. Attempt) is surfaced separately as the "Target N latihan disubmit
-// tercapai/belum tercapai" caption below, driven by isTargetReached.
+// (Min. Attempt) is surfaced separately as the "Total N latihan disubmit" caption below.
 function TargetProgressRow({ label, unit, current, target, tone }: {
   label: string
   unit: string
@@ -398,7 +397,7 @@ export default function FLMilestoneDetail() {
         )}
         {effectiveIndividualCount > 0 && (
           <p className="text-xs text-[#65758B]">
-            Target {expectedIndividualCount} latihan disubmit {isTargetReached ? 'tercapai' : 'belum tercapai'}.{' '}
+            Total {expectedIndividualCount} latihan disubmit.{' '}
             <button onClick={() => setShowHistory(true)} className="text-[#023DFF] hover:underline font-medium">
               Lihat riwayat →
             </button>
@@ -475,7 +474,7 @@ export default function FLMilestoneDetail() {
         ) : null}
         {(explicitlyCompleted ? expectedCount : totalAttempts) > 0 && (
           <p className="text-xs text-[#65758B]">
-            Target {expectedCount} latihan disubmit {isTargetReached ? 'tercapai' : 'belum tercapai'}.{' '}
+            Total {expectedCount} latihan disubmit.{' '}
             <button onClick={() => setShowHistory(true)} className="text-[#023DFF] hover:underline font-medium">
               Lihat riwayat →
             </button>

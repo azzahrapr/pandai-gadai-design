@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
@@ -22,6 +22,19 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false)
   const [showReset, setShowReset] = useState(false)
   const [resetting, setResetting] = useState(false)
+
+  // Auto-reset to the mock baseline every time someone lands on this (logged-out) login
+  // screen — e.g. reopening the Vercel demo link fresh — so stale localStorage flags
+  // (onboarding tour, task confirmations) and leftover Supabase rows from a prior demo
+  // session never carry over. Guarded to fire once per mount, and only once auth state
+  // has resolved to "logged out" (not while a persisted session is still being restored,
+  // which would otherwise wipe an in-progress reviewer's data on their own refresh).
+  const hasAutoReset = useRef(false)
+  useEffect(() => {
+    if (isLoading || currentUser || hasAutoReset.current) return
+    hasAutoReset.current = true
+    resetData()
+  }, [isLoading, currentUser, resetData])
 
   // Redirect if already logged in
   if (isLoading) return <LoadingScreen />

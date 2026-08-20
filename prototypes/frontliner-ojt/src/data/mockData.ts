@@ -369,7 +369,7 @@ export const MILESTONES: Milestone[] = [
       { id: 'pg-1', text: 'Seragam rapih dan bersih', category: 'Penampilan' },
       { id: 'pg-2', text: 'Tata rias (wajah dan rambut) sesuai standar', category: 'Penampilan' },
       { id: 'pg-3', text: 'Sepatu hitam tertutup', category: 'Penampilan' },
-      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)', category: 'Penampilan' },
+      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)', category: 'Penampilan', kondisiIdeal: 'Tidak bau badan' },
     ],
     quiz: [
       {
@@ -421,7 +421,7 @@ export const MILESTONES: Milestone[] = [
       { id: 'pg-1', text: 'Seragam rapih dan bersih', category: 'Penampilan' },
       { id: 'pg-2', text: 'Tata rias (wajah dan rambut) sesuai standar', category: 'Penampilan' },
       { id: 'pg-3', text: 'Sepatu hitam tertutup', category: 'Penampilan' },
-      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)', category: 'Penampilan' },
+      { id: 'pg-4', text: 'Aroma tubuh bersih (tidak bau badan)', category: 'Penampilan', kondisiIdeal: 'Tidak bau badan' },
     ],
     quiz: [
       {
@@ -466,8 +466,8 @@ export const MILESTONES: Milestone[] = [
       },
     ],
     checklistItems: [
-      { id: 'pp-1', text: 'Menjelaskan biaya dan masa gadai Elektronik (Biaya Jasa, Admin, Asuransi, Masa Gadai, Denda)', category: 'Produk' },
-      { id: 'pp-2', text: 'Menjelaskan biaya dan masa gadai BPKB Instant', category: 'Produk' },
+      { id: 'pp-1', text: 'Menjelaskan biaya dan masa gadai Elektronik (Biaya Jasa, Admin, Asuransi, Masa Gadai, Denda)', category: 'Produk', kondisiIdeal: 'Menjelaskan Biaya Jasa, Biaya Admin, Biaya Asuransi, Masa Gadai, dan Biaya Denda' },
+      { id: 'pp-2', text: 'Menjelaskan biaya dan masa gadai BPKB Instant', category: 'Produk', kondisiIdeal: 'Menjelaskan Biaya Jasa, Biaya Admin, Biaya Asuransi, Masa Gadai, dan Biaya Denda' },
       { id: 'pp-3', text: 'Menjelaskan biaya dan masa gadai LM Press', category: 'Produk' },
     ],
     quiz: [
@@ -579,9 +579,9 @@ export const MILESTONES: Milestone[] = [
     ],
     submissionType: 'individual',
     checklistItems: [
-      { id: 'cm-1', text: 'Administratif Tarik-Setor Tunai', category: 'Kas', description: 'Mampu menginput laporan tarik setor tunai di sistem.', target: 1, targetForPass: 1 },
-      { id: 'cm-2', text: 'Administratif Penggunaan Kas Kecil', category: 'Kas Kecil', description: 'Mampu menginput pengeluaran kas kecil pada modul cash management.', target: 1, targetForPass: 1 },
-      { id: 'cm-3', text: 'Administratif Uang Kelebihan Nasabah', category: 'Nasabah', description: 'Mampu mengarahkan nasabah dalam pengecekan uang kelebihan dan penginputannya pada cash management.', target: 1, targetForPass: 1 },
+      { id: 'cm-1', text: 'Administratif Tarik-Setor Tunai', category: 'Kas', description: 'Mampu menginput laporan tarik setor tunai di sistem.', target: 1, targetForPass: 1, kondisiIdeal: 'Mampu menginput laporan tarik setor tunai' },
+      { id: 'cm-2', text: 'Administratif Penggunaan Kas Kecil', category: 'Kas Kecil', description: 'Mampu menginput pengeluaran kas kecil pada modul cash management.', target: 1, targetForPass: 1, kondisiIdeal: 'Mampu menginput pengeluaran kas kecil pada cash management' },
+      { id: 'cm-3', text: 'Administratif Uang Kelebihan Nasabah', category: 'Nasabah', description: 'Mampu mengarahkan nasabah dalam pengecekan uang kelebihan dan penginputannya pada cash management.', target: 1, targetForPass: 1, kondisiIdeal: 'Mampu mengarahkan nasabah dalam pengecekan uang kelebihan dan penginputannya pada cash management' },
     ],
     quiz: [
       {
@@ -862,13 +862,13 @@ export const MILESTONES: Milestone[] = [
       },
     ],
     checklistItems: [
-      { id: 'pn-1', text: 'Sigap berdiri menyambut nasabah (postur siap melayani)', category: 'Sambutan' },
-      { id: 'pn-2', text: 'Mengucapkan salam sambutan dengan nada antusias', category: 'Sambutan' },
-      { id: 'pn-3', text: 'Mempersilahkan nasabah duduk dengan intonasi ramah', category: 'Sambutan' },
-      { id: 'pn-4', text: 'Memperkenalkan diri dan menanyakan keperluan nasabah', category: 'Sambutan' },
-      { id: 'pn-5', text: 'Memberikan estimasi waktu menunggu', category: 'Pelayanan' },
-      { id: 'pn-6', text: 'Menjelaskan tahapan selanjutnya kepada nasabah', category: 'Pelayanan' },
-      { id: 'pn-7', text: 'Edukasi Aplikasi Pandai Gadai', category: 'Edukasi' },
+      { id: 'pn-1', text: 'Sigap berdiri menyambut nasabah (postur siap melayani)', category: 'Sambutan', kondisiIdeal: 'Sigap berdiri, postur siap melayani' },
+      { id: 'pn-2', text: 'Mengucapkan salam sambutan dengan nada antusias', category: 'Sambutan', kondisiIdeal: 'Mengucapkan "Selamat datang di Pandai Gadai" dengan nada antusias dan ekspresi tubuh antusias' },
+      { id: 'pn-3', text: 'Mempersilahkan nasabah duduk dengan intonasi ramah', category: 'Sambutan', kondisiIdeal: 'Intonasi suara dan gaya bahasa tubuh ramah' },
+      { id: 'pn-4', text: 'Memperkenalkan diri dan menanyakan keperluan nasabah', category: 'Sambutan', kondisiIdeal: 'Intonasi suara dan gaya bahasa tubuh ramah' },
+      { id: 'pn-5', text: 'Memberikan estimasi waktu menunggu', category: 'Pelayanan', kondisiIdeal: 'Intonasi suara dan gaya bahasa tubuh ramah' },
+      { id: 'pn-6', text: 'Menjelaskan tahapan selanjutnya kepada nasabah', category: 'Pelayanan', kondisiIdeal: 'Intonasi suara dan gaya bahasa tubuh ramah' },
+      { id: 'pn-7', text: 'Edukasi Aplikasi Pandai Gadai', category: 'Edukasi', kondisiIdeal: 'Menjelaskan fungsi aplikasi (Transaksi Online, Poin Pandai, Saldo Pandai)' },
     ],
     quiz: [
       {

@@ -453,6 +453,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(key)
       }
     }
+    // fl ids get repurposed across persona iterations (e.g. fl-006 has been both a
+    // "not yet enrolled" gate persona and the Day-1 onboarding demo account) — if this
+    // browser ever completed the onboarding tour under a prior persona for this same id,
+    // TourContext's `onboarding-tour-completed-${flId}` flag permanently suppresses the
+    // tour regardless of mockData.ts changes. Clear it so the tour can trigger fresh.
+    localStorage.removeItem(`onboarding-tour-completed-${flId}`)
     setCurrentUser(prev => {
       if (!prev || prev.role !== 'fl') return prev
       return {
@@ -495,6 +501,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // baseline, so it needs to clear this too, not just the Supabase-backed tables above.
     localStorage.removeItem('task-confirmations')
     setTaskConfirmations(MOCK_TASK_CONFIRMATIONS)
+    // Same staleness class as task-confirmations above: TourContext stores each user's
+    // onboarding-tour completion in localStorage keyed by id, decoupled from mockData.ts.
+    // Reused/repurposed fl ids can carry a stale "completed" flag from an earlier persona,
+    // silently suppressing the tour forever. Clear all of them on a full reset.
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key?.startsWith('onboarding-tour-completed-')) {
+        localStorage.removeItem(key)
+      }
+    }
   }
 
   function startMilestone(milestoneId: string) {

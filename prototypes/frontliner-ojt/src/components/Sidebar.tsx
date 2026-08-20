@@ -14,7 +14,7 @@ const NAV_LINK_BASE = 'relative flex items-center gap-3 px-4 py-2.5 rounded-lg t
 const NAV_LINK_ACTIVE = 'bg-[#344256] text-white font-medium'
 const NAV_LINK_INACTIVE = 'text-white/50 hover:bg-white/5 hover:text-white/80 font-normal'
 
-function NavItem({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) {
+function NavItem({ to, label, icon, badge }: { to: string; label: string; icon: React.ReactNode; badge?: number }) {
   return (
     <NavLink
       to={to}
@@ -27,7 +27,14 @@ function NavItem({ to, label, icon }: { to: string; label: string; icon: React.R
           {isActive && (
             <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#023DFF] rounded-r-full" />
           )}
-          <span className={isActive ? 'text-white' : 'text-white/50'}>{icon}</span>
+          <span className={`relative ${isActive ? 'text-white' : 'text-white/50'}`}>
+            {icon}
+            {!!badge && (
+              <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] bg-[#DC2626] rounded-full flex items-center justify-center text-white text-[9px] font-bold px-0.5 leading-none">
+                {badge > 9 ? '9+' : badge}
+              </span>
+            )}
+          </span>
           {label}
         </>
       )}
@@ -36,7 +43,7 @@ function NavItem({ to, label, icon }: { to: string; label: string; icon: React.R
 }
 
 export function FLSidebar() {
-  const { currentUser, logout } = useApp()
+  const { currentUser, logout, unreadNotificationCount } = useApp()
   const profile = currentUser?.profile as FLProfile | undefined
   const day = profile?.currentDay ?? 1
   const dayProgress = Math.round((Math.min(day, 13) / 13) * 100)
@@ -72,10 +79,9 @@ export function FLSidebar() {
         <p className="px-3 text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-2">Menu</p>
         <NavItem to="/fl/dashboard" label="Beranda" icon={<IconHome />} />
         <NavItem to="/fl/milestones" label="Modul Belajar" icon={<IconBook />} />
-        <NavItem to="/fl/checklist" label="Checklist" icon={<IconChecklist />} />
         <NavItem to="/fl/scores" label="Nilai Saya" icon={<IconChart />} />
-
-        <NavItem to="/fl/assessment" label="Ujian Akhir" icon={<IconGrad />} />
+        <NavItem to="/fl/notifications" label="Notifikasi" icon={<IconBell />} badge={unreadNotificationCount} />
+        <NavItem to="/fl/profile" label="Profil" icon={<IconProfile />} />
       </nav>
 
       {/* User */}
@@ -125,6 +131,7 @@ export function KanitSidebar() {
         <NavItem to="/kanit/dashboard" label="Dashboard" icon={<IconHome />} />
         <NavItem to="/kanit/review-progress" label="Review Progress" icon={<IconChecklist />} />
         <NavItem to="/kanit/results" label="Nilai Akhir" icon={<IconChart />} />
+        <NavItem to="/kanit/profile" label="Profil" icon={<IconProfile />} />
       </nav>
 
       {/* User */}
@@ -167,8 +174,11 @@ function IconChart() {
 function IconScale() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M5 14h6M3.333 5.333l9.334 1.334M3.333 5.333L2 9.333c0 .737.597 1.334 1.333 1.334S4.667 10.07 4.667 9.333L3.333 5.333zm9.334 1.334L14 10.667c0 .736-.597 1.333-1.333 1.333-.737 0-1.334-.597-1.334-1.333l1.334-4z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
 }
-function IconGrad() {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L1.333 5.333 8 8.667l6.667-3.334L8 2zM1.333 5.333V10M4.667 6.667v3.666c0 1.105 1.492 2 3.333 2s3.333-.895 3.333-2V6.667" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+function IconBell() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 5.333A4 4 0 004 5.333c0 4.667-2 6-2 6h12s-2-1.333-2-6M9.154 14a1.333 1.333 0 01-2.307 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+}
+function IconProfile() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.333" r="2.667" stroke="currentColor" strokeWidth="1.4"/><path d="M2.667 13.333c0-2.667 2.4-4.667 5.333-4.667s5.333 2 5.333 4.667" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
 }
 function IconLogout() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 14H3.333A.667.667 0 012.667 13.333V2.667A.667.667 0 013.333 2H6M10.667 11.333L14 8l-3.333-3.333M14 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>

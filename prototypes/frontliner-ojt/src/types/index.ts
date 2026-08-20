@@ -34,6 +34,11 @@ export interface ChecklistItem extends TargetSpec {
   text: string
   category: string
   description?: string
+  // Curriculum spreadsheet's "Kondisi Ideal" column (col AD) — a standardized acceptance
+  // criterion for this item, shown to the Kanit as review guidance (see
+  // PanduanPenilaianBanner). Only set for items the curriculum actually defines one for;
+  // most items have none, which is expected — don't backfill a guess.
+  kondisiIdeal?: string
 }
 
 export interface Milestone extends TargetSpec {

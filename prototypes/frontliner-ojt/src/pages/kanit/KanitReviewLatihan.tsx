@@ -5,6 +5,7 @@ import { MILESTONES } from '../../data/mockData'
 import type { DailyChecklist } from '../../types'
 import { ConfirmationReview } from './KanitReviewConfirmation'
 import { PenaksiranGuidanceBanner } from '../../components/PenaksiranGuidanceBanner'
+import { PanduanPenilaianBanner } from '../../components/PanduanPenilaianBanner'
 
 const PENAKSIRAN_MILESTONE_IDS = new Set(['penaksiran-elektronik', 'penaksiran-emas', 'penaksiran-bpkb'])
 
@@ -63,7 +64,8 @@ function ChecklistReview({ flId, moduleKey }: { flId: string; moduleKey: string 
     .filter((cl): cl is DailyChecklist => !!cl)
   const remainingCount = sessions.filter(cl => cl.status !== 'scored').length
 
-  const moduleName = MILESTONES.find(m => m.id === decodedKey)?.name
+  const milestone = MILESTONES.find(m => m.id === decodedKey)
+  const moduleName = milestone?.name
     ?? sessions[0]?.tasks?.[0]?.taskName
     ?? sessions[0]?.milestoneName
     ?? decodedKey
@@ -147,6 +149,7 @@ function ChecklistReview({ flId, moduleKey }: { flId: string; moduleKey: string 
       ) : (
         <div className="space-y-4">
           {isPenaksiran && <PenaksiranGuidanceBanner />}
+          {!isPenaksiran && <PanduanPenilaianBanner checklistItems={milestone?.checklistItems ?? []} />}
           {remainingCount > 0 && (
             <p className="text-xs text-[#65758B]">{remainingCount} latihan menunggu review</p>
           )}

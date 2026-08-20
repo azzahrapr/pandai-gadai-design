@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext'
 import { MILESTONES } from '../../data/mockData'
 import type { TaskConfirmation } from '../../types'
 import { PenaksiranGuidanceBanner } from '../../components/PenaksiranGuidanceBanner'
+import { PanduanPenilaianBanner } from '../../components/PanduanPenilaianBanner'
 
 const PENAKSIRAN_MILESTONE_IDS = new Set(['penaksiran-elektronik', 'penaksiran-bpkb', 'penaksiran-emas'])
 
@@ -343,6 +344,7 @@ export function ConfirmationReview({ flId, milestoneId }: { flId: string; milest
         </div>
       ) : (
         <div className="space-y-4">
+          <PanduanPenilaianBanner checklistItems={milestone.checklistItems} />
           {remainingCount > 0 && (
             <p className="text-xs text-[#65758B]">{remainingCount} latihan menunggu review</p>
           )}
