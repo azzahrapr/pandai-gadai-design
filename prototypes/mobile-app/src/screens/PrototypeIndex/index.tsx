@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const links = [
-  { label: 'Guest Mode', path: '/guest', desc: 'Splash → Login → Homepage' },
   { label: 'Homepage', path: '/home', desc: 'Logged in, verified user' },
   { label: 'Homepage (Unverified)', path: '/unverified', desc: 'Logged in, not yet verified' },
   { label: 'Simulasi Gadai', path: '/simulasi', desc: 'Pilih Barang → Estimasi → Promo' },
