@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 
 import './index.css'
 import { InspectProvider } from './components/Inspect/InspectContext'
@@ -39,6 +40,22 @@ import SimulasiSukses from './screens/SimulasiSukses'
 import SimulasiPromoSukses from './screens/SimulasiPromoSukses'
 
 
+function PageViewTracker() {
+  const location = useLocation()
+
+  useEffect(() => {
+    const gtag = (window as any).gtag
+    if (typeof gtag !== 'function') return
+    gtag('event', 'page_view', {
+      page_path: location.pathname + location.search,
+      page_location: window.location.href,
+      page_title: document.title,
+    })
+  }, [location])
+
+  return null
+}
+
 function App() {
   return (
     <div className="min-h-screen bg-gray-300 flex items-start justify-center pt-4 pb-8">
@@ -46,6 +63,7 @@ function App() {
       <div className="flex items-start gap-6">
       <div className="relative">
       <BrowserRouter>
+        <PageViewTracker />
         <div className="flex flex-col items-center gap-4">
         <Routes>
           <Route path="/" element={<PrototypeIndex />} />
