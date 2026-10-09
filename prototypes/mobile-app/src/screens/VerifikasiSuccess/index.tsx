@@ -102,7 +102,7 @@ export default function VerifikasiSuccess() {
       {/* CTA button */}
       <div className="px-4 pt-4 shrink-0">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/poin-pandai/success', { state: { claimed: 4000, newTotal: 4000 } })}
           className="w-full bg-[#023dff] rounded-[6px] py-[10px] flex items-center justify-center gap-2"
         >
           <span className="text-[14px] font-medium text-[#f8fafc]">Yuk, Telusuri Aplikasinya</span>
