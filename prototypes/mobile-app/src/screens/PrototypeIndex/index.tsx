@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const links = [
-  { label: 'Homepage', path: '/home', desc: 'Logged in, verified user' },
-  { label: 'Homepage (Unverified)', path: '/unverified', desc: 'Logged in, not yet verified' },
+  { label: 'Beranda', path: '/home', desc: 'Sudah login, user terverifikasi' },
+  { label: 'Beranda (Belum Terverifikasi)', path: '/unverified', desc: 'Sudah login, belum terverifikasi' },
   { label: 'Simulasi Gadai', path: '/simulasi', desc: 'Pilih Barang → Estimasi → Promo' },
 ]
 
