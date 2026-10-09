@@ -34,7 +34,7 @@ export default function PrototypeIndex() {
       <div className="px-6 pt-16 pb-8 border-b border-[#e2e8f0]">
         <p className="text-[12px] font-semibold text-[#64748b] uppercase tracking-widest mb-2">Pandai Gadai</p>
         <h1 className="text-[28px] font-bold text-[#020617] leading-8">Prototype Index</h1>
-        <p className="text-[14px] text-[#64748b] mt-2">Select a flow to preview.</p>
+        <p className="text-[14px] text-[#64748b] mt-2">Pilih alur untuk pratinjau.</p>
       </div>
 
       {/* Links */}
